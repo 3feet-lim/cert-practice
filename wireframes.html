@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>CertQuiz — 저해상도 와이어프레임</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#f0efe9; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color:#1a1a1a; }
+  header { position: sticky; top:0; z-index:10; background:#1a1a1a; color:#fff; padding:18px 32px; display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0; font-weight:700; }
+  header .sub { font-size:13px; color:#bbb; }
+  nav { margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
+  nav a { color:#fff; text-decoration:none; font-size:12px; border:1px solid #444; border-radius:5px; padding:4px 9px; }
+  nav a:hover { background:#333; }
+  main { max-width:1160px; margin:0 auto; padding:32px 32px 80px; display:flex; flex-direction:column; gap:48px; }
+  .screen { background:#fff; border:1px solid #ddd; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+  .screen-head { display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid #eee; }
+  .tag { font-family: ui-monospace, monospace; font-size:12px; font-weight:700; color:#fff; background:#555; border-radius:4px; padding:2px 8px; }
+  .screen-head h2 { font-size:16px; margin:0; }
+  .screen-head .file { margin-left:auto; font-family: ui-monospace, monospace; font-size:11px; color:#999; }
+  .frame-iframe { display:block; width:100%; border:0; background:#fdfcf7; }
+</style>
+</head>
+<body>
+<header>
+  <h1>CertQuiz 와이어프레임</h1>
+  <span class="sub">design.md 기준 · 저해상도 구조 스펙 · 10개 화면</span>
+  <nav><a href="#s1">S1</a><a href="#s2">S2</a><a href="#s3">S3</a><a href="#s4">S4</a><a href="#s5">S5</a><a href="#s6">S6</a><a href="#s7">S7</a><a href="#s8">S8</a><a href="#s9">S9</a><a href="#s10">S10</a></nav>
+</header>
+<main>
+
+<section id="s1" class="screen">
+  <div class="screen-head">
+    <span class="tag">S1</span>
+    <h2>로그인</h2>
+    <span class="file">Main.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    a { color:#3b5bdb; }
+    .frame { width:1080px; height:720px; display:flex; align-items:center; justify-content:center; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; padding:12px 26px; font-size:19px; font-family:'Gaegu'; background:#fff; cursor:pointer; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;box&quot; style=&quot;width:420px; padding:44px 36px; transform:rotate(-0.4deg); text-align:center;&quot;>
+    <div style=&quot;font-size:34px; font-weight:700; margin-bottom:6px;&quot;>CertQuiz</div>
+    <div class=&quot;bar&quot; style=&quot;width:220px; margin:0 auto 34px;&quot;></div>
+
+    <div style=&quot;width:64px; height:64px; border:2.5px solid #222; border-radius:50%; margin:0 auto 28px; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700;&quot;>☁</div>
+
+    <button class=&quot;btn&quot; style=&quot;width:100%;&quot;>
+      <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M8 12h8M12 8v8&quot;/></svg>
+      Google로 로그인
+    </button>
+
+    <div style=&quot;margin-top:26px; font-size:14px; color:#999;&quot;>지인 전용 · 비공개 배포</div>
+  </div>
+</div></body></html>" style="height:744px;" loading="lazy"></iframe>
+</section>
+<section id="s2" class="screen">
+  <div class="screen-head">
+    <span class="tag">S2</span>
+    <h2>홈 / 자격증 선택</h2>
+    <span class="file">Home.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    a { color:#3b5bdb; }
+    .frame { width:1080px; padding:28px 40px 48px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:18px; border-bottom:2.5px solid #222; margin-bottom:26px; }
+    .logo { font-size:24px; font-weight:700; }
+    .nav { display:flex; align-items:center; gap:22px; font-size:17px; }
+    .navlink.active { color:#c96a00; font-weight:700; }
+    .avatar { width:34px; height:34px; border-radius:50%; border:2.5px solid #222; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .h1 { font-size:26px; font-weight:700; margin:0 0 4px; }
+    .h2 { font-size:20px; font-weight:700; margin:0; }
+    .muted { color:#8a8a8a; font-size:14px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #222; border-radius:999px; padding:4px 12px; font-size:13px; background:#fff; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; padding:9px 20px; font-size:16px; font-family:'Gaegu'; background:#fff; cursor:pointer; }
+    .btn-accent { background:#ffb347; border-color:#c96a00; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;nav&quot;>
+      <div class=&quot;navlink active&quot;>홈</div>
+      <div class=&quot;navlink&quot;>내 이력</div>
+      <div class=&quot;navlink&quot;>리더보드</div>
+      <div class=&quot;avatar&quot;>JS</div>
+    </div>
+  </div>
+
+  <div class=&quot;box&quot; style=&quot;padding:16px 22px; margin-bottom:28px; display:flex; align-items:center; justify-content:space-between; transform:rotate(-0.3deg); background:#fff8ec;&quot;>
+    <div style=&quot;display:flex; align-items:center; gap:12px;&quot;>
+      <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#c96a00&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 8v4l3 2&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/></svg>
+      <div>진행 중인 연습이 있어요 — 12 / 75문제 풀이함</div>
+    </div>
+    <button class=&quot;btn btn-accent&quot;>이어풀기</button>
+  </div>
+
+  <div class=&quot;h1&quot;>자격증 선택</div>
+  <div class=&quot;muted&quot; style=&quot;margin-bottom:20px;&quot;>벤더별로 그룹핑되어 표시됩니다</div>
+
+  <div class=&quot;chip&quot; style=&quot;margin-bottom:12px;&quot;>AWS</div>
+  <div style=&quot;display:flex; gap:20px;&quot;>
+    <div class=&quot;box&quot; style=&quot;flex:1; padding:22px; transform:rotate(0.3deg);&quot;>
+      <div class=&quot;h2&quot;>DOP-C02</div>
+      <div class=&quot;muted&quot; style=&quot;margin-bottom:14px;&quot;>AWS Certified DevOps Engineer – Professional</div>
+      <div style=&quot;display:flex; gap:8px; margin-bottom:18px;&quot;>
+        <div class=&quot;chip&quot;>75문항</div>
+        <div class=&quot;chip&quot;>180분</div>
+        <div class=&quot;chip&quot;>합격 75%</div>
+      </div>
+      <button class=&quot;btn btn-accent&quot;>시작하기</button>
+    </div>
+    <div class=&quot;box&quot; style=&quot;flex:1; padding:22px; border-style:dashed; opacity:0.5;&quot;>
+      <div class=&quot;h2&quot;>SAA-C03</div>
+      <div class=&quot;muted&quot; style=&quot;margin-bottom:14px;&quot;>준비 중</div>
+      <div class=&quot;bar&quot; style=&quot;width:60%;&quot;></div>
+    </div>
+  </div>
+</div></body></html>" style="height:844px;" loading="lazy"></iframe>
+</section>
+<section id="s3" class="screen">
+  <div class="screen-head">
+    <span class="tag">S3</span>
+    <h2>모드 선택</h2>
+    <span class="file">ModeSelect.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    .frame { width:1080px; padding:28px 40px 48px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:18px; border-bottom:2.5px solid #222; margin-bottom:26px; }
+    .logo { font-size:24px; font-weight:700; }
+    .avatar { width:34px; height:34px; border-radius:50%; border:2.5px solid #222; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .h1 { font-size:26px; font-weight:700; margin:0 0 4px; }
+    .h2 { font-size:22px; font-weight:700; margin:0 0 12px; display:flex; align-items:center; gap:10px; }
+    .muted { color:#8a8a8a; font-size:14px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #222; border-radius:999px; padding:4px 12px; font-size:13px; background:#fff; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; padding:11px 22px; font-size:17px; font-family:'Gaegu'; background:#fff; cursor:pointer; width:100%; margin-top:8px; }
+    .btn-accent { background:#ffb347; border-color:#c96a00; }
+    .btn-blue { background:#c8d4ff; border-color:#3b5bdb; }
+    ul { margin:0; padding-left:20px; font-size:15px; line-height:1.9; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;avatar&quot;>JS</div>
+  </div>
+
+  <div class=&quot;h1&quot;>DOP-C02</div>
+  <div class=&quot;muted&quot; style=&quot;margin-bottom:16px;&quot;>AWS Certified DevOps Engineer – Professional</div>
+  <div style=&quot;display:flex; gap:8px; margin-bottom:32px;&quot;>
+    <div class=&quot;chip&quot;>75문항</div>
+    <div class=&quot;chip&quot;>180분</div>
+    <div class=&quot;chip&quot;>합격 75%</div>
+  </div>
+
+  <div style=&quot;display:flex; gap:24px;&quot;>
+    <div class=&quot;box&quot; style=&quot;flex:1; padding:26px; transform:rotate(-0.4deg);&quot;>
+      <div class=&quot;h2&quot;>
+        <svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 20h9&quot;/><path d=&quot;M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z&quot;/></svg>
+        연습 모드
+      </div>
+      <ul>
+        <li>문제마다 즉시 정답 + 해설</li>
+        <li>완료 안 해도 이어풀기 가능</li>
+        <li>이력/리더보드엔 기록 안 됨</li>
+      </ul>
+      <button class=&quot;btn btn-blue&quot;>연습 시작</button>
+    </div>
+
+    <div class=&quot;box&quot; style=&quot;flex:1; padding:26px; transform:rotate(0.3deg);&quot;>
+      <div class=&quot;h2&quot;>
+        <svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M12 7v5l3 3&quot;/></svg>
+        모의고사 모드
+      </div>
+      <ul>
+        <li>실전과 동일 — 75문항 · 180분</li>
+        <li>제출 전까지 정답 비공개</li>
+        <li>제출 후 점수·이력에 기록</li>
+      </ul>
+      <button class=&quot;btn btn-accent&quot;>모의고사 시작</button>
+    </div>
+  </div>
+</div></body></html>" style="height:784px;" loading="lazy"></iframe>
+</section>
+<section id="s4" class="screen">
+  <div class="screen-head">
+    <span class="tag">S4</span>
+    <h2>문제 풀이 — 연습</h2>
+    <span class="file">PracticeQuiz.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    .frame { width:1080px; padding:24px 40px 40px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; border-bottom:2.5px solid #222; margin-bottom:18px; }
+    .logo { font-size:22px; font-weight:700; }
+    .exit { font-size:15px; color:#8a8a8a; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #222; border-radius:999px; padding:4px 12px; font-size:13px; background:#fff; }
+    .chip-accent { background:#ffe8cc; border-color:#c96a00; }
+    .row { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .choice { display:flex; align-items:center; gap:12px; border:2.2px solid #222; border-radius:14px; padding:12px 16px; margin-bottom:10px; }
+    .choice.selected { border-color:#3b5bdb; background:#f2f4ff; }
+    .choice.correct { border-color:#2f9e44; background:#ecfaf0; }
+    .radio { width:18px; height:18px; border:2.2px solid #222; border-radius:50%; flex:none; }
+    .radio.on { background:#3b5bdb; border-color:#3b5bdb; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; padding:9px 18px; font-size:15px; font-family:'Gaegu'; background:#fff; cursor:pointer; }
+    .jump { width:26px; height:26px; border:2px solid #222; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; }
+    .jump.done { background:#dcdcdc; }
+    .jump.now { border-color:#3b5bdb; border-width:2.5px; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;exit&quot;>나가기 ✕</div>
+  </div>
+
+  <div class=&quot;row&quot;>
+    <div style=&quot;display:flex; align-items:center; gap:14px;&quot;>
+      <div style=&quot;font-size:17px; font-weight:700;&quot;>12 / 75</div>
+      <div class=&quot;chip&quot;>SDLC Automation</div>
+    </div>
+    <div style=&quot;display:flex; gap:8px;&quot;>
+      <div class=&quot;chip&quot;>EN / <b>KO</b></div>
+      <div class=&quot;chip&quot;><svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M5 3v18&quot;/><path d=&quot;M5 4h11l-2.5 4L16 12H5&quot;/></svg>나중에 풀기</div>
+    </div>
+  </div>
+
+  <div class=&quot;box&quot; style=&quot;padding:24px; margin-bottom:16px;&quot;>
+    <div style=&quot;font-weight:700; margin-bottom:12px;&quot;>Q12.</div>
+    <div class=&quot;bar&quot; style=&quot;width:96%; margin-bottom:8px;&quot;></div>
+    <div class=&quot;bar&quot; style=&quot;width:88%; margin-bottom:8px;&quot;></div>
+    <div class=&quot;bar&quot; style=&quot;width:60%; margin-bottom:20px;&quot;></div>
+
+    <div class=&quot;choice&quot;>
+      <div class=&quot;radio&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:70%;&quot;></div>
+    </div>
+    <div class=&quot;choice correct&quot;>
+      <div class=&quot;radio on&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:60%; background:#b7e4c7;&quot;></div>
+    </div>
+    <div class=&quot;choice&quot;>
+      <div class=&quot;radio&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:80%;&quot;></div>
+    </div>
+    <div class=&quot;choice&quot;>
+      <div class=&quot;radio&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:50%;&quot;></div>
+    </div>
+  </div>
+
+  <div class=&quot;box&quot; style=&quot;padding:18px 24px; margin-bottom:20px; background:#f5fbf6; border-color:#2f9e44;&quot;>
+    <div style=&quot;display:flex; align-items:center; gap:8px; font-weight:700; color:#2f9e44; margin-bottom:8px;&quot;>
+      <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#2f9e44&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M8 12l3 3 5-6&quot;/></svg>
+      정답: B — 해설
+    </div>
+    <div class=&quot;bar&quot; style=&quot;width:92%; margin-bottom:6px; background:#cfd8cf;&quot;></div>
+    <div class=&quot;bar&quot; style=&quot;width:75%; background:#cfd8cf;&quot;></div>
+  </div>
+
+  <div class=&quot;row&quot;>
+    <button class=&quot;btn&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 6l-6 6 6 6&quot;/></svg>이전</button>
+    <div style=&quot;display:flex; gap:6px;&quot;>
+      <div class=&quot;jump done&quot;>1</div><div class=&quot;jump done&quot;>2</div><div class=&quot;jump done&quot;>…</div><div class=&quot;jump now&quot;>12</div><div class=&quot;jump&quot;>13</div><div class=&quot;jump&quot;>14</div><div class=&quot;jump&quot;>…</div>
+    </div>
+    <button class=&quot;btn&quot;>다음<svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M9 6l6 6-6 6&quot;/></svg></button>
+  </div>
+</div></body></html>" style="height:884px;" loading="lazy"></iframe>
+</section>
+<section id="s5" class="screen">
+  <div class="screen-head">
+    <span class="tag">S5</span>
+    <h2>문제 풀이 — 모의고사</h2>
+    <span class="file">ExamQuiz.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    .frame { width:1080px; padding:24px 40px 40px; position:relative; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; border-bottom:2.5px solid #222; margin-bottom:18px; }
+    .logo { font-size:22px; font-weight:700; }
+    .timer { display:flex; align-items:center; gap:8px; border:2.5px solid #c92a2a; border-radius:999px; padding:6px 16px; font-size:18px; font-weight:700; color:#c92a2a; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #222; border-radius:999px; padding:4px 12px; font-size:13px; background:#fff; }
+    .row { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .choice { display:flex; align-items:center; gap:12px; border:2.2px solid #222; border-radius:14px; padding:12px 16px; margin-bottom:10px; }
+    .choice.selected { border-color:#3b5bdb; background:#f2f4ff; }
+    .cbox { width:18px; height:18px; border:2.2px solid #222; border-radius:5px; flex:none; }
+    .cbox.on { background:#3b5bdb; border-color:#3b5bdb; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; padding:9px 18px; font-size:15px; font-family:'Gaegu'; background:#fff; cursor:pointer; }
+    .btn-accent { background:#ffb347; border-color:#c96a00; }
+    .jump { width:26px; height:26px; border:2px solid #222; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; }
+    .jump.done { background:#dcdcdc; }
+    .jump.flag { border-color:#c96a00; border-width:2.5px; }
+    .jump.now { border-color:#3b5bdb; border-width:2.5px; }
+    .modal { position:absolute; top:120px; right:36px; width:300px; padding:18px; transform:rotate(1deg); box-shadow:6px 6px 0 rgba(0,0,0,0.08); background:#fff8ec; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;timer&quot;>
+      <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#c92a2a&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M12 7v5l3 3&quot;/></svg>
+      02:14:33
+    </div>
+  </div>
+
+  <div class=&quot;row&quot;>
+    <div style=&quot;display:flex; align-items:center; gap:14px;&quot;>
+      <div style=&quot;font-size:17px; font-weight:700;&quot;>12 / 75</div>
+      <div class=&quot;chip&quot;>Security and Compliance</div>
+    </div>
+    <div style=&quot;display:flex; gap:8px;&quot;>
+      <div class=&quot;chip&quot;>EN / <b>KO</b></div>
+      <div class=&quot;chip&quot;><svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M5 3v18&quot;/><path d=&quot;M5 4h11l-2.5 4L16 12H5&quot;/></svg>나중에 풀기</div>
+    </div>
+  </div>
+
+  <div class=&quot;box&quot; style=&quot;padding:24px; margin-bottom:22px;&quot;>
+    <div style=&quot;font-weight:700; margin-bottom:6px;&quot;>Q12. <span class=&quot;chip&quot; style=&quot;font-size:12px;&quot;>2개 선택</span></div>
+    <div class=&quot;bar&quot; style=&quot;width:96%; margin:12px 0 8px;&quot;></div>
+    <div class=&quot;bar&quot; style=&quot;width:88%; margin-bottom:20px;&quot;></div>
+
+    <div class=&quot;choice selected&quot;>
+      <div class=&quot;cbox on&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:70%;&quot;></div>
+    </div>
+    <div class=&quot;choice&quot;>
+      <div class=&quot;cbox&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:60%;&quot;></div>
+    </div>
+    <div class=&quot;choice selected&quot;>
+      <div class=&quot;cbox on&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:80%;&quot;></div>
+    </div>
+    <div class=&quot;choice&quot;>
+      <div class=&quot;cbox&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:50%;&quot;></div>
+    </div>
+  </div>
+
+  <div class=&quot;row&quot;>
+    <button class=&quot;btn&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 6l-6 6 6 6&quot;/></svg>이전</button>
+    <div style=&quot;display:flex; gap:6px;&quot;>
+      <div class=&quot;jump done&quot;>1</div><div class=&quot;jump done&quot;>2</div><div class=&quot;jump done&quot;>…</div><div class=&quot;jump now&quot;>12</div><div class=&quot;jump flag&quot;>13</div><div class=&quot;jump&quot;>14</div><div class=&quot;jump&quot;>…</div>
+    </div>
+    <div style=&quot;display:flex; gap:10px;&quot;>
+      <button class=&quot;btn&quot;>다음<svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#222&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M9 6l6 6-6 6&quot;/></svg></button>
+      <button class=&quot;btn btn-accent&quot;>시험 제출</button>
+    </div>
+  </div>
+
+  <div class=&quot;box modal&quot;>
+    <div style=&quot;font-weight:700; margin-bottom:8px;&quot;>제출 확인 (예시 모달)</div>
+    <div class=&quot;bar&quot; style=&quot;width:90%; margin-bottom:6px;&quot;></div>
+    <div style=&quot;font-size:13px; color:#8a8a8a; margin-bottom:14px;&quot;>미풀이 3문제 · 플래그 2문제가 있습니다</div>
+    <div style=&quot;display:flex; gap:8px;&quot;>
+      <button class=&quot;btn&quot; style=&quot;flex:1; font-size:13px; padding:6px;&quot;>계속 풀기</button>
+      <button class=&quot;btn btn-accent&quot; style=&quot;flex:1; font-size:13px; padding:6px;&quot;>제출</button>
+    </div>
+  </div>
+</div></body></html>" style="height:884px;" loading="lazy"></iframe>
+</section>
+<section id="s6" class="screen">
+  <div class="screen-head">
+    <span class="tag">S6</span>
+    <h2>결과 — 연습</h2>
+    <span class="file">PracticeResult.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    .frame { width:1080px; padding:28px 40px 48px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:18px; border-bottom:2.5px solid #222; margin-bottom:26px; }
+    .logo { font-size:24px; font-weight:700; }
+    .avatar { width:34px; height:34px; border-radius:50%; border:2.5px solid #222; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .h1 { font-size:26px; font-weight:700; margin:0 0 4px; }
+    .muted { color:#8a8a8a; font-size:14px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #222; border-radius:999px; padding:4px 12px; font-size:13px; background:#fff; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; padding:10px 22px; font-size:16px; font-family:'Gaegu'; background:#fff; cursor:pointer; }
+    .btn-blue { background:#c8d4ff; border-color:#3b5bdb; }
+    .qrow { display:flex; align-items:center; gap:14px; padding:12px 16px; border-bottom:1.5px dashed #ccc; }
+    .qrow:last-child { border-bottom:none; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;avatar&quot;>JS</div>
+  </div>
+
+  <div style=&quot;display:flex; gap:24px; margin-bottom:28px;&quot;>
+    <div class=&quot;box&quot; style=&quot;padding:26px 34px; text-align:center; transform:rotate(-0.4deg);&quot;>
+      <div class=&quot;muted&quot; style=&quot;margin-bottom:6px;&quot;>연습 결과</div>
+      <div style=&quot;font-size:40px; font-weight:700;&quot;>58 / 75</div>
+      <div class=&quot;muted&quot; style=&quot;margin-top:6px;&quot;>이 결과는 이력에 저장되지 않습니다</div>
+    </div>
+    <div class=&quot;box&quot; style=&quot;flex:1; padding:22px;&quot;>
+      <div class=&quot;muted&quot; style=&quot;margin-bottom:10px;&quot;>도메인별 정답률 (요약)</div>
+      <div class=&quot;bar&quot; style=&quot;width:80%; margin-bottom:8px;&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:60%; margin-bottom:8px;&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:70%;&quot;></div>
+    </div>
+  </div>
+
+  <div class=&quot;box&quot; style=&quot;padding:6px 20px;&quot;>
+    <div class=&quot;qrow&quot;>
+      <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#2f9e44&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M8 12l3 3 5-6&quot;/></svg>
+      <div class=&quot;chip&quot;>Q1</div><div class=&quot;chip&quot;>SDLC</div>
+      <div class=&quot;bar&quot; style=&quot;width:50%;&quot;></div>
+      <div style=&quot;margin-left:auto; font-size:13px; color:#3b5bdb;&quot;>다시보기 ▾</div>
+    </div>
+    <div class=&quot;qrow&quot;>
+      <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#c92a2a&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M9 9l6 6M15 9l-6 6&quot;/></svg>
+      <div class=&quot;chip&quot;>Q2</div><div class=&quot;chip&quot;>Security</div>
+      <div class=&quot;bar&quot; style=&quot;width:65%;&quot;></div>
+      <div style=&quot;margin-left:auto; font-size:13px; color:#3b5bdb;&quot;>다시보기 ▾</div>
+    </div>
+    <div class=&quot;qrow&quot;>
+      <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#2f9e44&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M8 12l3 3 5-6&quot;/></svg>
+      <div class=&quot;chip&quot;>Q3</div><div class=&quot;chip&quot;>IaC</div>
+      <div class=&quot;bar&quot; style=&quot;width:40%;&quot;></div>
+      <div style=&quot;margin-left:auto; font-size:13px; color:#3b5bdb;&quot;>다시보기 ▾</div>
+    </div>
+    <div class=&quot;qrow&quot; style=&quot;justify-content:center; color:#999;&quot;>⋯ 72개 더 있음 ⋯</div>
+  </div>
+
+  <div style=&quot;display:flex; gap:12px; margin-top:24px;&quot;>
+    <button class=&quot;btn&quot;>홈으로</button>
+    <button class=&quot;btn btn-blue&quot;>다시 풀기</button>
+  </div>
+</div></body></html>" style="height:804px;" loading="lazy"></iframe>
+</section>
+<section id="s7" class="screen">
+  <div class="screen-head">
+    <span class="tag">S7</span>
+    <h2>결과 — 모의고사</h2>
+    <span class="file">ExamResult.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    .frame { width:1080px; padding:28px 40px 48px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:18px; border-bottom:2.5px solid #222; margin-bottom:26px; }
+    .logo { font-size:24px; font-weight:700; }
+    .avatar { width:34px; height:34px; border-radius:50%; border:2.5px solid #222; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .muted { color:#8a8a8a; font-size:14px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #222; border-radius:999px; padding:4px 12px; font-size:13px; background:#fff; }
+    .chip-pass { background:#ecfaf0; border-color:#2f9e44; color:#2f9e44; font-weight:700; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; padding:10px 22px; font-size:16px; font-family:'Gaegu'; background:#fff; cursor:pointer; }
+    .btn-accent { background:#ffb347; border-color:#c96a00; }
+    .qrow { display:flex; align-items:center; gap:14px; padding:12px 16px; border-bottom:1.5px dashed #ccc; }
+    .qrow:last-child { border-bottom:none; }
+    .dbar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .dbar-label { width:210px; font-size:14px; }
+    .dbar-track { flex:1; height:16px; border:1.5px solid #222; border-radius:8px; background:#f4f4f4; overflow:hidden; }
+    .dbar-fill { height:100%; background:#3b5bdb; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;avatar&quot;>JS</div>
+  </div>
+
+  <div style=&quot;display:flex; gap:24px; margin-bottom:28px;&quot;>
+    <div class=&quot;box&quot; style=&quot;padding:26px 34px; text-align:center; transform:rotate(-0.4deg); min-width:280px;&quot;>
+      <div class=&quot;muted&quot; style=&quot;margin-bottom:6px;&quot;>DOP-C02 모의고사 결과</div>
+      <div style=&quot;font-size:40px; font-weight:700;&quot;>812 / 1000</div>
+      <div class=&quot;chip chip-pass&quot; style=&quot;margin-top:10px;&quot;>합격</div>
+      <div class=&quot;muted&quot; style=&quot;margin-top:8px;&quot;>합격선 750 (75%)</div>
+    </div>
+    <div class=&quot;box&quot; style=&quot;flex:1; padding:22px;&quot;>
+      <div class=&quot;muted&quot; style=&quot;margin-bottom:14px;&quot;>도메인별 정답률</div>
+      <div class=&quot;dbar-row&quot;><div class=&quot;dbar-label&quot;>SDLC Automation</div><div class=&quot;dbar-track&quot;><div class=&quot;dbar-fill&quot; style=&quot;width:85%;&quot;></div></div></div>
+      <div class=&quot;dbar-row&quot;><div class=&quot;dbar-label&quot;>Configuration &amp;amp; IaC</div><div class=&quot;dbar-track&quot;><div class=&quot;dbar-fill&quot; style=&quot;width:70%;&quot;></div></div></div>
+      <div class=&quot;dbar-row&quot;><div class=&quot;dbar-label&quot;>Security and Compliance</div><div class=&quot;dbar-track&quot;><div class=&quot;dbar-fill&quot; style=&quot;width:60%;&quot;></div></div></div>
+      <div class=&quot;dbar-row&quot;><div class=&quot;dbar-label&quot;>Resilient Cloud Solutions</div><div class=&quot;dbar-track&quot;><div class=&quot;dbar-fill&quot; style=&quot;width:90%;&quot;></div></div></div>
+      <div class=&quot;dbar-row&quot;><div class=&quot;dbar-label&quot;>Monitoring and Logging</div><div class=&quot;dbar-track&quot;><div class=&quot;dbar-fill&quot; style=&quot;width:75%;&quot;></div></div></div>
+      <div class=&quot;dbar-row&quot;><div class=&quot;dbar-label&quot;>Incident and Event Response</div><div class=&quot;dbar-track&quot;><div class=&quot;dbar-fill&quot; style=&quot;width:65%;&quot;></div></div></div>
+    </div>
+  </div>
+
+  <div class=&quot;box&quot; style=&quot;padding:6px 20px;&quot;>
+    <div class=&quot;qrow&quot;>
+      <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#2f9e44&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M8 12l3 3 5-6&quot;/></svg>
+      <div class=&quot;chip&quot;>Q1</div><div class=&quot;chip&quot;>SDLC</div>
+      <div class=&quot;bar&quot; style=&quot;width:50%;&quot;></div>
+      <div style=&quot;margin-left:auto; font-size:13px; color:#3b5bdb;&quot;>풀이 보기 ▾</div>
+    </div>
+    <div class=&quot;qrow&quot;>
+      <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#c92a2a&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M9 9l6 6M15 9l-6 6&quot;/></svg>
+      <div class=&quot;chip&quot;>Q2</div><div class=&quot;chip&quot;>Security</div>
+      <div class=&quot;bar&quot; style=&quot;width:65%;&quot;></div>
+      <div style=&quot;margin-left:auto; font-size:13px; color:#3b5bdb;&quot;>풀이 보기 ▾</div>
+    </div>
+    <div class=&quot;qrow&quot; style=&quot;justify-content:center; color:#999;&quot;>⋯ 73개 더 있음 ⋯</div>
+  </div>
+
+  <div style=&quot;display:flex; gap:12px; margin-top:24px;&quot;>
+    <button class=&quot;btn&quot;>홈으로</button>
+    <button class=&quot;btn btn-accent&quot;>내 이력에서 보기</button>
+  </div>
+</div></body></html>" style="height:884px;" loading="lazy"></iframe>
+</section>
+<section id="s8" class="screen">
+  <div class="screen-head">
+    <span class="tag">S8</span>
+    <h2>내 이력 / 통계</h2>
+    <span class="file">History.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    .frame { width:1080px; padding:28px 40px 48px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:18px; border-bottom:2.5px solid #222; margin-bottom:26px; }
+    .logo { font-size:24px; font-weight:700; }
+    .nav { display:flex; align-items:center; gap:22px; font-size:17px; }
+    .navlink.active { color:#c96a00; font-weight:700; }
+    .avatar { width:34px; height:34px; border-radius:50%; border:2.5px solid #222; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .h1 { font-size:26px; font-weight:700; margin:0; }
+    .muted { color:#8a8a8a; font-size:14px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #222; border-radius:999px; padding:4px 12px; font-size:13px; background:#fff; }
+    .chip-pass { background:#ecfaf0; border-color:#2f9e44; color:#2f9e44; }
+    .chip-fail { background:#fdecec; border-color:#c92a2a; color:#c92a2a; }
+    .switch { width:44px; height:24px; border:2px solid #222; border-radius:999px; padding:2px; }
+    .switch .dot { width:16px; height:16px; background:#222; border-radius:50%; margin-left:auto; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th { text-align:left; padding:10px 12px; border-bottom:2px solid #222; font-weight:700; }
+    td { padding:10px 12px; border-bottom:1.5px dashed #ccc; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;nav&quot;>
+      <div class=&quot;navlink&quot;>홈</div>
+      <div class=&quot;navlink active&quot;>내 이력</div>
+      <div class=&quot;navlink&quot;>리더보드</div>
+      <div class=&quot;avatar&quot;>JS</div>
+    </div>
+  </div>
+
+  <div style=&quot;display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;&quot;>
+    <div class=&quot;h1&quot;>내 이력</div>
+    <div class=&quot;box&quot; style=&quot;padding:10px 16px; display:flex; align-items:center; gap:10px; transform:rotate(0.3deg);&quot;>
+      <div>점수 공개</div>
+      <div class=&quot;switch&quot;><div class=&quot;dot&quot;></div></div>
+      <div class=&quot;muted&quot;>리더보드에 공개됩니다</div>
+    </div>
+  </div>
+
+  <div class=&quot;box&quot; style=&quot;padding:22px; margin-bottom:24px;&quot;>
+    <div class=&quot;muted&quot; style=&quot;margin-bottom:12px;&quot;>점수 추이 (DOP-C02)</div>
+    <svg width=&quot;100%&quot; height=&quot;90&quot; viewBox=&quot;0 0 600 90&quot;>
+      <polyline points=&quot;0,70 100,55 200,60 300,35 400,40 500,15 600,20&quot; fill=&quot;none&quot; stroke=&quot;#3b5bdb&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/>
+    </svg>
+  </div>
+
+  <div class=&quot;box&quot; style=&quot;padding:6px 20px;&quot;>
+    <table>
+      <tr><th>회차</th><th>자격증</th><th>점수</th><th>결과</th><th>응시일</th></tr>
+      <tr><td>#5</td><td>DOP-C02</td><td>812/1000</td><td><span class=&quot;chip chip-pass&quot;>합격</span></td><td>2026-08-30</td></tr>
+      <tr><td>#4</td><td>DOP-C02</td><td>690/1000</td><td><span class=&quot;chip chip-fail&quot;>불합격</span></td><td>2026-08-20</td></tr>
+      <tr><td>#3</td><td>DOP-C02</td><td>733/1000</td><td><span class=&quot;chip chip-fail&quot;>불합격</span></td><td>2026-08-12</td></tr>
+      <tr><td>#2</td><td>DOP-C02</td><td>560/1000</td><td><span class=&quot;chip chip-fail&quot;>불합격</span></td><td>2026-08-02</td></tr>
+      <tr><td>#1</td><td>DOP-C02</td><td>480/1000</td><td><span class=&quot;chip chip-fail&quot;>불합격</span></td><td>2026-07-25</td></tr>
+    </table>
+  </div>
+</div></body></html>" style="height:824px;" loading="lazy"></iframe>
+</section>
+<section id="s9" class="screen">
+  <div class="screen-head">
+    <span class="tag">S9</span>
+    <h2>리더보드</h2>
+    <span class="file">Leaderboard.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    .frame { width:1080px; padding:28px 40px 48px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:18px; border-bottom:2.5px solid #222; margin-bottom:26px; }
+    .logo { font-size:24px; font-weight:700; }
+    .nav { display:flex; align-items:center; gap:22px; font-size:17px; }
+    .navlink.active { color:#c96a00; font-weight:700; }
+    .avatar { width:34px; height:34px; border-radius:50%; border:2.5px solid #222; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .h1 { font-size:26px; font-weight:700; margin:0; }
+    .muted { color:#8a8a8a; font-size:14px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #222; border-radius:999px; padding:5px 14px; font-size:15px; background:#fff; }
+    .rank-row { display:flex; align-items:center; gap:16px; padding:14px 18px; border-bottom:1.5px dashed #ccc; }
+    .rank-row:last-child { border-bottom:none; }
+    .rank-num { width:32px; height:32px; border:2.2px solid #222; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex:none; }
+    .rank-num.top { background:#ffd43b; }
+    .avatar-sm { width:30px; height:30px; border-radius:50%; border:2px solid #222; background:#fff; flex:none; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;nav&quot;>
+      <div class=&quot;navlink&quot;>홈</div>
+      <div class=&quot;navlink&quot;>내 이력</div>
+      <div class=&quot;navlink active&quot;>리더보드</div>
+      <div class=&quot;avatar&quot;>JS</div>
+    </div>
+  </div>
+
+  <div style=&quot;display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;&quot;>
+    <div class=&quot;h1&quot;>리더보드</div>
+    <div class=&quot;chip&quot;>DOP-C02 ▾</div>
+  </div>
+  <div class=&quot;muted&quot; style=&quot;margin-bottom:20px;&quot;>공개 설정한 사용자만 표시됩니다 · 자격증별 최고점 기준</div>
+
+  <div class=&quot;box&quot; style=&quot;padding:6px 20px;&quot;>
+    <div class=&quot;rank-row&quot;>
+      <div class=&quot;rank-num top&quot;>
+        <svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#7c4a03&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M8 4h8v4a4 4 0 0 1-8 0V4z&quot;/><path d=&quot;M12 12v3&quot;/><path d=&quot;M9 19h6&quot;/><path d=&quot;M10 16h4v3h-4z&quot;/></svg>
+      </div>
+      <div class=&quot;avatar-sm&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:160px;&quot;></div>
+      <div style=&quot;margin-left:auto; font-weight:700;&quot;>941 / 1000</div>
+    </div>
+    <div class=&quot;rank-row&quot;>
+      <div class=&quot;rank-num&quot;>2</div>
+      <div class=&quot;avatar-sm&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:140px;&quot;></div>
+      <div style=&quot;margin-left:auto; font-weight:700;&quot;>903 / 1000</div>
+    </div>
+    <div class=&quot;rank-row&quot;>
+      <div class=&quot;rank-num&quot;>3</div>
+      <div class=&quot;avatar-sm&quot; style=&quot;background:#eef1ff; border-color:#3b5bdb;&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:150px; background:#c8d4ff;&quot;></div>
+      <div style=&quot;margin-left:auto; font-weight:700; color:#3b5bdb;&quot;>812 / 1000 (나)</div>
+    </div>
+    <div class=&quot;rank-row&quot;>
+      <div class=&quot;rank-num&quot;>4</div>
+      <div class=&quot;avatar-sm&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:120px;&quot;></div>
+      <div style=&quot;margin-left:auto; font-weight:700;&quot;>770 / 1000</div>
+    </div>
+    <div class=&quot;rank-row&quot;>
+      <div class=&quot;rank-num&quot;>5</div>
+      <div class=&quot;avatar-sm&quot;></div>
+      <div class=&quot;bar&quot; style=&quot;width:130px;&quot;></div>
+      <div style=&quot;margin-left:auto; font-weight:700;&quot;>705 / 1000</div>
+    </div>
+  </div>
+</div></body></html>" style="height:784px;" loading="lazy"></iframe>
+</section>
+<section id="s10" class="screen">
+  <div class="screen-head">
+    <span class="tag">S10</span>
+    <h2>관리자 — JSON 임포트</h2>
+    <span class="file">AdminImport.dc.html</span>
+  </div>
+  <iframe class="frame-iframe" srcdoc="<!doctype html><html><head><meta charset=&quot;utf-8&quot;><style>
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;display=swap');
+    * { box-sizing: border-box; }
+    body { margin:0; background:#fdfcf7; font-family:'Gaegu', sans-serif; color:#222; }
+    .frame { width:1080px; padding:28px 40px 48px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding-bottom:18px; border-bottom:2.5px solid #222; margin-bottom:26px; }
+    .logo { font-size:24px; font-weight:700; }
+    .nav { display:flex; align-items:center; gap:16px; font-size:15px; }
+    .avatar { width:34px; height:34px; border-radius:50%; border:2.5px solid #222; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+    .box { border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; background:#fff; }
+    .bar { background:#dcdcdc; border-radius:5px; height:13px; }
+    .h1 { font-size:26px; font-weight:700; margin:0 0 20px; }
+    .muted { color:#8a8a8a; font-size:14px; }
+    .chip { display:inline-flex; align-items:center; gap:6px; border:2px solid #c96a00; border-radius:999px; padding:3px 12px; font-size:12px; background:#ffe8cc; font-weight:700; }
+    .dropzone { border:2.5px dashed #666; border-radius:16px; padding:44px; text-align:center; color:#666; }
+    .check-row { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:14px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2.5px solid #222; border-radius:22px 8px 20px 8px / 8px 20px 8px 22px; padding:11px 22px; font-size:16px; font-family:'Gaegu'; background:#fff; cursor:pointer; }
+    .btn-accent { background:#ffb347; border-color:#c96a00; }
+    .pool-row { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:13px; }
+    .pool-label { width:210px; }
+    .pool-track { flex:1; height:10px; border:1.3px solid #222; border-radius:6px; background:#f4f4f4; overflow:hidden; }
+    .pool-fill { height:100%; background:#c8d4ff; }
+    .pool-fill.low { background:#ffd8a8; }
+    .pool-count { width:36px; text-align:right; font-weight:700; }
+  </style></head><body><div class=&quot;frame&quot;>
+  <div class=&quot;topbar&quot;>
+    <div class=&quot;logo&quot;>CertQuiz</div>
+    <div class=&quot;nav&quot;>
+      <div class=&quot;chip&quot;>ADMIN</div>
+      <div class=&quot;avatar&quot;>JS</div>
+    </div>
+  </div>
+
+  <div class=&quot;h1&quot;>자격증 데이터 임포트</div>
+
+  <div style=&quot;display:flex; gap:24px;&quot;>
+    <div style=&quot;flex:1;&quot;>
+      <div class=&quot;dropzone&quot;>
+        <svg width=&quot;34&quot; height=&quot;34&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#666&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; style=&quot;margin:0 auto 12px;&quot;><path d=&quot;M7 18a4 4 0 0 1-1-7.9A5 5 0 0 1 16 8a4.5 4.5 0 0 1 1 8.9&quot;/><path d=&quot;M12 12v7&quot;/><path d=&quot;M9 15l3-3 3 3&quot;/></svg>
+        JSON 파일을 끌어다 놓거나<br>클릭하여 업로드
+      </div>
+      <div class=&quot;muted&quot; style=&quot;margin-top:10px;&quot;>dop-c02.json · 128 KB</div>
+    </div>
+
+    <div class=&quot;box&quot; style=&quot;flex:1; padding:22px;&quot;>
+      <div style=&quot;font-weight:700; margin-bottom:12px;&quot;>검증 결과</div>
+      <div class=&quot;check-row&quot;>
+        <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#2f9e44&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M8 12l3 3 5-6&quot;/></svg>
+        도메인 비율 합계 = 100%
+      </div>
+      <div class=&quot;check-row&quot;>
+        <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#2f9e44&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M8 12l3 3 5-6&quot;/></svg>
+        모든 문제의 domain_id 존재
+      </div>
+      <div class=&quot;check-row&quot;>
+        <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#2f9e44&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M8 12l3 3 5-6&quot;/></svg>
+        정답 개수 ≥ 1, choices 부분집합
+      </div>
+      <div class=&quot;check-row&quot;>
+        <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#c96a00&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 9v4&quot;/><path d=&quot;M12 17h.01&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/></svg>
+        한국어 미번역 62문제 (en_only)
+      </div>
+      <div class=&quot;check-row&quot;>
+        <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#c96a00&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 9v4&quot;/><path d=&quot;M12 17h.01&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/></svg>
+        Incident and Event Response 여유 부족 (출제 비율 대비 확보량 적음)
+      </div>
+
+      <div class=&quot;bar&quot; style=&quot;width:100%; height:1.5px; margin:14px 0; background:#ddd;&quot;></div>
+
+      <div class=&quot;muted&quot; style=&quot;margin-bottom:8px;&quot;>전체 문제 풀 330문제 보유 · 모의고사 1회당 75문제를 도메인 비율에 맞춰 랜덤 추출</div>
+      <div class=&quot;pool-row&quot;><div class=&quot;pool-label&quot;>SDLC Automation (22%)</div><div class=&quot;pool-track&quot;><div class=&quot;pool-fill&quot; style=&quot;width:90%;&quot;></div></div><div class=&quot;pool-count&quot;>90</div></div>
+      <div class=&quot;pool-row&quot;><div class=&quot;pool-label&quot;>Configuration &amp;amp; IaC (17%)</div><div class=&quot;pool-track&quot;><div class=&quot;pool-fill&quot; style=&quot;width:65%;&quot;></div></div><div class=&quot;pool-count&quot;>58</div></div>
+      <div class=&quot;pool-row&quot;><div class=&quot;pool-label&quot;>Security and Compliance (17%)</div><div class=&quot;pool-track&quot;><div class=&quot;pool-fill&quot; style=&quot;width:72%;&quot;></div></div><div class=&quot;pool-count&quot;>64</div></div>
+      <div class=&quot;pool-row&quot;><div class=&quot;pool-label&quot;>Resilient Cloud Solutions (15%)</div><div class=&quot;pool-track&quot;><div class=&quot;pool-fill&quot; style=&quot;width:56%;&quot;></div></div><div class=&quot;pool-count&quot;>50</div></div>
+      <div class=&quot;pool-row&quot;><div class=&quot;pool-label&quot;>Monitoring and Logging (15%)</div><div class=&quot;pool-track&quot;><div class=&quot;pool-fill&quot; style=&quot;width:51%;&quot;></div></div><div class=&quot;pool-count&quot;>46</div></div>
+      <div class=&quot;pool-row&quot;><div class=&quot;pool-label&quot;>Incident and Event Response (14%)</div><div class=&quot;pool-track&quot;><div class=&quot;pool-fill low&quot; style=&quot;width:38%;&quot;></div></div><div class=&quot;pool-count&quot;>34</div></div>
+    </div>
+  </div>
+
+  <div style=&quot;margin-top:24px;&quot;>
+    <button class=&quot;btn btn-accent&quot;>임포트 확정 (기존 문제 풀 전체 교체)</button>
+    <div class=&quot;muted&quot; style=&quot;margin-top:10px;&quot;>재임포트 시 이 자격증의 문제 풀을 통째로 교체합니다. 과거 응시 이력(Attempt)은 스냅샷이라 영향 없습니다.</div>
+  </div>
+</div></body></html>" style="height:844px;" loading="lazy"></iframe>
+</section>
+</main>
+</body>
+</html>
