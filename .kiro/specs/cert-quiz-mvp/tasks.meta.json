@@ -1,0 +1,1582 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 pnpm workspace와 배포 단위별 프로젝트 구조를 생성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331137810
+      }
+    ],
+    "1.2 재현 가능한 lint·format·test·build 설정을 추가한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331139274
+      }
+    ],
+    "1.3 최소 React SPA와 Hono Lambda를 shared health contract로 연결한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331140127
+      }
+    ],
+    "2.1 실제 DSQL에서 실행 가능한 connector·migration·query spike를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331141109
+      }
+    ],
+    "2.2 핵심 원자성과 동시성 probe를 spike에 추가한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331141303
+      }
+    ],
+    "2.3 spike 결과로 DSQL 또는 Aurora Serverless v2 adapter를 선택하도록 구성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331141558
+      }
+    ],
+    "3. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331141860
+      }
+    ],
+    "4.1 exact `Fraction`과 점수 계산 primitive를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331142941
+      }
+    ],
+    "4.2 `Clock`, `RandomSource`, UUID, canonical 시간 primitive를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331143245
+      }
+    ],
+    "4.3 domain error와 안전한 HTTP envelope를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331143528
+      }
+    ],
+    "4.4 Zod 기반 API 계약과 strict question projection을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331143712
+      }
+    ],
+    "4.5 exact 채점 의미 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331143993
+      }
+    ],
+    "4.6 표시값·판정값 분리와 설정 오류 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331144433
+      }
+    ],
+    "5.1 identity, revisioned catalog, import validation migration을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331144643
+      }
+    ],
+    "5.2 practice session, snapshot, completed result migration을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331144931
+      }
+    ],
+    "5.3 exam session, Attempt, immutable item migration을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331145186
+      }
+    ],
+    "5.4 repository ports, UnitOfWork와 DSQL/PostgreSQL adapter를 배선한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331145492
+      }
+    ],
+    "5.5 공통 repository contract suite를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331145639
+      }
+    ],
+    "5.6 repository concurrency와 fault-injection suite를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331145812
+      }
+    ],
+    "6.1 Cognito token verifier와 Google identity extractor middleware를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331145966
+      }
+    ],
+    "6.2 원자적 profile get-or-create와 승인 상태 조회를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331146160
+      }
+    ],
+    "6.3 approval, admin, ownership middleware와 관리자 사용자 API를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331146340
+      }
+    ],
+    "6.4 본인 profile과 점수 공개 설정 API를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331146511
+      }
+    ],
+    "6.5 외부 신원·신규 profile property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331146669
+      }
+    ],
+    "6.6 인증·인가 비간섭 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331146899
+      }
+    ],
+    "6.7 승인 전이·pending 목록 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331147071
+      }
+    ],
+    "6.8 Cognito와 인증 route integration test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331147255
+      }
+    ],
+    "7.1 active revision 기반 catalog validator와 repository query를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331147432
+      }
+    ],
+    "7.2 approved catalog API를 Provider별 projection에 연결한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331147580
+      }
+    ],
+    "7.3 catalog 관계·노출 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331147744
+      }
+    ],
+    "8.1 byte-limit parser와 구조/schema validation pipeline을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331147883
+      }
+    ],
+    "8.2 semantic validator와 summary 계산을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331148018
+      }
+    ],
+    "8.3 RFC 8785 원칙의 canonical JSON, SHA-256와 commit token을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331148232
+      }
+    ],
+    "8.4 staging revision insert와 active head atomic switch를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331148419
+      }
+    ],
+    "8.5 관리자 dry-run/commit API를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331148606
+      }
+    ],
+    "8.6 import dry-run property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331148801
+      }
+    ],
+    "8.7 검증본 결합·catalog 교체 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331149103
+      }
+    ],
+    "8.8 canonicalization·token·fault integration test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331149409
+      }
+    ],
+    "9.1 largest-remainder allocator를 exact arithmetic으로 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331149793
+      }
+    ],
+    "9.2 unbiased question sampling과 전체 shuffle을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331150115
+      }
+    ],
+    "9.3 SessionFactory와 immutable snapshot transaction을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331150627
+      }
+    ],
+    "9.4 mode/reveal 상태별 strict SnapshotProjector를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331152403
+      }
+    ],
+    "9.5 domain allocation property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331152597
+      }
+    ],
+    "9.6 uniform sampling·permutation property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331152955
+      }
+    ],
+    "9.7 session 생성 원자성·snapshot property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331153216
+      }
+    ],
+    "9.8 strict projection leak contract test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331153435
+      }
+    ],
+    "10. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331153589
+      }
+    ],
+    "11.1 start/resume/replace lifecycle을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331153778
+      }
+    ],
+    "11.2 answer draft, flag, position의 versioned state mutation을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331154216
+      }
+    ],
+    "11.3 최초 question submit 잠금과 exact scoring을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331154509
+      }
+    ],
+    "11.4 마지막 제출과 Completed_Practice_Result 생성을 원자적으로 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331154705
+      }
+    ],
+    "11.5 168시간 visibility와 idempotent retention cleanup을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331154894
+      }
+    ],
+    "11.6 practice API routes와 안전한 projections를 연결한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331155069
+      }
+    ],
+    "11.7 practice lifecycle property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331155267
+      }
+    ],
+    "11.8 최초 제출 잠금 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331155420
+      }
+    ],
+    "11.9 공개 격리·단일 완료 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331155563
+      }
+    ],
+    "11.10 168시간·연습 통계 격리 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331155728
+      }
+    ],
+    "12.1 idempotent exam start와 server-clock state mutation을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331155877
+      }
+    ],
+    "12.2 exam restore와 submission preview를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331156047
+      }
+    ],
+    "12.3 모든 인증 요청에 OwnedExpiredExamFinalizer를 배선한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331156292
+      }
+    ],
+    "12.4 cutoff 기반 `finalizeOnce`와 immutable Attempt 생성을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331156451
+      }
+    ],
+    "12.5 exam start/get/state/preview/submit API를 연결한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331156646
+      }
+    ],
+    "12.6 exam 시간 함수 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331156827
+      }
+    ],
+    "12.7 exam 저장·복원 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331157232
+      }
+    ],
+    "12.8 lazy expiration·cutoff property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331157835
+      }
+    ],
+    "12.9 concurrent finalize property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331158780
+      }
+    ],
+    "12.10 all-owner-route lazy expiration concurrency integration test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331158950
+      }
+    ],
+    "13.1 Attempt detail, history와 trend query를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331159154
+      }
+    ],
+    "13.2 score visibility 기반 exact leaderboard를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331159352
+      }
+    ],
+    "13.3 result/history/trend/leaderboard API를 shared contracts에 연결한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331159598
+      }
+    ],
+    "13.4 Attempt 불변성·이력 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331159855
+      }
+    ],
+    "13.5 leaderboard property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331160071
+      }
+    ],
+    "13.6 history·leaderboard repository integration test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331160301
+      }
+    ],
+    "14.1 React Router route hierarchy와 auth/pending/approved/admin layout을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331160484
+      }
+    ],
+    "14.2 TanStack Query API client와 Zustand quiz transient store를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331160672
+      }
+    ],
+    "14.3 Tailwind/shadcn shell, AsyncBoundary와 safe Markdown renderer를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331160816
+      }
+    ],
+    "14.4 비동기 UI 요청 상태 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331160954
+      }
+    ],
+    "15.1 S1 로그인/callback과 승인 대기 화면을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331161109
+      }
+    ],
+    "15.2 S2 홈과 S3 mode select를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331161267
+      }
+    ],
+    "15.3 관리자 pending 사용자 화면을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331161430
+      }
+    ],
+    "15.4 S10 import 화면을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331161584
+      }
+    ],
+    "15.5 auth/catalog/admin component test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331161744
+      }
+    ],
+    "16.1 QuestionPresenter, navigator, language, Markdown UI를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331161926
+      }
+    ],
+    "16.2 S4 PracticePage를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331162083
+      }
+    ],
+    "16.3 S5 ExamPage와 ServerTimer를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331162287
+      }
+    ],
+    "16.4 문제 입력·언어 상태 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331162460
+      }
+    ],
+    "16.5 탐색 경계·상태 분류 property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331162606
+      }
+    ],
+    "16.6 Flag version commit/rollback property test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331162755
+      }
+    ],
+    "16.7 quiz component와 projection leak test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331162926
+      }
+    ],
+    "17.1 S6 practice result와 S7 exam result를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331163100
+      }
+    ],
+    "17.2 S8 history와 score visibility를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331163265
+      }
+    ],
+    "17.3 S9 certification leaderboard를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331163420
+      }
+    ],
+    "17.4 result/history/leaderboard component test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331163548
+      }
+    ],
+    "18.1 Terraform 기반 인프라를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331163752
+      }
+    ],
+    "18.2 Serverless Framework 배포 구성을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331163889
+      }
+    ],
+    "18.3 IAM, CORS, CSP, rate limit와 web 보안 header를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331164139
+      }
+    ],
+    "18.4 structured telemetry와 alarm/runbook automation을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331164302
+      }
+    ],
+    "18.5 인프라·보안 자동화 test를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331164469
+      }
+    ],
+    "19.1 통합 test harness와 결정적 fixture를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331164614
+      }
+    ],
+    "19.2 API·DB integration suite를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331164762
+      }
+    ],
+    "19.3 Playwright S1~S10 E2E suite를 작성한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331164945
+      }
+    ],
+    "19.4 PR·DB adapter·배포 후보 CI gate를 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331165146
+      }
+    ],
+    "19.5 migration·alias·web·catalog release와 rollback automation을 구현한다": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331165356
+      }
+    ],
+    "20. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "b300fb5c-6d7d-479c-94e1-7b8538862b33",
+        "chatSessionId": "sess_8c0c7d97-9f16-43e6-8ce5-ba2689f390af",
+        "timestamp": 1788331165551
+      }
+    ],
+    "1.1 최소 pnpm/TypeScript 모노레포와 `apps/web` 기반을 생성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332917262
+      },
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333054755
+      },
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788334718107
+      }
+    ],
+    "1.2 프론트엔드 lint·format·test·build 품질 게이트를 구성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332917553
+      },
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788334729917
+      },
+      {
+        "executionId": "43367fca-71e1-4c2c-83a6-a2f43bc4ed04",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788336024906
+      }
+    ],
+    "1.3 UI 선행 개발용 shared transport contracts와 strict schema를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332918506
+      },
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788334736865
+      },
+      {
+        "executionId": "43367fca-71e1-4c2c-83a6-a2f43bc4ed04",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788336032744
+      }
+    ],
+    "1.4 교체 가능한 typed frontend API port를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332919586
+      }
+    ],
+    "1.5 MSW 기반 역할·카탈로그·quiz·결과 결정적 fixture를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332920681
+      }
+    ],
+    "1.6 MSW 상태 머신과 오류 scenario handler를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332921796
+      }
+    ],
+    "1.7 mock health contract로 프론트엔드 bootstrap을 완성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332922698
+      }
+    ],
+    "2.1 React Router route hierarchy와 auth/pending/approved/admin layout을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332923669
+      }
+    ],
+    "2.2 TanStack Query client와 Zustand quiz transient store를 API port에 연결한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332924749
+      }
+    ],
+    "2.3 Tailwind/shadcn shell, AsyncBoundary와 safe Markdown renderer를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332926100
+      }
+    ],
+    "2.4 비동기 UI 요청 상태 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332926867
+      }
+    ],
+    "3.1 S1 로그인/callback과 승인 대기 화면을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332927891
+      }
+    ],
+    "3.2 S2 홈과 S3 mode select를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332928966
+      }
+    ],
+    "3.3 관리자 pending 사용자 화면을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332929967
+      }
+    ],
+    "3.4 S10 import 화면을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332930992
+      }
+    ],
+    "3.5 auth/catalog/admin mock-backed component test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332932040
+      }
+    ],
+    "4.1 QuestionPresenter, navigator, language, Markdown UI를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332933071
+      }
+    ],
+    "4.2 S4 PracticePage를 mock API port에 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332934124
+      }
+    ],
+    "4.3 S5 ExamPage와 ServerTimer를 mock API port에 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332935246
+      }
+    ],
+    "4.4 문제 입력·언어 상태 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332936193
+      }
+    ],
+    "4.5 탐색 경계·상태 분류 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332937234
+      }
+    ],
+    "4.6 Flag version commit/rollback property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332938256
+      }
+    ],
+    "4.7 quiz mock-backed component와 projection leak test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332939266
+      }
+    ],
+    "5.1 S6 practice result와 S7 exam result를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332940296
+      }
+    ],
+    "5.2 S8 history와 score visibility를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332941292
+      }
+    ],
+    "5.3 S9 certification leaderboard를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332942316
+      }
+    ],
+    "5.4 result/history/leaderboard mock-backed component test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332943366
+      }
+    ],
+    "6.1 frontend unit/property/component suite를 통합한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332944433
+      }
+    ],
+    "6.2 MSW 기반 Playwright S1~S10 E2E suite를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332945437
+      }
+    ],
+    "6.3 mock fixture와 shared contract compatibility test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332946470
+      }
+    ],
+    "7. Frontend checkpoint - Ensure all frontend tests pass": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332947488
+      }
+    ],
+    "8.1 backend/domain/DB/infra workspace 구조를 추가한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332948443
+      }
+    ],
+    "8.2 backend lint·test·build 경계와 루트 명령을 확장한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332949535
+      }
+    ],
+    "8.3 실제 Hono Lambda와 shared health contract를 연결한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332950560
+      }
+    ],
+    "9.1 실제 DSQL에서 실행 가능한 connector·migration·query spike를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332951599
+      }
+    ],
+    "9.2 핵심 원자성과 동시성 probe를 spike에 추가한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332952631
+      }
+    ],
+    "9.3 spike 결과로 DSQL 또는 Aurora Serverless v2 adapter를 선택하도록 구성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332953683
+      }
+    ],
+    "10. Backend foundation checkpoint - Ensure all foundation tests pass": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332954713
+      }
+    ],
+    "11.1 exact `Fraction`과 점수 계산 primitive를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332955699
+      }
+    ],
+    "11.2 `Clock`, `RandomSource`, UUID와 canonical 시간 primitive를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332956741
+      }
+    ],
+    "11.3 domain error와 안전한 HTTP error mapper를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332957761
+      }
+    ],
+    "11.4 strict SnapshotProjector와 backend contract provider test를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332958775
+      }
+    ],
+    "11.5 exact 채점 의미 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332959835
+      }
+    ],
+    "11.6 표시값·판정값 분리와 설정 오류 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332960872
+      }
+    ],
+    "12.1 identity, revisioned catalog와 import validation migration을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332961902
+      }
+    ],
+    "12.2 practice session, snapshot과 completed result migration을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332962942
+      }
+    ],
+    "12.3 exam session, Attempt와 immutable item migration을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332963954
+      }
+    ],
+    "12.4 repository ports, UnitOfWork와 DSQL/PostgreSQL adapter를 배선한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332964889
+      }
+    ],
+    "12.5 공통 repository contract suite를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332965886
+      }
+    ],
+    "12.6 repository concurrency와 fault-injection suite를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332966854
+      }
+    ],
+    "13.1 Cognito token verifier와 Google identity extractor middleware를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332967967
+      }
+    ],
+    "13.2 원자적 profile get-or-create와 승인 상태 조회를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332968997
+      }
+    ],
+    "13.3 approval, admin, ownership middleware와 관리자 사용자 API를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332970036
+      }
+    ],
+    "13.4 본인 profile과 점수 공개 설정 API를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332971060
+      }
+    ],
+    "13.5 외부 신원·신규 profile property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332972076
+      }
+    ],
+    "13.6 인증·인가 비간섭 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332973102
+      }
+    ],
+    "13.7 승인 전이·pending 목록 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332974082
+      }
+    ],
+    "13.8 Cognito와 인증 route integration test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332978920
+      }
+    ],
+    "14.1 active revision 기반 catalog validator와 repository query를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332979872
+      }
+    ],
+    "14.2 approved catalog API를 기존 Provider별 projection contract에 연결한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332980881
+      }
+    ],
+    "14.3 catalog 관계·노출 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332981932
+      }
+    ],
+    "15.1 byte-limit parser와 구조/schema validation pipeline을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332982948
+      }
+    ],
+    "15.2 semantic validator와 summary 계산을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332984004
+      }
+    ],
+    "15.3 RFC 8785 원칙의 canonical JSON, SHA-256와 commit token을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332984990
+      }
+    ],
+    "15.4 staging revision insert와 active head atomic switch를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332986039
+      }
+    ],
+    "15.5 관리자 dry-run/commit API를 기존 frontend contract에 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332987008
+      }
+    ],
+    "15.6 import dry-run property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332987968
+      }
+    ],
+    "15.7 검증본 결합·catalog 교체 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332988997
+      }
+    ],
+    "15.8 canonicalization·token·fault integration test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332990044
+      }
+    ],
+    "16.1 largest-remainder allocator를 exact arithmetic으로 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332991100
+      }
+    ],
+    "16.2 unbiased question sampling과 전체 shuffle을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332992117
+      }
+    ],
+    "16.3 SessionFactory와 immutable snapshot transaction을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332993154
+      }
+    ],
+    "16.4 generation API source와 strict projection을 연결한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332994164
+      }
+    ],
+    "16.5 domain allocation property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332995124
+      }
+    ],
+    "16.6 uniform sampling·permutation property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332996039
+      }
+    ],
+    "16.7 session 생성 원자성·snapshot property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332997159
+      }
+    ],
+    "16.8 strict projection leak contract test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332998191
+      }
+    ],
+    "17. Backend domain checkpoint - Ensure all domain and repository tests pass": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788332999220
+      }
+    ],
+    "18.1 start/resume/replace lifecycle을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333000268
+      }
+    ],
+    "18.2 answer draft, Flag와 position의 versioned state mutation을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333001315
+      }
+    ],
+    "18.3 최초 question submit 잠금과 exact scoring을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333002314
+      }
+    ],
+    "18.4 마지막 제출과 Completed_Practice_Result 생성을 원자적으로 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333003294
+      }
+    ],
+    "18.5 168시간 visibility와 idempotent retention cleanup을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333004238
+      }
+    ],
+    "18.6 practice API routes를 기존 shared contracts에 연결한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333005290
+      }
+    ],
+    "18.7 practice lifecycle property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333006311
+      }
+    ],
+    "18.8 최초 제출 잠금 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333007374
+      }
+    ],
+    "18.9 공개 격리·단일 완료 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333008393
+      }
+    ],
+    "18.10 168시간·연습 통계 격리 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333009492
+      }
+    ],
+    "19.1 idempotent exam start와 server-clock state mutation을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333010494
+      }
+    ],
+    "19.2 exam restore와 submission preview를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333011598
+      }
+    ],
+    "19.3 모든 인증 요청에 OwnedExpiredExamFinalizer를 배선한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333012601
+      }
+    ],
+    "19.4 cutoff 기반 `finalizeOnce`와 immutable Attempt 생성을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333013713
+      }
+    ],
+    "19.5 exam start/get/state/preview/submit API를 기존 shared contracts에 연결한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333014657
+      }
+    ],
+    "19.6 exam 시간 함수 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333015703
+      }
+    ],
+    "19.7 exam 저장·복원 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333016723
+      }
+    ],
+    "19.8 lazy expiration·cutoff property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333017762
+      }
+    ],
+    "19.9 concurrent finalize property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333018784
+      }
+    ],
+    "19.10 all-owner-route lazy expiration concurrency integration test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333019706
+      }
+    ],
+    "20.1 Attempt detail, history와 trend query를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333020805
+      }
+    ],
+    "20.2 score visibility 기반 exact leaderboard를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333021856
+      }
+    ],
+    "20.3 result/history/trend/leaderboard API를 기존 shared contracts에 연결한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333022833
+      }
+    ],
+    "20.4 Attempt 불변성·이력 property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333023881
+      }
+    ],
+    "20.5 leaderboard property test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333024968
+      }
+    ],
+    "20.6 history·leaderboard repository integration test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333025926
+      }
+    ],
+    "21.1 Terraform 기반 인프라를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333026908
+      }
+    ],
+    "21.2 Serverless Framework 배포 구성을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333027939
+      }
+    ],
+    "21.3 IAM, CORS, CSP, rate limit와 web 보안 header를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333028976
+      }
+    ],
+    "21.4 structured telemetry와 alarm/runbook automation을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333030057
+      }
+    ],
+    "21.5 인프라·보안 자동화 test를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333031122
+      }
+    ],
+    "22.1 API·DB 통합 harness를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333032123
+      }
+    ],
+    "23.1 frontend real HTTP API adapter와 환경별 adapter switch를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333033150
+      }
+    ],
+    "23.2 frontend consumer와 backend provider contract compatibility gate를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333034188
+      }
+    ],
+    "23.3 API·DB integration suite를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333035240
+      }
+    ],
+    "23.4 real API 기반 Playwright S1~S10 E2E suite를 작성한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333036318
+      }
+    ],
+    "23.5 PR·DB adapter·배포 후보 CI gate를 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333037293
+      }
+    ],
+    "23.6 migration·alias·web·catalog release와 rollback automation을 구현한다": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333038500
+      }
+    ],
+    "24. Final integration checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "8602e09c-e2b2-4f20-8fb0-386a445ffec8",
+        "chatSessionId": "sess_94058f3c-b8ae-4ea0-a843-3802b2ae9d60",
+        "timestamp": 1788333039410
+      }
+    ]
+  }
+}

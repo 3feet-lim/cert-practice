@@ -1,0 +1,34 @@
+{
+  "name": "cert-quiz",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "pnpm run typecheck && pnpm --filter @cert-quiz/web build",
+    "ci": "pnpm run quality:web",
+    "format": "prettier --check \"apps/**/*.{ts,tsx,js,mjs,json,css,html}\" \"packages/**/*.{ts,tsx,js,mjs,json}\" \"tests/**/*.{ts,tsx,js,mjs,json}\" \"*.{json,mjs,yaml,yml}\"",
+    "format:write": "pnpm exec prettier --write \"apps/**/*.{ts,tsx,js,mjs,json,css,html}\" \"packages/**/*.{ts,tsx,js,mjs,json}\" \"tests/**/*.{ts,tsx,js,mjs,json}\" \"*.{json,mjs,yaml,yml}\"",
+    "lint": "eslint \"apps/**/*.{ts,tsx}\" \"packages/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\" --max-warnings 0",
+    "test": "pnpm run test:boundaries && pnpm --filter @cert-quiz/contracts test && pnpm --filter @cert-quiz/web test",
+    "test:boundaries": "node --test tests/architecture/*.test.mjs",
+    "test:ci": "pnpm run test:boundaries && pnpm --filter @cert-quiz/contracts test && pnpm --filter @cert-quiz/web test:coverage",
+    "test:coverage": "pnpm --filter @cert-quiz/web test:coverage",
+    "test:e2e": "pnpm --filter @cert-quiz/e2e test",
+    "typecheck": "tsc6 -b --pretty false",
+    "quality:web": "pnpm run lint && pnpm run format && pnpm run typecheck && pnpm run test:ci && pnpm run build && pnpm run test:e2e"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.9.1",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.5",
+    "globals": "17.11.0",
+    "prettier": "3.9.6",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "typescript-eslint": "8.69.0"
+  }
+}

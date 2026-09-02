@@ -1,0 +1,27 @@
+{
+  "name": "@cert-quiz/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc6 -b --pretty false",
+    "test": "vitest run",
+    "typecheck": "tsc6 -b --pretty false"
+  },
+  "dependencies": {
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "fast-check": "4.9.0",
+    "vitest": "4.1.11"
+  }
+}
