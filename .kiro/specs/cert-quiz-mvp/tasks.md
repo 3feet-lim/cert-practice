@@ -2,18 +2,18 @@
 
 ## Overview
 
-TypeScript 모노레포에서 프론트엔드를 먼저 구축하고 검증한 뒤 백엔드·데이터베이스·AWS 인프라를 구현해 같은 계약에 연결한다. 첫 단계는 `apps/web`, shared transport contracts, 교체 가능한 typed frontend API port, MSW handler와 결정적 fixture를 확정한다. S1~S10 화면은 DB, Hono, Cognito 또는 AWS 없이 이 포트와 mock adapter만 사용해 개발하며, mock-backed component/Playwright suite로 사용자 흐름과 비동기 상태를 검증한다.
+TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자가 화면 구성·시각 디자인·정보 구조·S1~S10 흐름을 직접 검토해 승인한 뒤** 상태ful 동작을 연결한다. 첫 프론트엔드 단계는 최소 결정적 fixture, route skeleton, navigation, design token, Tailwind/shadcn shell과 재사용 가능한 presentational component만 사용한다. 이 단계의 화면은 loading/empty/error/success 대표 변형을 정적으로 선택해 볼 수 있어야 하며 TanStack Query, Zustand mutation, MSW 상태 머신, 실제 HTTP, Cognito, DB 또는 backend 동작에 의존하지 않는다. `pnpm ui:preview:export`는 이 화면을 실제 multipage HTML과 상대 local asset으로 export하고, 검토 시작점은 repository root 기준 `artifacts/ui-preview/index.html`로 고정한다.
 
-MSW와 fixture는 **UI 개발용 동작만 제공한다**. mock 통과는 백엔드 인증·인가·소유권, 영속성, 원자성, 정확한 서버 시간, 동시성, 보안 또는 인프라 요구사항을 충족했다는 증거가 아니다. 후반 단계에서 도메인·DB·auth·Hono API·IaC를 기존 contracts의 호환 구현으로 추가하고, real API adapter로 전환한 뒤 contract, repository, integration, 실제 E2E와 release gate를 모두 통과시킨다. 설계의 Correctness Properties 1~25와 Requirements 1~16은 구현 및 자동화 테스트 작업에 완전히 추적된다.
+필수 `Static UI review checkpoint`에서 `artifacts/ui-preview/index.html`에서 시작하는 browsable S1~S10 HTML gallery와 exported-artifact visual smoke/accessibility 검증 결과를 제공한 뒤 실행을 중단하고 사용자 시각 승인을 기다린다. 승인 후에만 query client/store/API port와 async boundary를 연결하고, auth·pending·catalog·admin/import → practice → exam → result/history/leaderboard 순서로 mock 동작과 테스트를 작은 slice별로 추가한다. 모든 frontend mock checkpoint가 끝난 뒤에만 backend·도메인·DB·auth·Hono API·AWS 인프라를 기존 contracts의 호환 구현으로 추가한다. mock 통과는 backend 인증·인가·소유권, 영속성, 원자성, 정확한 서버 시간, 동시성, 보안 또는 인프라 요구사항의 증거가 아니며, 후반 real adapter, contract, repository, integration, 실제 E2E와 release gate가 이를 별도로 검증한다. 설계의 Correctness Properties 1~25와 Requirements 1~16은 구현 및 자동화 테스트 작업에 완전히 추적된다.
 
 ## Tasks
 
-- [ ] 1. 최소 프론트엔드 workspace, transport contracts와 mock 경계 구성
+- [x] 1. 최소 프론트엔드 workspace, transport contracts와 mock 경계 구성
   - [x] 1.1 최소 pnpm/TypeScript 모노레포와 `apps/web` 기반을 생성한다
     - pnpm workspace, 루트 TypeScript project reference, `apps/web`, `packages/contracts`, `tests/e2e`를 만들고 React/Vite 진입점과 단일 실행 build/typecheck 명령을 구성한다.
     - `packages/domain`, `packages/db`, `apps/api`, 인프라는 후속 단계에서 추가할 수 있도록 의존 방향만 예약하고 프론트엔드 bootstrap이 Hono Lambda를 요구하지 않게 한다.
     - _Requirements: 16.1, 16.2_
-  - [~] 1.2 프론트엔드 lint·format·test·build 품질 게이트를 구성한다
+  - [x] 1.2 프론트엔드 lint·format·test·build 품질 게이트를 구성한다
     - Vitest, fast-check, React Testing Library, Playwright, coverage와 watch가 아닌 CI 단일 실행 명령을 추가한다.
     - web이 DB row, AWS SDK, Hono 구현을 import하지 못하고 contracts와 frontend API port만 사용하도록 lint boundary를 설정한다.
     - _Requirements: 16.1, 16.2, 16.8, 16.9_
@@ -21,117 +21,169 @@ MSW와 fixture는 **UI 개발용 동작만 제공한다**. mock 통과는 백엔
     - 성공/오류 envelope, request ID, retryability, UUID, UTC timestamp, decimal string, State_Version과 인증·승인·카탈로그·practice·exam·result·history·leaderboard·admin import DTO를 Zod로 정의한다.
     - practice-unsubmitted, practice-submitted, exam-active, review DTO를 서로 다른 `.strict()` schema로 만들어 공개 전 정답·정오답·점수·해설 필드가 타입과 JSON에 존재하지 않게 한다.
     - _Requirements: 1.7-1.12, 2.4-2.6, 3.6-3.11, 5.6-5.8, 8.8-8.10, 10.7, 13.1-13.3, 16.3-16.7_
-  - [ ] 1.4 교체 가능한 typed frontend API port를 구현한다
+  - [x] 1.4 교체 가능한 typed frontend API port를 구현한다
     - S1~S10이 필요한 query/mutation을 `CertQuizApi` 인터페이스로 정의하고 mock adapter와 향후 HTTP adapter가 같은 입력·출력·오류 union을 구현하게 한다.
     - React component와 store가 `fetch`, MSW, Hono route 또는 DB 세부사항을 직접 알지 않도록 provider/composition root에서 adapter를 주입한다.
     - _Requirements: 1.7-1.12, 2.5, 2.6, 3.6, 5.5, 6.7-6.12, 7.1-7.12, 8.1-8.12, 10.1-10.13, 13.1-14.15, 15.18-15.27, 16.1-16.9_
-  - [ ] 1.5 MSW 기반 역할·카탈로그·quiz·결과 결정적 fixture를 구현한다
-    - unauthenticated, pending, approved user, admin actor와 빈/유효/invalid catalog, active practice, submitted practice, active/expired/finalized exam, immutable result, history, leaderboard, dry-run/commit fixture를 만든다.
-    - seeded ID/RNG와 fake server clock으로 exam timer·expiry, 168시간 경계, 순위 동률, 번역 상태와 DOP-C02 75문항 메타데이터를 재현 가능하게 한다.
-    - _Requirements: 1.1-1.15, 2.1-2.6, 3.6-3.11, 5.1-5.13, 7.1-10.13, 13.1-15.28_
-  - [ ] 1.6 MSW 상태 머신과 오류 scenario handler를 구현한다
+  - [x] 1.5 정적 UI preview용 최소 결정적 fixture를 구현한다
+    - unauthenticated, pending, approved user, admin actor와 catalog, practice, exam, result, history, leaderboard, admin import의 화면 표시용 read-only fixture를 성공·빈 상태·오류 대표 사례로 만든다.
+    - 모든 ID, 시각, 점수, 문항 순서와 DOP-C02 75문항 메타데이터를 고정해 screenshot과 screen gallery가 실행마다 동일하게 보이게 하며, 이 작업에는 handler, timer, mutation, 상태 전이 또는 backend 보장을 구현하지 않는다.
+    - fixture를 shared schema로 검증하되 정적 UI 단계에서는 MSW 상태 머신과 실제 API port를 호출하지 않는다.
+    - _Requirements: 1.7-1.10, 2.5, 2.6, 3.6-3.11, 5.1-5.13, 8.8-8.10, 10.7, 13.1-15.19, 16.1-16.7_
+  - [x] 1.6 MSW 상태 머신과 오류 scenario handler를 구현한다
     - loading 지연, empty, retryable/non-retryable 오류, stale version, 저장 rollback, owner/role denial, import validation 오류, token 만료·재사용, duplicate submission과 idempotent result를 scenario별 handler로 제공한다.
     - practice/exam version 증가, 최초 제출 잠금, preview count, serverNow/expiresAt, 동일 submit 결과를 메모리 상태 머신으로 모사하되 backend 보장의 대체물이 아님을 코드 주석과 테스트 이름에 명시한다.
     - _Requirements: 1.7-1.12, 2.4, 6.7-6.12, 7.5-8.12, 10.3-11.12, 15.17-15.27, 16.1-16.9_
-  - [ ] 1.7 mock health contract로 프론트엔드 bootstrap을 완성한다
+  - [x] 1.7 mock health contract로 프론트엔드 bootstrap을 완성한다
     - shared health DTO를 API port와 MSW handler로 제공하고 웹 진입 화면이 mock adapter를 통해 workspace·번들·schema validation을 실제 사용하게 한다.
     - 실제 Hono health route와 HTTP wiring은 후속 backend 작업으로 분리해 프론트엔드 bootstrap의 선행 조건에서 제거한다.
     - _Requirements: 16.1, 16.2, 16.4_
 
-- [ ] 2. React application foundation과 비동기 상태 모델 구현
-  - [ ] 2.1 React Router route hierarchy와 auth/pending/approved/admin layout을 구현한다
-    - `/login`, callback, `/pending`, `/app` 아래 S2~S10 route를 만들고 내부 allowlist return URL만 복원한다.
-    - route guard는 UX로만 사용하고 API port의 인증·권한 오류를 canonical 상태로 처리한다.
-    - _Requirements: 1.7, 1.8, 1.11, 2.1-2.4_
-  - [ ] 2.2 TanStack Query client와 Zustand quiz transient store를 API port에 연결한다
-    - query별 독립 loading/error, canonical mutation response reconciliation, logout cache purge, flag rollback과 submit duplicate lock을 구현한다.
-    - mock/real adapter 전환이 query key, component 또는 store 변경을 요구하지 않게 composition root에서 `CertQuizApi`를 주입한다.
+- [ ] 2. 정적 UI foundation과 export 가능한 review shell 구성
+  - [ ] 2.1 S1~S10 route skeleton, export manifest와 정적 navigation을 구현한다
+    - `/login`, `/auth/callback`, `/pending`, `/app`, certification mode, practice, exam, practice result, attempt result, history, leaderboard, admin users/import 경로를 React Router에 등록한다.
+    - 각 route는 정적 fixture key 또는 preview query만으로 화면을 선택하고 auth guard, redirect 복원, TanStack Query, Zustand, API 호출, Cognito callback 처리 또는 mutation을 구현하지 않는다.
+    - S1~S10과 대표 loading/empty/error/success fixture를 결정적 `.html` 상대 경로에 연결하는 export manifest를 정의하고, 상단·측면 navigation 및 gallery/이전/다음 링크가 생성 HTML 파일 사이의 상대 링크가 되게 한다.
+    - _Requirements: 1.7, 1.8, 1.11, 2.1-2.4, 16.1-16.7_
+  - [ ] 2.2 design token과 Tailwind/shadcn 정적 application shell을 구현한다
+    - 색상, typography, spacing, radius, elevation, focus, status token을 정의하고 라이트 데스크톱 `AppShell`, public/pending/app/admin layout을 만든다.
+    - loading/empty/error/success panel, page header, card, table, badge, dialog, form field와 navigation의 presentational variant를 만들되 비동기 로직이나 mutation을 연결하지 않는다.
+    - export된 HTML이 `artifacts/ui-preview/assets/` 아래의 상대 local CSS/JS/image/font만 참조하고 외부 CDN, 절대 asset URL 또는 runtime network request를 요구하지 않게 build asset 경계를 구성한다.
+    - _Requirements: 5.9-5.13, 16.1-16.7_
+  - [ ] 2.3 재사용 가능한 정적 presentational component와 안전한 Markdown 표현을 구현한다
+    - certification card, score summary, domain breakdown, data table, status banner, question navigator, timer face, file summary와 validation error list를 props-only component로 구현한다.
+    - Markdown은 Raw_HTML escape, Safe_URL allowlist, 외부 링크 속성, image failure fallback을 정적 fixture로 표현하고 semantic landmark/heading, keyboard focus, label, table/dialog semantics와 chart 대체 표를 제공한다.
+    - component는 API port, query cache, store 또는 MSW handler를 import하지 않게 정적 preview 경계를 유지한다.
+    - _Requirements: 5.9-5.13, 16.3-16.7_
+  - [ ] 2.4 단일 명령 static HTML export pipeline을 구현한다
+    - repository root에서 실행하는 `pnpm ui:preview:export`가 output을 재생성하고 정확히 `artifacts/ui-preview/index.html` 및 `artifacts/ui-preview/screens/.../*.html`, `artifacts/ui-preview/assets/...`를 출력하도록 build/export script를 구성한다.
+    - export renderer는 Task 1.5의 고정 read-only fixture와 presentational component만 사용하고 API, MSW, auth, 진행 timer, mutation, DB 또는 backend 없이 기본 static server에서 제공 가능한 multipage artifact를 생성한다.
+    - 명령과 exact output path를 package script 설명 및 gallery metadata에 표시하고 동일 source/fixture의 반복 export에서 파일 경로, 내용, navigation과 asset reference가 결정적으로 유지되게 한다.
+    - _Requirements: 1.7-16.7_
+
+- [ ] 3. S1~S10 정적 fixture 화면과 실제 HTML 상태 변형 구현
+  - [ ] 3.1 S1 로그인·callback·pending, S2 홈과 S3 mode select 정적 화면을 구현한다
+    - 로그인, 안전한 callback 오류, 승인 대기, Provider grouping, certification metadata, active practice banner, practice resume/replace 선택과 exam 시작 확인의 시각 구조를 구현한다.
+    - 각 데이터 영역의 대표 loading/empty/error/success fixture variant를 screen gallery와 해당 screen별 실제 `.html` 파일에서 독립적으로 볼 수 있게 한다.
+    - _Requirements: 1.7, 1.8, 3.6-3.9, 7.5-7.9, 10.1, 16.1-16.7_
+  - [ ] 3.2 공통 quiz presenter visual과 S4 Practice·S5 Exam 정적 화면을 구현한다
+    - radio/checkbox, 필수 선택 수, 언어 toggle, 번호·domain, `1..N` navigator, answered/unanswered/Flag/reveal 시각 상태와 safe Markdown 설명 영역을 props-only로 표현한다.
+    - Practice의 제출 전/후 feedback과 Exam의 고정 server timer 모양, preview dialog, unanswered/flag count, 만료·finalized 안내를 실제 `.html` variant로 보여 주되 선택 저장, timer 진행, 제출, 상태 머신 또는 API 호출은 구현하지 않는다.
+    - _Requirements: 5.1-6.6, 6.13-6.16, 8.8-8.10, 10.3-10.7, 10.13, 16.1-16.7_
+  - [ ] 3.3 S6 Practice result, S7 Exam result, S8 History와 S9 Leaderboard 정적 화면을 구현한다
+    - Raw_Score/Accuracy_Rate 우선 표시, domain/question review, pass badge, 참고 Reference_1000, 168시간 만료, attempt table, trend chart+대체 표, visibility control, rank/tie/current marker를 정적으로 표현한다.
+    - 결과 없음, 만료, 비공개, 빈 history/leaderboard, 오류와 정상 데이터를 각각 결정적 fixture와 screen별 실제 `.html` variant로 제공한다.
+    - _Requirements: 9.1-9.11, 12.9-12.12, 13.1-13.14, 14.2-14.15, 16.3-16.7_
+  - [ ] 3.4 관리자 pending 사용자와 S10 import 정적 화면을 구현한다
+    - pending user table, approve 상태 모양, 10 MiB JSON dropzone, dry-run summary, 계산 불가 값, validation error list, commit 확인 dialog와 token 만료·재검증 안내를 props-only로 구현한다.
+    - pending 없음, 파일 없음, validating 모양, validation 성공/실패, commit 확인·완료·오류 대표 variant를 실제 `.html` 파일로 제공하되 파일 parsing, 승인, token 또는 commit 동작은 구현하지 않는다.
+    - _Requirements: 1.9, 1.10, 2.5, 2.6, 15.1-15.27, 16.1-16.7_
+  - [ ] 3.5 S1~S10 multipage HTML gallery와 deterministic export를 완성한다
+    - 개발 전용 `/__preview`와 별도로 `pnpm ui:preview:export`를 실행해 gallery `artifacts/ui-preview/index.html`과 S1~S10 각각의 success 및 적용 가능한 loading/empty/error 대표 variant를 `artifacts/ui-preview/screens/` 아래 실제 `.html` 파일로 생성한다.
+    - gallery index, 각 screen variant의 gallery/이전/다음 링크와 모든 CSS/JS/image/font 참조를 artifact 내부 상대 경로로 만들고, 각 HTML 직접 URL을 기본 static server에서 열 수 있게 한다.
+    - 생성 artifact가 Task 1.5의 고정 fixture만 포함하고 API, MSW, auth, 진행 timer, mutation, persistence, DB, backend 또는 외부 network에 의존하지 않음을 export manifest 검사로 보장한다.
+    - _Requirements: 1.7-16.7_
+  - [ ] 3.6 exported HTML visual smoke와 accessibility 자동 검사를 작성한다
+    - `artifacts/ui-preview/index.html`에서 모든 내부 `.html` 링크와 local asset을 순회해 누락 파일·깨진 상대 링크·외부/절대 URL 없이 모든 대표 variant가 예외 없이 제공되는지 검사한다.
+    - export된 각 문서의 unintended horizontal overflow, landmark/heading/label/table 누락, keyboard focus, dialog semantics, chart 대체 표, 색상 contrast와 Markdown unsafe URL 회귀를 자동 검사한다.
+    - 이 검사는 exported artifact의 layout, presentation, HTML semantics와 접근성만 검증하며 auth, mutation, timer, persistence, backend 또는 API 동작을 검증한다고 주장하지 않는다.
+    - _Requirements: 5.1-5.13, 6.1-6.6, 6.13-6.16, 16.1-16.7_
+
+- [ ] 4. Static UI review checkpoint - exact HTML path 제시 후 사용자 시각 승인 전 실행 중단
+  - repository root에서 `pnpm ui:preview:export`를 실행하고 exact review entry인 `artifacts/ui-preview/index.html`과 S1~S10 실제 HTML variant가 생성되었는지 확인한다.
+  - frontend lint, typecheck, build와 exported-artifact visual smoke/accessibility 검사를 통과시킨 뒤 화면 구성, design token, layout, 정보 계층, 상대 HTML navigation, loading/empty/error/success 표현과 desktop 흐름을 `artifacts/ui-preview/index.html` 경로와 함께 사용자에게 제시한다.
+  - artifact가 local relative CSS/JS/assets만 사용하고 API, MSW, auth, 진행 timer, mutation, DB 또는 backend 없이 기본 static server에서 열리는지 확인한다.
+  - **여기서 반드시 STOP하고 `artifacts/ui-preview/index.html`의 사용자 시각 승인을 기다린다. 승인 전에는 Task 5~7의 TanStack Query, Zustand, API-port wiring, MSW interaction, mutation 또는 상태 머신 작업을 시작하지 않는다.**
+
+- [ ] 5. 승인된 UI에 mock 상태 기반과 비동기 경계 연결
+  - [ ] 5.1 TanStack Query client와 Zustand transient store를 typed API port에 연결한다
+    - 승인된 component markup/layout을 유지한 채 query key, local draft/current index/dialog state, logout cache purge와 adapter injection을 composition root에 추가한다.
+    - mock/real adapter 전환이 component 또는 store 변경을 요구하지 않게 하고, 이 단계에서는 real HTTP와 backend를 연결하지 않는다.
     - _Requirements: 5.5, 6.9, 6.12, 16.1, 16.2, 16.5, 16.8, 16.9_
-  - [ ] 2.3 Tailwind/shadcn shell, AsyncBoundary와 safe Markdown renderer를 구현한다
-    - 라이트 데스크톱 UI, loading/empty/error/retry/next-action, raw HTML escape, Safe_URL allowlist, image 실패 대체 상태를 공통 component로 제공한다.
-    - semantic HTML, keyboard focus, radio/checkbox label, dialog focus trap과 chart 대체 표를 제공한다.
-    - _Requirements: 5.9-5.12, 16.1-16.7_
-  - [ ] 2.4 비동기 UI 요청 상태 property test를 작성한다
+  - [ ] 5.2 AsyncBoundary와 mutation 공통 상태를 API port 응답에 연결한다
+    - query별 독립 loading/error/empty/success, retryable과 next-action 분리, 입력 보존, canonical mutation reconciliation, optimistic Flag rollback과 duplicate submit lock을 구현한다.
+    - 정적 variant component를 재사용하고 승인된 visual contract가 상태 wiring 때문에 임의로 바뀌지 않게 한다.
+    - _Requirements: 6.7-6.12, 16.1-16.9_
+  - [ ] 5.3 비동기 UI 요청 상태 property/component test를 작성한다
     - **Property 25: 비동기 UI 요청 상태 머신**
     - 임의 성공/retryable/non-retryable/중복 제출 시퀀스에서 독립 loading, 입력 보존, retry/next-action 분리와 단일 action/result 수렴을 검증한다.
     - **Validates: Requirements 16.1-16.9**
+    - _Requirements: 16.1-16.9_
+  - [ ] 5.4 Mock state foundation checkpoint - 공통 상태 검증
+    - lint, typecheck, Property 25와 AsyncBoundary component test를 통과시키고 정적 UI 승인본과 layout 회귀가 없는지 screen gallery smoke를 다시 실행한다.
 
-- [ ] 3. 로그인, pending, catalog, mode select와 admin 화면 구현
-  - [ ] 3.1 S1 로그인/callback과 승인 대기 화면을 구현한다
-    - API port가 제공하는 unauthenticated/pending/approved 상태로 Cognito redirect intent, token 없는 안전한 callback 오류, `/me/approval` 새로고침과 approved 전환을 구현한다.
-    - real Cognito code+PKCE는 backend/실연결 단계에서 검증하되 UI contract는 현재 확정한다.
-    - _Requirements: 1.1-1.8, 16.1-16.7_
-  - [ ] 3.2 S2 홈과 S3 mode select를 구현한다
-    - Provider grouping, certification metadata, catalog empty/error, active practice resume/replace와 명시적 exam 시작 확인을 mock API port에 연결한다.
-    - _Requirements: 3.6-3.9, 7.5-7.9, 10.1, 16.3-16.7_
-  - [ ] 3.3 관리자 pending 사용자 화면을 구현한다
-    - 정확한 사용자 필드, 빈 상태, 개별 approve pending lock과 idempotent 결과를 표시한다.
+- [ ] 6. auth·pending·catalog·admin/import mock interaction slice 구현
+  - [ ] 6.1 S1 login/callback과 pending interaction을 구현한다
+    - API port의 unauthenticated/pending/approved 상태로 redirect intent, token 없는 안전한 callback 오류, `/me/approval` 새로고침과 approved 전환을 구현한다.
+    - real Cognito code+PKCE는 후반 실연결 단계로 남기고 mock 상태가 승인된 정적 화면 variant를 선택하게 한다.
+    - _Requirements: 1.1-1.8, 16.1-16.9_
+  - [ ] 6.2 S2 catalog와 S3 mode select interaction을 구현한다
+    - Provider grouping query, catalog empty/error, active practice resume/replace 선택 전 비변경과 명시적 exam 시작 확인을 mock API port에 연결한다.
+    - _Requirements: 3.6-3.9, 7.5-7.9, 10.1, 16.1-16.9_
+  - [ ] 6.3 관리자 pending 사용자 interaction을 구현한다
+    - 목록 조회, 빈 상태, 개별 approve pending lock, idempotent 결과와 safe error를 연결한다.
     - _Requirements: 1.9, 1.10, 2.5, 2.6, 16.1-16.9_
-  - [ ] 3.4 S10 import 화면을 구현한다
-    - 10 MiB JSON 선택, dry-run summary/error, 계산 불가 표시, memory-only token, content 변경 재검증과 commit 확인을 구현한다.
+  - [ ] 6.4 S10 import interaction을 구현한다
+    - 10 MiB JSON 선택, dry-run summary/error, 계산 불가 표시, memory-only token, content 변경 재검증, commit 확인과 mock replay 오류를 연결한다.
     - _Requirements: 15.1-15.27, 16.1-16.9_
-  - [ ] 3.5 auth/catalog/admin mock-backed component test를 작성한다
-    - pending route 제한, catalog 빈/오류, resume/replace 선택 전 비변경, approve replay, import 입력 보존과 token 재사용 오류를 검증한다.
+  - [ ] 6.5 auth/catalog/admin/import mock-backed component·browser test를 작성한다
+    - pending route 제한, catalog empty/error, resume/replace 선택 전 비변경, approve replay, import 입력 보존과 token 재사용 오류를 검증한다.
     - 이 테스트는 UI 허용 행렬과 표시만 검증하며 실제 인증·인가·atomic import 증거로 사용하지 않는다.
     - _Requirements: 1.7-1.10, 2.5, 2.6, 3.6, 7.5-7.9, 15.18-15.26, 16.1-16.9_
+  - [ ] 6.6 Auth/catalog/admin/import checkpoint - slice 검증
+    - 해당 route의 unit/component/browser test와 screen gallery 회귀 검사를 통과시키고 다음 quiz interaction slice 전에 사용자에게 현재 동작을 확인할 수 있는 deterministic preview를 제공한다.
 
-- [ ] 4. 공통 quiz presenter와 S4/S5 화면 구현
-  - [ ] 4.1 QuestionPresenter, navigator, language, Markdown UI를 구현한다
-    - required count에 따른 radio/checkbox와 선택 상한, 선택 수, 번호/domain, `1..N` navigator, 경계 이동, 응답/Flag 상태를 구현한다.
-    - en/ko 전체 전환, en_only fallback, 공개 상태 보존, safe Markdown과 image 실패를 처리한다.
+- [ ] 7. practice → exam → result/history/leaderboard mock interaction slice 구현
+  - [ ] 7.1 공통 QuestionPresenter와 navigator interaction을 연결한다
+    - required count에 따른 radio/checkbox 선택 상한, 선택 수, 경계 이동, navigator, en/ko 전체 전환, en_only fallback과 위치/선택/Flag/reveal 보존을 reducer/store에 연결한다.
+    - safe Markdown과 image failure presentation은 승인된 정적 component를 그대로 재사용한다.
     - _Requirements: 5.1-5.13, 6.1-6.6, 6.13-6.16_
-  - [ ] 4.2 S4 PracticePage를 mock API port에 구현한다
-    - resume canonical state, draft 저장, optimistic Flag rollback, 최초 제출 pending lock, 제출 후에만 feedback/reveal, 완료 후 S6 이동을 구현한다.
+  - [ ] 7.2 S4 Practice interaction을 구현한다
+    - resume canonical state, draft 저장, optimistic Flag rollback, 최초 제출 pending lock, 제출 후에만 feedback/reveal, 완료 후 S6 이동을 mock API port에 연결한다.
     - _Requirements: 6.7, 6.9, 6.10, 6.12, 7.7, 7.10-7.12, 8.1-8.12, 16.5-16.9_
-  - [ ] 4.3 S5 ExamPage와 ServerTimer를 mock API port에 구현한다
-    - serverNow/expiresAt offset과 monotonic display timer, restore, preview dialog, unanswered/flag count, expiry/finalize/result 전환을 구현한다.
-    - 0초에서 client 점수를 만들지 않고 API port로 lazy finalize 결과를 조회한다.
-    - _Requirements: 10.3-10.13, 11.1-11.12, 16.5-16.9_
-  - [ ] 4.4 문제 입력·언어 상태 property test를 작성한다
+  - [ ] 7.3 문제 입력·언어 상태 property test를 작성한다
     - **Property 8: 문제 입력 종류와 언어 전환의 상태 보존**
     - 임의 presenter state에서 선택 상한, 언어별 일관 콘텐츠, en_only fallback과 위치/선택/Flag/reveal 보존을 검증한다.
     - **Validates: Requirements 5.1-5.8**
-  - [ ] 4.5 탐색 경계·상태 분류 property test를 작성한다
+    - _Requirements: 5.1-5.8_
+  - [ ] 7.4 탐색 경계·상태 분류 property test를 작성한다
     - **Property 9: 문항 탐색 경계와 상태 분류**
     - 임의 N/index/응답/Flag에서 navigator 완전성, 이동 경계와 current/answered/flag 분류를 검증한다.
     - **Validates: Requirements 6.1-6.6, 6.13-6.16**
-  - [ ] 4.6 Flag version commit/rollback property test를 작성한다
+    - _Requirements: 6.1-6.6, 6.13-6.16_
+  - [ ] 7.5 Flag version commit/rollback property test를 작성한다
     - **Property 10: Flag 저장의 versioned commit/rollback**
     - mock API port의 practice/exam 성공, stale, 저장 실패 응답에서 canonical state와 UI optimistic state의 증가·복원을 검증한다.
     - **Validates: Requirements 6.7-6.12**
-  - [ ] 4.7 quiz mock-backed component와 projection leak test를 작성한다
-    - radio/checkbox 접근성, Markdown XSS/Safe_URL/image failure, practice reveal timing, exam DOM/serialized props의 정답 부재와 duplicate submit lock을 검증한다.
-    - _Requirements: 5.1-5.13, 8.8-8.10, 10.7, 16.8, 16.9_
-
-- [ ] 5. S6~S9 결과, 이력과 리더보드 화면 구현
-  - [ ] 5.1 S6 practice result와 S7 exam result를 구현한다
-    - Raw_Score/Accuracy_Rate를 우선 표시하고 domain/question review, pass badge, 참고 Reference_1000과 168시간 만료 상태를 구현한다.
-    - _Requirements: 9.1-9.7, 12.9-12.11, 13.1-13.3_
-  - [ ] 5.2 S8 history와 score visibility를 구현한다
-    - Attempt-only count/table/trend, 같은 시각의 안정적 순서, 빈 상태와 visibility 저장 실패 rollback을 구현한다.
-    - _Requirements: 9.8, 9.9, 13.10-13.14, 14.2, 14.3, 16.3-16.7_
-  - [ ] 5.3 S9 certification leaderboard를 구현한다
-    - 서버가 제공한 rank, exact 대표 성과의 표시값, 공동 순위, current marker와 비공개/빈 상태를 렌더링한다.
-    - _Requirements: 9.10, 9.11, 14.4-14.15, 16.3-16.7_
-  - [ ] 5.4 result/history/leaderboard mock-backed component test를 작성한다
-    - exact-vs-display 구분, 168시간 만료, immutable review, 빈 이력/count 0, 공동 순위/current marker/privacy를 검증한다.
-    - _Requirements: 9.1-9.11, 12.9-12.12, 13.1-13.14, 14.4-14.15_
-
-- [ ] 6. 프론트엔드 mock 기반 검증 게이트 완성
-  - [ ] 6.1 frontend unit/property/component suite를 통합한다
-    - presenter reducer, timer display, query/store reconciliation, strict schema, error mapping과 Properties 8~10, 25를 단일 실행 명령으로 묶고 재현 가능한 fast-check seed/path를 보존한다.
-    - _Requirements: 5.1-6.16, 10.3-10.13, 16.1-16.9_
-  - [ ] 6.2 MSW 기반 Playwright S1~S10 E2E suite를 작성한다
-    - unauthenticated→pending→approved/admin, catalog/mode, practice, exam expiry, 결과, 이력, leaderboard, import의 loading/empty/error/retry 흐름을 브라우저에서 자동화한다.
-    - stale version, duplicate submit, reconnect timer, 정답 공개 시점과 privacy projection을 검증하되 mock E2E를 real backend acceptance로 간주하지 않는다.
+    - _Requirements: 6.7-6.12_
+  - [ ] 7.6 Practice component/browser test를 작성한다
+    - radio/checkbox 접근성, reveal timing, Markdown XSS/Safe_URL/image failure, stale version, rollback과 duplicate submit lock을 검증한다.
+    - _Requirements: 5.1-6.16, 7.7, 7.10-7.12, 8.1-8.12, 16.8, 16.9_
+  - [ ] 7.7 Practice interaction checkpoint - slice 검증
+    - Practice unit/property/component/browser test와 승인된 S4 visual 회귀를 통과시키고 exam interaction 착수 전에 deterministic practice flow를 확인 가능하게 한다.
+  - [ ] 7.8 S5 ExamPage와 ServerTimer interaction을 구현한다
+    - serverNow/expiresAt offset과 monotonic display timer, restore, preview dialog, unanswered/flag count, expiry/finalize/result 전환을 mock API port에 연결한다.
+    - 0초에서 client 점수를 만들지 않고 API port로 lazy finalize 결과를 조회한다.
+    - _Requirements: 10.3-10.13, 11.1-11.12, 16.5-16.9_
+  - [ ] 7.9 Exam component/browser test를 작성한다
+    - reconnect timer, preview count, expiry 전환, stale version, duplicate submit lock과 exam DOM/serialized props의 정답·해설 필드 부재를 검증한다.
+    - 이 테스트는 mock timer/상태만 검증하며 실제 server clock, persistence 또는 concurrent finalize 증거로 사용하지 않는다.
+    - _Requirements: 10.3-11.12, 16.1-16.9_
+  - [ ] 7.10 Exam interaction checkpoint - slice 검증
+    - Exam component/browser test와 승인된 S5 visual 회귀를 통과시키고 결과·이력 slice 착수 전에 deterministic exam flow를 확인 가능하게 한다.
+  - [ ] 7.11 S6~S9 result, history와 leaderboard interaction을 구현한다
+    - practice/exam result 조회, 168시간 만료, Attempt-only history/trend, visibility 저장 실패 rollback, 서버 rank/tie/current marker와 privacy/empty 상태를 mock API port에 연결한다.
+    - _Requirements: 9.1-9.11, 12.9-12.12, 13.1-13.14, 14.2-14.15, 16.1-16.9_
+  - [ ] 7.12 result/history/leaderboard mock-backed component·browser test를 작성한다
+    - exact-vs-display 구분, immutable review, 만료, 빈 이력/count 0, visibility rollback, 공동 순위/current marker와 privacy를 검증한다.
+    - _Requirements: 9.1-9.11, 12.9-12.12, 13.1-13.14, 14.2-14.15, 16.1-16.9_
+  - [ ] 7.13 frontend mock contract와 S1~S10 E2E suite를 완성한다
+    - 모든 fixture를 shared Zod schema로 parse하고 endpoint request/response matrix와 forbidden field 부재를 contract test로 고정한다.
+    - S1~S10의 approved mock flow와 대표 loading/empty/error/retry를 Playwright로 자동화하되 mock E2E를 real backend acceptance로 간주하지 않는다.
     - _Requirements: 1.7-16.9_
-  - [ ] 6.3 mock fixture와 shared contract compatibility test를 작성한다
-    - 모든 MSW 성공·오류 fixture를 shared Zod schema로 parse하고 endpoint별 request/response matrix와 forbidden field 부재를 snapshot/contract test로 고정한다.
-    - 향후 backend가 같은 fixture corpus를 provider contract suite로 재사용할 수 있게 export한다.
-    - _Requirements: 1.7-2.6, 3.6-3.11, 7.1-16.9_
-
-- [ ] 7. Frontend checkpoint - Ensure all frontend tests pass
-  - Ensure frontend lint, typecheck, unit, property, component and mock-backed Playwright tests pass; ask the user if questions arise.
+  - [ ] 7.14 Frontend mock checkpoint - backend 착수 전 전체 검증
+    - frontend lint, typecheck, build, unit, Properties 8~10·25, component, contract, static visual/accessibility, slice browser와 mock-backed Playwright test를 모두 통과시킨다.
+    - 정적 UI 승인본의 의도적 변경만 허용되었는지 확인하고 사용자에게 frontend mock 흐름을 검토 가능하게 제공한 뒤에만 Task 8 이후 backend 작업을 시작한다.
 
 - [ ] 8. Backend workspace와 실제 Hono API bootstrap 구성
   - [ ] 8.1 backend/domain/DB/infra workspace 구조를 추가한다
@@ -487,10 +539,13 @@ MSW와 fixture는 **UI 개발용 동작만 제공한다**. mock 통과는 백엔
 
 ## Notes
 
-- 이 문서의 모든 leaf 작업은 필수이며 모두 `[ ]` 미시작 상태다. 선택 작업을 뜻하는 별표 표기나 생략 가능한 테스트 작업은 없다.
-- MSW/mock fixture는 UI 개발과 frontend consumer contract 검증만 담당한다. backend 보안, 인증·인가, 소유권, 영속성, transaction 원자성, 서버 시간, 동시성, 실제 AWS/DB 배선을 충족하거나 대체하지 않는다.
+- 완료 상태는 기존 실행 기록을 그대로 보존한다. Task `1`과 `1.1`~`1.7`은 모두 `[x]`이며 재작성한 Task `2` 이후는 `[ ]`이다. Task 1.5는 결정적 read-only fixture만 제공하며 HTML 화면 rendering/export는 미완료 Task 2~3에서 수행한다. 선택 작업을 뜻하는 별표 표기나 생략 가능한 테스트 작업은 없다.
+- Task 2~3은 **정적 UI 전용**이다. props와 Task 1.5의 read-only fixture만 사용하며 `pnpm ui:preview:export`로 `artifacts/ui-preview/index.html`, S1~S10 실제 `.html` variant와 상대 local assets를 생성한다. 생성 artifact는 TanStack Query, Zustand mutation, MSW 상태 머신, real HTTP, Cognito, 진행 timer, DB와 backend 동작 또는 외부 network에 의존하지 않는다.
+- Task 4 `Static UI review checkpoint`는 강제 승인 게이트다. `artifacts/ui-preview/index.html`과 exported-artifact visual/accessibility 검증을 제공한 뒤 반드시 실행을 중단하고 사용자 시각 승인을 받아야 Task 5 이후를 시작할 수 있다.
+- mock fixture와 interaction은 UI 개발과 frontend consumer contract 검증만 담당한다. backend 보안, 인증·인가, 소유권, 영속성, transaction 원자성, 서버 시간, 동시성, 실제 AWS/DB 배선을 충족하거나 대체하지 않는다.
+- Task 5~7은 승인된 markup/layout을 유지하면서 공통 async 기반 → auth/catalog/admin/import → practice → exam → result/history/leaderboard 순서로 연결하며 각 slice checkpoint를 통과한 뒤 다음 slice로 진행한다. Task 7.14 전에는 Task 8 이후 backend 작업을 시작하지 않는다.
 - frontend는 `CertQuizApi`와 `packages/contracts`에만 의존한다. backend는 이미 확정된 schema를 consumer로 사용하고 provider contract gate 없이 비호환 변경하지 않는다.
-- Correctness Properties 1~25는 각각 정확히 하나의 독립 property-test 작업에 연결한다: P1~P3 `13.5-13.7`, P4 `14.3`, P5~P7 `16.5-16.7`, P8~P10 `4.4-4.6`, P11~P14 `18.7-18.10`, P15~P18 `19.6-19.9`, P19~P20 `11.5-11.6`, P21~P22 `20.4-20.5`, P23~P24 `15.6-15.7`, P25 `2.4`.
+- Correctness Properties 1~25는 각각 정확히 하나의 독립 property-test 작업에 연결한다: P1~P3 `13.5-13.7`, P4 `14.3`, P5~P7 `16.5-16.7`, P8~P10 `7.3-7.5`, P11~P14 `18.7-18.10`, P15~P18 `19.6-19.9`, P19~P20 `11.5-11.6`, P21~P22 `20.4-20.5`, P23~P24 `15.6-15.7`, P25 `5.3`.
 - 모든 property test는 TypeScript `fast-check`를 사용하고 기본 `numRuns: 200`과 재현 가능한 seed/path를 기록한다. 각 파일에는 `Feature: cert-quiz-mvp, Property N` 주석을 둔다.
 - repository concurrency/fault-injection과 실제 DB barrier test는 순수/model-based property test를 보완하며, frontend mock test와 중복되는 것이 아니라 서로 다른 trust boundary를 검증한다.
 - 각 작업은 앞 단계의 실제 contracts와 composition root를 수정해 연결하며 사용되지 않는 대체 구현이나 고립된 scaffold를 만들지 않는다.
@@ -500,73 +555,85 @@ MSW와 fixture는 **UI 개발용 동작만 제공한다**. mock 통과는 백엔
 ```json
 {
   "waves": [
-    { "id": 0, "tasks": ["1.1"] },
-    { "id": 1, "tasks": ["1.2", "1.3"] },
-    { "id": 2, "tasks": ["1.4"] },
-    { "id": 3, "tasks": ["1.5", "1.6"] },
-    { "id": 4, "tasks": ["1.7"] },
-    { "id": 5, "tasks": ["2.1", "2.2", "2.3"] },
-    { "id": 6, "tasks": ["2.4"] },
-    { "id": 7, "tasks": ["3.1", "3.2", "3.3", "3.4"] },
-    { "id": 8, "tasks": ["3.5"] },
-    { "id": 9, "tasks": ["4.1"] },
-    { "id": 10, "tasks": ["4.2", "4.3"] },
-    { "id": 11, "tasks": ["4.4", "4.5", "4.6", "4.7"] },
-    { "id": 12, "tasks": ["5.1", "5.2", "5.3"] },
-    { "id": 13, "tasks": ["5.4"] },
-    { "id": 14, "tasks": ["6.1", "6.2"] },
-    { "id": 15, "tasks": ["6.3"] },
-    { "id": 16, "tasks": ["8.1"] },
-    { "id": 17, "tasks": ["8.2", "8.3"] },
-    { "id": 18, "tasks": ["9.1"] },
-    { "id": 19, "tasks": ["9.2"] },
-    { "id": 20, "tasks": ["9.3"] },
-    { "id": 21, "tasks": ["11.1", "11.2", "11.3"] },
-    { "id": 22, "tasks": ["11.4"] },
-    { "id": 23, "tasks": ["11.5", "11.6"] },
-    { "id": 24, "tasks": ["12.1", "12.2", "12.3"] },
-    { "id": 25, "tasks": ["12.4"] },
-    { "id": 26, "tasks": ["12.5", "12.6"] },
-    { "id": 27, "tasks": ["13.1", "13.2"] },
-    { "id": 28, "tasks": ["13.3", "13.4"] },
-    { "id": 29, "tasks": ["13.5", "13.6", "13.7", "13.8"] },
-    { "id": 30, "tasks": ["14.1"] },
-    { "id": 31, "tasks": ["14.2", "14.3"] },
-    { "id": 32, "tasks": ["15.1", "15.3"] },
-    { "id": 33, "tasks": ["15.2"] },
-    { "id": 34, "tasks": ["15.4"] },
-    { "id": 35, "tasks": ["15.5"] },
-    { "id": 36, "tasks": ["15.6", "15.7", "15.8"] },
-    { "id": 37, "tasks": ["16.1", "16.2"] },
-    { "id": 38, "tasks": ["16.3"] },
-    { "id": 39, "tasks": ["16.4"] },
-    { "id": 40, "tasks": ["16.5", "16.6", "16.7", "16.8"] },
-    { "id": 41, "tasks": ["18.1"] },
-    { "id": 42, "tasks": ["18.2"] },
-    { "id": 43, "tasks": ["18.3"] },
-    { "id": 44, "tasks": ["18.4", "18.5"] },
-    { "id": 45, "tasks": ["18.6"] },
-    { "id": 46, "tasks": ["18.7", "18.8", "18.9"] },
-    { "id": 47, "tasks": ["19.1"] },
-    { "id": 48, "tasks": ["19.2", "19.3"] },
-    { "id": 49, "tasks": ["19.4"] },
-    { "id": 50, "tasks": ["19.5"] },
-    { "id": 51, "tasks": ["19.6", "19.7", "19.8", "19.9"] },
-    { "id": 52, "tasks": ["19.10"] },
-    { "id": 53, "tasks": ["20.1", "20.2"] },
-    { "id": 54, "tasks": ["20.3"] },
-    { "id": 55, "tasks": ["18.10", "20.4", "20.5", "20.6"] },
-    { "id": 56, "tasks": ["21.1"] },
-    { "id": 57, "tasks": ["21.2", "21.3"] },
-    { "id": 58, "tasks": ["21.4"] },
-    { "id": 59, "tasks": ["21.5"] },
-    { "id": 60, "tasks": ["22.1"] },
-    { "id": 61, "tasks": ["23.1"] },
-    { "id": 62, "tasks": ["23.2"] },
-    { "id": 63, "tasks": ["23.3"] },
-    { "id": 64, "tasks": ["23.4"] },
-    { "id": 65, "tasks": ["23.5"] },
-    { "id": 66, "tasks": ["23.6"] }
+    { "id": 0, "tasks": ["2.1", "2.2"] },
+    { "id": 1, "tasks": ["2.3"] },
+    { "id": 2, "tasks": ["2.4"] },
+    { "id": 3, "tasks": ["3.1", "3.2", "3.3", "3.4"] },
+    { "id": 4, "tasks": ["3.5"] },
+    { "id": 5, "tasks": ["3.6"] },
+    { "id": 6, "tasks": ["4"] },
+    { "id": 7, "tasks": ["5.1"] },
+    { "id": 8, "tasks": ["5.2"] },
+    { "id": 9, "tasks": ["5.3"] },
+    { "id": 10, "tasks": ["5.4"] },
+    { "id": 11, "tasks": ["6.1", "6.2", "6.3", "6.4"] },
+    { "id": 12, "tasks": ["6.5"] },
+    { "id": 13, "tasks": ["6.6"] },
+    { "id": 14, "tasks": ["7.1"] },
+    { "id": 15, "tasks": ["7.2"] },
+    { "id": 16, "tasks": ["7.3", "7.4", "7.5", "7.6"] },
+    { "id": 17, "tasks": ["7.7"] },
+    { "id": 18, "tasks": ["7.8"] },
+    { "id": 19, "tasks": ["7.9"] },
+    { "id": 20, "tasks": ["7.10"] },
+    { "id": 21, "tasks": ["7.11"] },
+    { "id": 22, "tasks": ["7.12"] },
+    { "id": 23, "tasks": ["7.13"] },
+    { "id": 24, "tasks": ["7.14"] },
+    { "id": 25, "tasks": ["8.1"] },
+    { "id": 26, "tasks": ["8.2", "8.3"] },
+    { "id": 27, "tasks": ["9.1"] },
+    { "id": 28, "tasks": ["9.2"] },
+    { "id": 29, "tasks": ["9.3"] },
+    { "id": 30, "tasks": ["10"] },
+    { "id": 31, "tasks": ["11.1", "11.2", "11.3"] },
+    { "id": 32, "tasks": ["11.4"] },
+    { "id": 33, "tasks": ["11.5", "11.6"] },
+    { "id": 34, "tasks": ["12.1", "12.2", "12.3"] },
+    { "id": 35, "tasks": ["12.4"] },
+    { "id": 36, "tasks": ["12.5", "12.6"] },
+    { "id": 37, "tasks": ["13.1", "13.2"] },
+    { "id": 38, "tasks": ["13.3", "13.4"] },
+    { "id": 39, "tasks": ["13.5", "13.6", "13.7", "13.8"] },
+    { "id": 40, "tasks": ["14.1"] },
+    { "id": 41, "tasks": ["14.2", "14.3"] },
+    { "id": 42, "tasks": ["15.1", "15.3"] },
+    { "id": 43, "tasks": ["15.2"] },
+    { "id": 44, "tasks": ["15.4"] },
+    { "id": 45, "tasks": ["15.5"] },
+    { "id": 46, "tasks": ["15.6", "15.7", "15.8"] },
+    { "id": 47, "tasks": ["16.1", "16.2"] },
+    { "id": 48, "tasks": ["16.3"] },
+    { "id": 49, "tasks": ["16.4"] },
+    { "id": 50, "tasks": ["16.5", "16.6", "16.7", "16.8"] },
+    { "id": 51, "tasks": ["17"] },
+    { "id": 52, "tasks": ["18.1"] },
+    { "id": 53, "tasks": ["18.2"] },
+    { "id": 54, "tasks": ["18.3"] },
+    { "id": 55, "tasks": ["18.4", "18.5"] },
+    { "id": 56, "tasks": ["18.6"] },
+    { "id": 57, "tasks": ["18.7", "18.8", "18.9"] },
+    { "id": 58, "tasks": ["19.1"] },
+    { "id": 59, "tasks": ["19.2", "19.3"] },
+    { "id": 60, "tasks": ["19.4"] },
+    { "id": 61, "tasks": ["19.5"] },
+    { "id": 62, "tasks": ["19.6", "19.7", "19.8", "19.9"] },
+    { "id": 63, "tasks": ["19.10"] },
+    { "id": 64, "tasks": ["20.1", "20.2"] },
+    { "id": 65, "tasks": ["20.3"] },
+    { "id": 66, "tasks": ["18.10", "20.4", "20.5", "20.6"] },
+    { "id": 67, "tasks": ["21.1"] },
+    { "id": 68, "tasks": ["21.2", "21.3"] },
+    { "id": 69, "tasks": ["21.4"] },
+    { "id": 70, "tasks": ["21.5"] },
+    { "id": 71, "tasks": ["22.1"] },
+    { "id": 72, "tasks": ["23.1"] },
+    { "id": 73, "tasks": ["23.2"] },
+    { "id": 74, "tasks": ["23.3"] },
+    { "id": 75, "tasks": ["23.4"] },
+    { "id": 76, "tasks": ["23.5"] },
+    { "id": 77, "tasks": ["23.6"] },
+    { "id": 78, "tasks": ["24"] }
   ]
 }
 ```

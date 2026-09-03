@@ -18,6 +18,12 @@ export const practiceSessionSummarySchema = z
   })
   .strict();
 
+export const activePracticeSessionsDtoSchema = z
+  .object({
+    sessions: z.array(practiceSessionSummarySchema),
+  })
+  .strict();
+
 export const startPracticeRequestSchema = z.object({}).strict();
 
 export const practiceCreatedSchema = z
@@ -112,6 +118,7 @@ export const submitPracticeQuestionResponseSchema = z
   .strict();
 
 export type PracticeSessionSummary = z.infer<typeof practiceSessionSummarySchema>;
+export type ActivePracticeSessionsDto = z.infer<typeof activePracticeSessionsDtoSchema>;
 export type StartPracticeRequest = z.infer<typeof startPracticeRequestSchema>;
 export type StartPracticeResponse = z.infer<typeof startPracticeResponseSchema>;
 export type PracticeSessionDto = z.infer<typeof practiceSessionDtoSchema>;

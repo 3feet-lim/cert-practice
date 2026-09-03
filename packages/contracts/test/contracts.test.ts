@@ -96,6 +96,22 @@ describe("transport primitives and envelopes", () => {
     ).toBe(false);
   });
 
+  it("parses a strict shared health contract", () => {
+    expectParses(contracts.healthDtoSchema, {
+      status: "ok",
+      service: "cert-quiz-api",
+      contractVersion: "v1",
+    });
+    expect(
+      contracts.healthDtoSchema.safeParse({
+        status: "ok",
+        service: "cert-quiz-api",
+        contractVersion: "v1",
+        implementation: "hono",
+      }).success,
+    ).toBe(false);
+  });
+
   it("parses success and safe error envelopes", () => {
     expectParses(contracts.successEnvelopeSchema(contracts.approvalStatusDtoSchema), {
       data: { approvalStatus: "pending" },
@@ -256,7 +272,20 @@ describe("strict question projections", () => {
 });
 
 describe("practice and exam DTOs", () => {
-  it("parses practice start, active session, state, and submitted question contracts", () => {
+  it("parses practice start, active summary list, session, state, and submitted question contracts", () => {
+    expectParses(contracts.activePracticeSessionsDtoSchema, {
+      sessions: [
+        {
+          practiceSessionId: IDS.practice,
+          certificationId: IDS.certification,
+          certificationCode: "DOP-C02",
+          currentQuestionNumber: 1,
+          totalQuestions: 75,
+          stateVersion: 2,
+          updatedAt: timestamp,
+        },
+      ],
+    });
     expectParses(contracts.startPracticeResponseSchema, {
       kind: "resume-or-replace-required",
       session: {

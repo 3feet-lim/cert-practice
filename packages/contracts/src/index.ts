@@ -3,6 +3,7 @@ export * from "./auth.js";
 export * from "./catalog.js";
 export * from "./common.js";
 export * from "./exams.js";
+export * from "./health.js";
 export * from "./history.js";
 export * from "./leaderboard.js";
 export * from "./practice.js";

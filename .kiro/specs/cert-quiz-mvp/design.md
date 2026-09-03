@@ -1086,6 +1086,33 @@ API Gateway usage plan/WAF 또는 Lambda rate limiter로 login callback, start, 
 
 와이어프레임의 손그림 스타일, 1000점 중심 표현은 구현하지 않는다. S6/S7/S8/S9는 Raw_Score와 Accuracy_Rate를 우선 표시하고 Reference_1000은 부가 정보로만 표시한다.
 
+### Static UI review export contract
+
+상태ful 구현 전에 실행하는 정적 UI 검토는 개발 서버의 `/__preview` route만으로 완료된 것으로 간주하지 않는다. `pnpm ui:preview:export` 단일 명령은 repository root의 `artifacts/ui-preview/`를 재생성하고 검토 시작점인 `artifacts/ui-preview/index.html`을 출력해야 한다. 출력물은 최소한 다음 결정적 multipage 구조를 가진다.
+
+```text
+artifacts/ui-preview/
+├─ index.html                         # gallery와 S1~S10/variant index
+├─ screens/
+│  ├─ s1-login/{success,error,pending}.html
+│  ├─ s2-home/{success,loading,empty,error}.html
+│  ├─ s3-mode-select/{success,resume,confirm}.html
+│  ├─ s4-practice/{unsubmitted,submitted,error}.html
+│  ├─ s5-exam/{active,preview,expired}.html
+│  ├─ s6-practice-result/{success,expired}.html
+│  ├─ s7-exam-result/{success,error}.html
+│  ├─ s8-history/{success,empty,error}.html
+│  ├─ s9-leaderboard/{success,empty,private,error}.html
+│  └─ s10-admin-import/{empty,validating,valid,invalid,commit,error}.html
+└─ assets/                            # hashed or stable local CSS/JS/images/fonts
+```
+
+동등한 deterministic multipage hierarchy는 허용하지만, gallery와 S1~S10 각각의 대표 화면/상태는 실제 `.html` 파일이어야 하며 `index.html`과 각 화면의 이전·다음·gallery 링크로 순회할 수 있어야 한다. 모든 문서와 CSS/JS/image/font URL은 artifact root 내부의 상대 경로만 사용해 임의의 기본 static server에서 동작해야 하며 외부 CDN과 런타임 network request를 사용하지 않는다.
+
+export renderer는 Task 1.5의 고정 read-only fixture만 입력으로 사용한다. 출력 artifact에는 API port 호출, MSW, auth 처리, 진행 timer, mutation, persistence, DB 또는 backend 의존성이 없어야 한다. JS가 포함되는 경우 gallery navigation이나 정적 dialog 표현처럼 검토에 필요한 로컬 presentation 동작으로 제한하고 상태 전이 또는 서버 동작을 모사하지 않는다. 같은 source와 fixture에서 생성한 파일 경로, 화면 내용, navigation과 asset reference는 반복 export 간 결정적이어야 한다.
+
+각 export HTML은 landmark, heading hierarchy, label, table semantics, keyboard focus, dialog semantics, chart 대체 표와 안전한 Markdown 표현을 유지한다. visual smoke와 accessibility 검사는 개발 route가 아니라 `artifacts/ui-preview/index.html`에서 시작해 모든 내부 HTML 링크와 로컬 asset을 순회하며 누락 파일, 외부/절대 URL, unintended horizontal overflow, 색상 contrast, unsafe URL 및 접근성 회귀를 검사한다. Static UI review checkpoint는 이 검사를 통과한 exact path를 사용자에게 제시한 뒤 승인을 받을 때까지 후속 stateful 작업을 중단한다.
+
 ### Quiz data flow
 
 ```mermaid
