@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "pnpm run typecheck && pnpm --filter @cert-quiz/web build",
+    "ui:preview:export": "node scripts/export-ui-preview.mjs",
     "ci": "pnpm run quality:web",
     "format": "prettier --check \"apps/**/*.{ts,tsx,js,mjs,json,css,html}\" \"packages/**/*.{ts,tsx,js,mjs,json}\" \"tests/**/*.{ts,tsx,js,mjs,json}\" \"*.{json,mjs,yaml,yml}\"",
     "format:write": "pnpm exec prettier --write \"apps/**/*.{ts,tsx,js,mjs,json,css,html}\" \"packages/**/*.{ts,tsx,js,mjs,json}\" \"tests/**/*.{ts,tsx,js,mjs,json}\" \"*.{json,mjs,yaml,yml}\"",
