@@ -214,7 +214,7 @@ function scoreMetrics(passLabel = "합격 기준") {
 }
 
 function domainBreakdown() {
-  return `<div class="domain-list">${fixture.domains.map(([name, score]) => `<div class="domain-row"><span>${name}</span><div class="progress" aria-hidden="true"><span style="--value:${score}%"></span></div><strong>${score}%</strong></div>`).join("")}</div>`;
+  return `<div class="domain-list">${fixture.domains.map(([name, score]) => `<div class="domain-row"><span>${name}</span><div class="progress" aria-hidden="true"><span style="--value:${score}%"></span></div><strong>${score}%</strong></div>`).join("")}</div><table><caption>도메인별 성과 차트 대체 데이터 표</caption><thead><tr><th scope="col">도메인</th><th scope="col">정답률</th></tr></thead><tbody>${fixture.domains.map(([name, score]) => `<tr><th scope="row">${name}</th><td>${score}%</td></tr>`).join("")}</tbody></table>`;
 }
 
 function renderOverview() {
@@ -274,7 +274,7 @@ export function renderStandalonePreview() {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="CertQuiz deterministic standalone static UI design review">
 <title>CertQuiz · Standalone Static UI Review</title>
-<style>${css}</style>
+<link rel="stylesheet" href="./assets/ui-preview.css">
 </head>
 <body>
 <a class="skip-link" href="#gallery">본문으로 건너뛰기</a>
@@ -286,19 +286,152 @@ export function renderStandalonePreview() {
 `;
 }
 
+const fixedFixtureKeys = Object.freeze([
+  "actors.unauthenticated", "actors.callbackError", "actors.pending",
+  "catalog.success", "catalog.empty", "catalog.error",
+  "practice.success", "practice.submittedFeedback", "practice.error",
+  "exam.success", "exam.expired", "presentation.examPreview", "presentation.examFinalized",
+  "results.success", "results.empty", "results.error",
+  "history.success", "history.empty", "history.error",
+  "leaderboard.success", "leaderboard.empty", "leaderboard.error", "presentation.leaderboardPrivate",
+  "admin.users.success", "admin.users.empty", "admin.users.error",
+  "admin.import.empty", "admin.import.success", "admin.import.error",
+  "presentation.loading", "presentation.importValidating", "presentation.importCommit",
+  "presentation.importCompleted", "presentation.importTokenExpired",
+]);
+
+/**
+ * Export-only mirror of the TypeScript static route manifest. Every item names a
+ * Task 1.5 read-only fixture key, which is validated before files are written.
+ */
+export const staticPreviewManifest = Object.freeze([
+  ["s1-login", "success", "S1", "로그인", "actors.unauthenticated"], ["s1-login", "error", "S1", "로그인 callback 오류", "actors.callbackError"], ["s1-login", "pending", "S1", "승인 대기", "actors.pending"],
+  ["s2-home", "success", "S2", "학습 홈", "catalog.success"], ["s2-home", "loading", "S2", "학습 홈", "presentation.loading"], ["s2-home", "empty", "S2", "학습 홈", "catalog.empty"], ["s2-home", "error", "S2", "학습 홈", "catalog.error"],
+  ["s3-mode-select", "success", "S3", "학습 모드 선택", "catalog.success"], ["s3-mode-select", "loading", "S3", "학습 모드 선택", "presentation.loading"], ["s3-mode-select", "empty", "S3", "학습 모드 선택", "catalog.empty"], ["s3-mode-select", "error", "S3", "학습 모드 선택", "catalog.error"], ["s3-mode-select", "resume", "S3", "학습 모드 선택", "practice.success"], ["s3-mode-select", "confirm", "S3", "학습 모드 선택", "exam.success"],
+  ["s4-practice", "unsubmitted", "S4", "연습 모드", "practice.success"], ["s4-practice", "submitted", "S4", "연습 모드", "practice.submittedFeedback"], ["s4-practice", "error", "S4", "연습 모드", "practice.error"],
+  ["s5-exam", "active", "S5", "모의고사", "exam.success"], ["s5-exam", "preview", "S5", "모의고사", "presentation.examPreview"], ["s5-exam", "expired", "S5", "모의고사", "exam.expired"], ["s5-exam", "finalized", "S5", "모의고사", "presentation.examFinalized"],
+  ["s6-practice-result", "success", "S6", "연습 결과", "results.success"], ["s6-practice-result", "empty", "S6", "연습 결과", "results.empty"], ["s6-practice-result", "expired", "S6", "연습 결과", "results.error"],
+  ["s7-exam-result", "success", "S7", "모의고사 결과", "results.success"], ["s7-exam-result", "empty", "S7", "모의고사 결과", "results.empty"], ["s7-exam-result", "error", "S7", "모의고사 결과", "results.error"],
+  ["s8-history", "success", "S8", "모의고사 이력", "history.success"], ["s8-history", "empty", "S8", "모의고사 이력", "history.empty"], ["s8-history", "error", "S8", "모의고사 이력", "history.error"],
+  ["s9-leaderboard", "success", "S9", "리더보드", "leaderboard.success"], ["s9-leaderboard", "empty", "S9", "리더보드", "leaderboard.empty"], ["s9-leaderboard", "private", "S9", "리더보드", "presentation.leaderboardPrivate"], ["s9-leaderboard", "error", "S9", "리더보드", "leaderboard.error"],
+  ["admin-users", "success", "ADMIN-USERS", "승인 대기 사용자", "admin.users.success"], ["admin-users", "empty", "ADMIN-USERS", "승인 대기 사용자", "admin.users.empty"], ["admin-users", "error", "ADMIN-USERS", "승인 대기 사용자", "admin.users.error"],
+  ["s10-admin-import", "empty", "S10", "문제 은행 임포트", "admin.import.empty"], ["s10-admin-import", "validating", "S10", "문제 은행 임포트", "presentation.importValidating"], ["s10-admin-import", "valid", "S10", "문제 은행 임포트", "admin.import.success"], ["s10-admin-import", "invalid", "S10", "문제 은행 임포트", "admin.import.error"], ["s10-admin-import", "commit", "S10", "문제 은행 임포트", "presentation.importCommit"], ["s10-admin-import", "completed", "S10", "문제 은행 임포트", "presentation.importCompleted"], ["s10-admin-import", "token-expired", "S10", "문제 은행 임포트", "presentation.importTokenExpired"],
+].map(([section, variant, screen, title, fixtureKey]) => Object.freeze({
+  section,
+  variant,
+  screen,
+  title,
+  fixtureKey,
+  outputPath: `screens/${section}/${variant}.html`,
+})));
+
+function relativeHref(fromFile, toFile) {
+  const from = fromFile.split("/").slice(0, -1);
+  const to = toFile.split("/");
+  let common = 0;
+  while (common < from.length && common < to.length && from[common] === to[common]) common += 1;
+  return [...Array(from.length - common).fill(".."), ...to.slice(common)].join("/");
+}
+
+function documentShell({ title, stylesheetHref, body }) {
+  return `<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="description" content="CertQuiz deterministic static UI review">\n<title>${title} · CertQuiz UI review</title>\n<link rel="stylesheet" href="${stylesheetHref}">\n</head>\n<body>\n<a class="skip-link" href="#main-content">본문으로 건너뛰기</a>\n${body}\n</body>\n</html>\n`;
+}
+
+function renderGalleryDocument() {
+  const cards = staticPreviewManifest.map((entry) => `<a class="overview-card" href="${entry.outputPath}"><span>${entry.screen} · ${entry.variant.toUpperCase()}</span><h3>${entry.title}</h3><p>고정 Task 1.5 fixture 기반 정적 화면</p></a>`).join("");
+  return documentShell({
+    title: "S1–S10 gallery",
+    stylesheetHref: "assets/ui-preview.css",
+    body: `<header class="hero"><div class="brand"><span class="brand-mark">CQ</span><span>CertQuiz · Static UI Review</span></div><p class="eyebrow">DETERMINISTIC · OFFLINE · MULTIPAGE</p><h1>S1–S10 정적 화면 갤러리</h1><p class="lead">Task 1.5의 고정 read-only fixture와 presentational markup만으로 만든 검토 artifact입니다.</p><div class="meta-strip"><span>Command · pnpm ui:preview:export</span><span>Entry · artifacts/ui-preview/index.html</span><span>Output · artifacts/ui-preview/screens/.../*.html</span><span>Assets · artifacts/ui-preview/assets/</span></div></header><main id="main-content"><section class="overview" aria-labelledby="gallery-title"><p class="eyebrow">GALLERY METADATA</p><h2 id="gallery-title">CertQuiz S1–S10 UI gallery</h2><p class="lead">API, MSW, auth, timer progression, mutation, DB, backend 및 외부 network 없이 제공됩니다.</p><div class="overview-grid">${cards}</div></section><footer class="footer"><strong>Static review boundary</strong><p>반복 export는 동일한 경로, 문서 내용, navigation과 local asset reference를 생성합니다.</p></footer></main>`,
+  });
+}
+
+function renderScreenDocument(entry, index) {
+  const previous = staticPreviewManifest[(index - 1 + staticPreviewManifest.length) % staticPreviewManifest.length];
+  const next = staticPreviewManifest[(index + 1) % staticPreviewManifest.length];
+  const current = entry.outputPath;
+  const nav = `<nav aria-label="정적 화면 순서"><a href="${relativeHref(current, previous.outputPath)}">이전 화면</a><a href="${relativeHref(current, "index.html")}">Gallery</a><a href="${relativeHref(current, next.outputPath)}">다음 화면</a></nav>`;
+  const stateKind = entry.variant === "error" || entry.variant === "invalid" ? "error" : entry.variant === "loading" || entry.variant === "validating" ? "loading" : entry.variant === "empty" || entry.variant === "expired" ? "empty" : "success";
+  const details = entry.screen === "S3" ? `<article class="card flat"><p class="eyebrow">AWS · ${fixture.code}</p><h3>${fixture.certification}</h3><div class="chips"><span class="chip">${fixture.questions}문항</span><span class="chip">${fixture.minutes}분</span><span class="chip">합격 ${fixture.threshold}</span></div></article><div class="variant-grid"><article class="card span-6"><span class="badge success">시간 제한 없음</span><h3 class="cert-title">연습 모드</h3><p class="muted">문항 제출 직후 답이 잠기고 정답과 해설을 확인합니다.</p><div class="actions"><span class="button">연습 시작</span></div></article><article class="card span-6"><span class="badge warning">${fixture.minutes}분</span><h3 class="cert-title">모의고사</h3><p class="muted">제한 시간 안에 전체 문항을 풀고 결과를 검토합니다.</p><div class="actions"><span class="button">모의고사 시작</span></div></article>${entry.variant === "resume" ? `<div class="dialog span-12" role="dialog" aria-modal="false" aria-labelledby="resume-title" aria-describedby="resume-copy"><h3 id="resume-title">진행 중인 연습이 있습니다</h3><p id="resume-copy" class="muted">18번 문항부터 이어 풀거나 기존 세션을 명시적으로 교체하세요. 선택 전에는 상태가 바뀌지 않습니다.</p><div class="actions"><span class="button">이어 풀기</span><span class="button secondary">기존 세션 교체</span></div></div>` : ""}${entry.variant === "confirm" ? `<div class="dialog span-12" role="dialog" aria-modal="false" aria-labelledby="confirm-title" aria-describedby="confirm-copy"><h3 id="confirm-title">모의고사를 시작할까요?</h3><p id="confirm-copy" class="muted">확인 시점부터 서버 기준 ${fixture.minutes}분이 시작된다는 고정 안내입니다.</p><div class="actions"><span class="button">확인하고 시작</span><span class="button secondary">취소</span></div></div>` : ""}</div>` : entry.screen === "S4" || entry.screen === "S5" ? questionCard(entry.variant === "submitted") : entry.screen === "S6" || entry.screen === "S7" ? `${scoreMetrics()}<article class="card flat"><h3>도메인별 성과</h3>${domainBreakdown()}</article>` : entry.screen === "S8" || entry.screen === "S9" || entry.screen === "ADMIN" ? `<article class="card flat"><h3>${fixture.code} 고정 데이터</h3><table><caption>정적 fixture 요약</caption><thead><tr><th scope="col">자격증</th><th scope="col">문항</th><th scope="col">제한 시간</th><th scope="col">정답률</th></tr></thead><tbody><tr><th scope="row">${fixture.code}</th><td>${fixture.questions}</td><td>${fixture.minutes}분</td><td>${fixture.accuracy}</td></tr></tbody></table></article>` : `<article class="card flat"><p class="eyebrow">${fixture.code}</p><h3>${fixture.certification}</h3><p class="muted">${fixture.timestamp}에 고정된 read-only preview data입니다.</p></article>`;
+  return documentShell({
+    title: `${entry.screen} ${entry.title} ${entry.variant}`,
+    stylesheetHref: "../../assets/ui-preview.css",
+    body: `<header class="hero" data-static-fixture="${entry.fixtureKey}"><div class="brand"><span class="brand-mark">CQ</span><span>CertQuiz · Static UI Review</span></div><p class="eyebrow">${entry.screen} · ${entry.variant.toUpperCase()}</p><h1>${entry.title}</h1><p class="lead">고정 fixture와 presentational component markup만 사용한 static review screen입니다.</p></header><div class="jumpbar">${nav}</div><main id="main-content"><section class="screen" aria-labelledby="screen-title"><header class="screen-head"><div><p class="eyebrow">STATIC ARTIFACT · ${entry.fixtureKey}</p><h2 id="screen-title">${entry.title} · ${entry.variant}</h2><p class="lead">Command: <code>pnpm ui:preview:export</code> · entry: <code>artifacts/ui-preview/index.html</code></p></div></header><div class="stack">${state(stateKind, entry.variant.toUpperCase(), `${entry.title} ${entry.variant} fixture`, "이 화면은 동작을 실행하지 않는 결정적 read-only 표현입니다.")}${details}</div></section><footer class="footer">${nav}</footer></main>`,
+  });
+}
+
+function validateExportManifest() {
+  const outputPaths = new Set();
+  const screens = new Set();
+  for (const entry of staticPreviewManifest) {
+    if (!fixedFixtureKeys.includes(entry.fixtureKey)) {
+      throw new Error(`Preview export includes a non-Task-1.5 fixture: ${entry.fixtureKey}`);
+    }
+    if (!/^screens\/[a-z0-9-]+\/[a-z0-9-]+\.html$/.test(entry.outputPath)) {
+      throw new Error(`Preview export output path must be artifact-relative HTML: ${entry.outputPath}`);
+    }
+    if (outputPaths.has(entry.outputPath)) {
+      throw new Error(`Preview export output path is duplicated: ${entry.outputPath}`);
+    }
+    outputPaths.add(entry.outputPath);
+    screens.add(entry.screen);
+  }
+  for (const screen of ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10"]) {
+    if (!screens.has(screen)) throw new Error(`Preview export is missing ${screen}.`);
+  }
+}
+
+function validateArtifactDocuments(documents) {
+  const knownPaths = new Set(["assets/ui-preview.css", ...documents.map(([file]) => file)]);
+  const forbiddenRuntimeDependency = /<(?:script|iframe|form)\b|\bon\w+\s*=|\b(?:fetch|XMLHttpRequest|WebSocket|navigator\.sendBeacon)\s*\(/i;
+  const externalOrAbsoluteReference = /\b(?:src|href)=["'](?:https?:|\/\/|\/|data:)/i;
+
+  for (const [file, html] of documents) {
+    if (forbiddenRuntimeDependency.test(html)) {
+      throw new Error(`Preview artifact emits a runtime dependency: ${file}`);
+    }
+    if (externalOrAbsoluteReference.test(html)) {
+      throw new Error(`Preview artifact emits an external or absolute reference: ${file}`);
+    }
+    for (const [, reference] of html.matchAll(/\b(?:src|href)=["']([^"']+)["']/gi)) {
+      if (reference.startsWith("#") || reference.startsWith("mailto:")) continue;
+      const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(file), reference));
+      if (resolved.startsWith("../") || !knownPaths.has(resolved)) {
+        throw new Error(`Preview artifact reference escapes or misses an artifact file: ${file} -> ${reference}`);
+      }
+    }
+  }
+}
+
 export async function exportUiPreview(outputRoot = defaultOutputRoot) {
+  validateExportManifest();
   await rm(outputRoot, { recursive: true, force: true });
-  await mkdir(outputRoot, { recursive: true });
-  const html = renderStandalonePreview();
-  const outputPath = path.join(outputRoot, "index.html");
-  await writeFile(outputPath, html, "utf8");
-  return { outputRoot, outputPath, byteSize: Buffer.byteLength(html), documentCount: 1, assetCount: 0 };
+  const assetsDirectory = path.join(outputRoot, "assets");
+  await mkdir(assetsDirectory, { recursive: true });
+
+  const documents = [
+    ["index.html", renderGalleryDocument()],
+    ...staticPreviewManifest.map((entry, index) => [entry.outputPath, renderScreenDocument(entry, index)]),
+  ];
+  validateArtifactDocuments(documents);
+  await Promise.all([
+    writeFile(path.join(assetsDirectory, "ui-preview.css"), css, "utf8"),
+    ...documents.map(async ([relativePath, html]) => {
+      const destination = path.join(outputRoot, relativePath);
+      await mkdir(path.dirname(destination), { recursive: true });
+      await writeFile(destination, html, "utf8");
+    }),
+  ]);
+
+  const byteSize = documents.reduce((sum, [, html]) => sum + Buffer.byteLength(html), 0);
+  return { outputRoot, outputPath: path.join(outputRoot, "index.html"), byteSize, documentCount: documents.length, assetCount: 1 };
 }
 
 const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isDirectExecution) {
   const result = await exportUiPreview();
-  console.log("CertQuiz standalone static UI review exported deterministically.");
+  console.log("CertQuiz deterministic multipage static UI review exported.");
+  console.log("Command: pnpm ui:preview:export");
   console.log(`Entry: ${path.relative(repositoryRoot, result.outputPath)}`);
   console.log(`Documents: ${result.documentCount} · Assets: ${result.assetCount} · Bytes: ${result.byteSize}`);
 }

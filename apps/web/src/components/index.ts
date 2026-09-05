@@ -4,6 +4,7 @@ export * from "./AppShell";
 export * from "./AsyncBoundary";
 export * from "./ChoiceField";
 export * from "./SafeMarkdown";
+export * from "./StaticPresentation";
 export * from "./ui/Badge";
 export * from "./ui/Button";
 export * from "./ui/Card";

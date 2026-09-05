@@ -33,6 +33,9 @@ describe("static preview export manifest", () => {
       "screens/s2-home/empty.html",
       "screens/s2-home/error.html",
       "screens/s3-mode-select/success.html",
+      "screens/s3-mode-select/loading.html",
+      "screens/s3-mode-select/empty.html",
+      "screens/s3-mode-select/error.html",
       "screens/s3-mode-select/resume.html",
       "screens/s3-mode-select/confirm.html",
       "screens/s4-practice/unsubmitted.html",
@@ -41,9 +44,12 @@ describe("static preview export manifest", () => {
       "screens/s5-exam/active.html",
       "screens/s5-exam/preview.html",
       "screens/s5-exam/expired.html",
+      "screens/s5-exam/finalized.html",
       "screens/s6-practice-result/success.html",
+      "screens/s6-practice-result/empty.html",
       "screens/s6-practice-result/expired.html",
       "screens/s7-exam-result/success.html",
+      "screens/s7-exam-result/empty.html",
       "screens/s7-exam-result/error.html",
       "screens/s8-history/success.html",
       "screens/s8-history/empty.html",
@@ -60,7 +66,8 @@ describe("static preview export manifest", () => {
       "screens/s10-admin-import/valid.html",
       "screens/s10-admin-import/invalid.html",
       "screens/s10-admin-import/commit.html",
-      "screens/s10-admin-import/error.html",
+      "screens/s10-admin-import/completed.html",
+      "screens/s10-admin-import/token-expired.html",
     ]);
 
     expect(new Set(STATIC_PREVIEW_EXPORT_MANIFEST.map(({ id }) => id)).size).toBe(
@@ -162,6 +169,12 @@ describe("fixture-only static React Router skeleton", () => {
       "presentation.examPreview",
     ],
     [
+      "/app/exams/exam-preview?preview=finalized",
+      "S5",
+      "모의고사",
+      "presentation.examFinalized",
+    ],
+    [
       "/app/practice-results/result-preview?preview=expired",
       "S6",
       "연습 결과",
@@ -236,5 +249,74 @@ describe("fixture-only static React Router skeleton", () => {
       "href",
       "screens/s1-login/success.html",
     );
+  });
+});
+
+
+describe("S6-S9 static result, history, and leaderboard previews", () => {
+  it("renders raw score, accuracy, domain review, pass status, and reference score from immutable fixtures", () => {
+    const { unmount } = renderPreview("/app/practice-results/practice-result-preview?preview=success");
+    expect(screen.getByRole("heading", { name: "연습 결과" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "점수 요약" })).toHaveTextContent("60.00");
+    expect(screen.getByRole("table", { name: "도메인별 성과 표" })).toBeVisible();
+    expect(screen.getByRole("table", { name: "문항 검토" })).toBeVisible();
+    unmount();
+
+    renderPreview("/app/attempts/attempt-preview?preview=success");
+    expect(screen.getByText("합격")).toBeVisible();
+    expect(screen.getByText("참고 환산값")).toBeVisible();
+    expect(screen.getByText("시간 만료 자동 제출")).toBeVisible();
+  });
+
+  it("renders deterministic no-result, expired, history trend, and leaderboard privacy variants", () => {
+    const { unmount } = renderPreview("/app/practice-results/practice-result-preview?preview=empty");
+    expect(screen.getByText("No result selected")).toBeVisible();
+    unmount();
+
+    const expired = renderPreview("/app/practice-results/practice-result-preview?preview=expired");
+    expect(screen.getByRole("alert")).toHaveTextContent("no longer available");
+    expired.unmount();
+
+    const history = renderPreview("/app/history?preview=success");
+    expect(screen.getByRole("table", { name: "모의고사 응시 이력" })).toBeVisible();
+    expect(screen.getByRole("table", { name: "DOP-C02 정답률 추이 데이터" })).toBeVisible();
+    history.unmount();
+
+    renderPreview("/app/leaderboards/dop-c02?preview=private");
+    expect(screen.getByRole("checkbox", { name: "점수 공개" })).not.toBeChecked();
+    expect(screen.getByText("비공개 상태")).toBeVisible();
+    expect(screen.getByText("Tie Breaker")).toBeVisible();
+  });
+});
+
+
+describe("administrator static visual variants", () => {
+  it("renders read-only pending-user rows and disabled approval controls", () => {
+    renderPreview("/app/admin/users?preview=success");
+
+    expect(screen.getByRole("table", { name: "승인 대기 사용자 목록" })).toBeVisible();
+    expect(screen.getAllByRole("button", { name: /승인$/ })).toHaveLength(2);
+    for (const button of screen.getAllByRole("button", { name: /승인$/ })) {
+      expect(button).toBeDisabled();
+    }
+    expect(screen.getByText("이 정적 검토 화면의 승인 버튼은 동작하지 않습니다.")).toBeVisible();
+  });
+
+  it("renders validation errors, unavailable summaries, commit confirmation, completion, and token-expiry states", () => {
+    const invalid = renderPreview("/app/admin/import?preview=invalid");
+    expect(screen.getByText("계산 불가: The questions array is missing.")).toBeVisible();
+    expect(screen.getByRole("heading", { name: /검증 오류/ })).toBeVisible();
+    invalid.unmount();
+
+    const commit = renderPreview("/app/admin/import?preview=commit");
+    expect(screen.getByRole("dialog", { name: "문제 은행을 교체할까요?" })).toBeVisible();
+    commit.unmount();
+
+    const completed = renderPreview("/app/admin/import?preview=completed");
+    expect(screen.getByText("문제 은행을 교체했습니다")).toBeVisible();
+    completed.unmount();
+
+    renderPreview("/app/admin/import?preview=token-expired");
+    expect(screen.getByText("검증 토큰이 만료되었거나 이미 사용되었습니다")).toBeVisible();
   });
 });

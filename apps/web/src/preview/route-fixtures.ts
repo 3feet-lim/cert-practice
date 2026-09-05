@@ -22,6 +22,7 @@ const presentationFixtures = Object.freeze({
     state: "success" as const,
     data: examSuccessFixture.data.submissionPreview,
   }),
+  examFinalized: CERT_QUIZ_STATIC_PREVIEW_FIXTURES.exam.finalized,
   leaderboardPrivate: Object.freeze({
     state: "success" as const,
     data: Object.freeze({
@@ -41,6 +42,16 @@ const presentationFixtures = Object.freeze({
       dialog: "commit-confirmation",
       validation: importSuccessFixture.data,
     }),
+  }),
+  importCompleted: Object.freeze({
+    state: "success" as const,
+    data: Object.freeze({
+      message: "The validated catalog revision has been activated.",
+    }),
+  }),
+  importTokenExpired: Object.freeze({
+    state: "error" as const,
+    message: "The commit token expired or was already used; validate the file again.",
   }),
 });
 
@@ -63,6 +74,7 @@ export const STATIC_PREVIEW_FIXTURES = Object.freeze({
   "exam.expired": CERT_QUIZ_STATIC_PREVIEW_FIXTURES.exam.expired,
   "exam.error": CERT_QUIZ_STATIC_PREVIEW_FIXTURES.exam.error,
   "results.success": CERT_QUIZ_STATIC_PREVIEW_FIXTURES.results.success,
+  "results.empty": CERT_QUIZ_STATIC_PREVIEW_FIXTURES.results.empty,
   "results.error": CERT_QUIZ_STATIC_PREVIEW_FIXTURES.results.error,
   "history.success": CERT_QUIZ_STATIC_PREVIEW_FIXTURES.history.success,
   "history.empty": CERT_QUIZ_STATIC_PREVIEW_FIXTURES.history.empty,
@@ -78,9 +90,12 @@ export const STATIC_PREVIEW_FIXTURES = Object.freeze({
   "admin.import.error": CERT_QUIZ_STATIC_PREVIEW_FIXTURES.admin.import.error,
   "presentation.loading": presentationFixtures.loading,
   "presentation.examPreview": presentationFixtures.examPreview,
+  "presentation.examFinalized": presentationFixtures.examFinalized,
   "presentation.leaderboardPrivate": presentationFixtures.leaderboardPrivate,
   "presentation.importValidating": presentationFixtures.importValidating,
   "presentation.importCommit": presentationFixtures.importCommit,
+  "presentation.importCompleted": presentationFixtures.importCompleted,
+  "presentation.importTokenExpired": presentationFixtures.importTokenExpired,
 });
 
 export type StaticPreviewFixtureKey = keyof typeof STATIC_PREVIEW_FIXTURES;

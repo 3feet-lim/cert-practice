@@ -61,11 +61,12 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
               );
             }
 
+            const isExternal = href.startsWith("https://");
             return (
               <a
                 href={href}
                 title={title}
-                rel="noopener noreferrer"
+                {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className="font-medium text-indigo-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 {children}
