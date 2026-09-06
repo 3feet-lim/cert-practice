@@ -61,7 +61,9 @@ export function StatePanel({
             {title}
           </h2>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">{message}</p>
-          {details ? <div className="mt-3 text-sm text-foreground">{details}</div> : null}
+          {details ? (
+            <div className="mt-3 text-sm text-foreground">{details}</div>
+          ) : null}
           {action ? <div className="mt-5 flex flex-wrap gap-3">{action}</div> : null}
         </div>
       </div>

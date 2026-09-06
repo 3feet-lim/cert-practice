@@ -95,106 +95,106 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
   - artifact가 local relative CSS/JS/assets만 사용하고 API, MSW, auth, 진행 timer, mutation, DB 또는 backend 없이 기본 static server에서 열리는지 확인한다.
   - **여기서 반드시 STOP하고 `artifacts/ui-preview/index.html`의 사용자 시각 승인을 기다린다. 승인 전에는 Task 5~7의 TanStack Query, Zustand, API-port wiring, MSW interaction, mutation 또는 상태 머신 작업을 시작하지 않는다.**
 
-- [ ] 5. 승인된 UI에 mock 상태 기반과 비동기 경계 연결
-  - [~] 5.1 TanStack Query client와 Zustand transient store를 typed API port에 연결한다
+- [x] 5. 승인된 UI에 mock 상태 기반과 비동기 경계 연결
+  - [x] 5.1 TanStack Query client와 Zustand transient store를 typed API port에 연결한다
     - 승인된 component markup/layout을 유지한 채 query key, local draft/current index/dialog state, logout cache purge와 adapter injection을 composition root에 추가한다.
     - mock/real adapter 전환이 component 또는 store 변경을 요구하지 않게 하고, 이 단계에서는 real HTTP와 backend를 연결하지 않는다.
     - _Requirements: 5.5, 6.9, 6.12, 16.1, 16.2, 16.5, 16.8, 16.9_
-  - [~] 5.2 AsyncBoundary와 mutation 공통 상태를 API port 응답에 연결한다
+  - [x] 5.2 AsyncBoundary와 mutation 공통 상태를 API port 응답에 연결한다
     - query별 독립 loading/error/empty/success, retryable과 next-action 분리, 입력 보존, canonical mutation reconciliation, optimistic Flag rollback과 duplicate submit lock을 구현한다.
     - 정적 variant component를 재사용하고 승인된 visual contract가 상태 wiring 때문에 임의로 바뀌지 않게 한다.
     - _Requirements: 6.7-6.12, 16.1-16.9_
-  - [~] 5.3 비동기 UI 요청 상태 property/component test를 작성한다
+  - [x] 5.3 비동기 UI 요청 상태 property/component test를 작성한다
     - **Property 25: 비동기 UI 요청 상태 머신**
     - 임의 성공/retryable/non-retryable/중복 제출 시퀀스에서 독립 loading, 입력 보존, retry/next-action 분리와 단일 action/result 수렴을 검증한다.
     - **Validates: Requirements 16.1-16.9**
     - _Requirements: 16.1-16.9_
-  - [~] 5.4 Mock state foundation checkpoint - 공통 상태 검증
+  - [x] 5.4 Mock state foundation checkpoint - 공통 상태 검증
     - lint, typecheck, Property 25와 AsyncBoundary component test를 통과시키고 정적 UI 승인본과 layout 회귀가 없는지 screen gallery smoke를 다시 실행한다.
 
-- [ ] 6. auth·pending·catalog·admin/import mock interaction slice 구현
-  - [~] 6.1 S1 login/callback과 pending interaction을 구현한다
+- [x] 6. auth·pending·catalog·admin/import mock interaction slice 구현
+  - [x] 6.1 S1 login/callback과 pending interaction을 구현한다
     - API port의 unauthenticated/pending/approved 상태로 redirect intent, token 없는 안전한 callback 오류, `/me/approval` 새로고침과 approved 전환을 구현한다.
     - real Cognito code+PKCE는 후반 실연결 단계로 남기고 mock 상태가 승인된 정적 화면 variant를 선택하게 한다.
     - _Requirements: 1.1-1.8, 16.1-16.9_
-  - [~] 6.2 S2 catalog와 S3 mode select interaction을 구현한다
+  - [x] 6.2 S2 catalog와 S3 mode select interaction을 구현한다
     - Provider grouping query, catalog empty/error, active practice resume/replace 선택 전 비변경과 명시적 exam 시작 확인을 mock API port에 연결한다.
     - _Requirements: 3.6-3.9, 7.5-7.9, 10.1, 16.1-16.9_
-  - [~] 6.3 관리자 pending 사용자 interaction을 구현한다
+  - [x] 6.3 관리자 pending 사용자 interaction을 구현한다
     - 목록 조회, 빈 상태, 개별 approve pending lock, idempotent 결과와 safe error를 연결한다.
     - _Requirements: 1.9, 1.10, 2.5, 2.6, 16.1-16.9_
-  - [~] 6.4 S10 import interaction을 구현한다
+  - [x] 6.4 S10 import interaction을 구현한다
     - 10 MiB JSON 선택, dry-run summary/error, 계산 불가 표시, memory-only token, content 변경 재검증, commit 확인과 mock replay 오류를 연결한다.
     - _Requirements: 15.1-15.27, 16.1-16.9_
-  - [~] 6.5 auth/catalog/admin/import mock-backed component·browser test를 작성한다
+  - [x] 6.5 auth/catalog/admin/import mock-backed component·browser test를 작성한다
     - pending route 제한, catalog empty/error, resume/replace 선택 전 비변경, approve replay, import 입력 보존과 token 재사용 오류를 검증한다.
     - 이 테스트는 UI 허용 행렬과 표시만 검증하며 실제 인증·인가·atomic import 증거로 사용하지 않는다.
     - _Requirements: 1.7-1.10, 2.5, 2.6, 3.6, 7.5-7.9, 15.18-15.26, 16.1-16.9_
-  - [~] 6.6 Auth/catalog/admin/import checkpoint - slice 검증
+  - [x] 6.6 Auth/catalog/admin/import checkpoint - slice 검증
     - 해당 route의 unit/component/browser test와 screen gallery 회귀 검사를 통과시키고 다음 quiz interaction slice 전에 사용자에게 현재 동작을 확인할 수 있는 deterministic preview를 제공한다.
 
-- [ ] 7. practice → exam → result/history/leaderboard mock interaction slice 구현
-  - [~] 7.1 공통 QuestionPresenter와 navigator interaction을 연결한다
+- [x] 7. practice → exam → result/history/leaderboard mock interaction slice 구현
+  - [x] 7.1 공통 QuestionPresenter와 navigator interaction을 연결한다
     - required count에 따른 radio/checkbox 선택 상한, 선택 수, 경계 이동, navigator, en/ko 전체 전환, en_only fallback과 위치/선택/Flag/reveal 보존을 reducer/store에 연결한다.
     - safe Markdown과 image failure presentation은 승인된 정적 component를 그대로 재사용한다.
     - _Requirements: 5.1-5.13, 6.1-6.6, 6.13-6.16_
-  - [~] 7.2 S4 Practice interaction을 구현한다
+  - [x] 7.2 S4 Practice interaction을 구현한다
     - resume canonical state, draft 저장, optimistic Flag rollback, 최초 제출 pending lock, 제출 후에만 feedback/reveal, 완료 후 S6 이동을 mock API port에 연결한다.
     - _Requirements: 6.7, 6.9, 6.10, 6.12, 7.7, 7.10-7.12, 8.1-8.12, 16.5-16.9_
-  - [~] 7.3 문제 입력·언어 상태 property test를 작성한다
+  - [x] 7.3 문제 입력·언어 상태 property test를 작성한다
     - **Property 8: 문제 입력 종류와 언어 전환의 상태 보존**
     - 임의 presenter state에서 선택 상한, 언어별 일관 콘텐츠, en_only fallback과 위치/선택/Flag/reveal 보존을 검증한다.
     - **Validates: Requirements 5.1-5.8**
     - _Requirements: 5.1-5.8_
-  - [~] 7.4 탐색 경계·상태 분류 property test를 작성한다
+  - [x] 7.4 탐색 경계·상태 분류 property test를 작성한다
     - **Property 9: 문항 탐색 경계와 상태 분류**
     - 임의 N/index/응답/Flag에서 navigator 완전성, 이동 경계와 current/answered/flag 분류를 검증한다.
     - **Validates: Requirements 6.1-6.6, 6.13-6.16**
     - _Requirements: 6.1-6.6, 6.13-6.16_
-  - [~] 7.5 Flag version commit/rollback property test를 작성한다
+  - [x] 7.5 Flag version commit/rollback property test를 작성한다
     - **Property 10: Flag 저장의 versioned commit/rollback**
     - mock API port의 practice/exam 성공, stale, 저장 실패 응답에서 canonical state와 UI optimistic state의 증가·복원을 검증한다.
     - **Validates: Requirements 6.7-6.12**
     - _Requirements: 6.7-6.12_
-  - [~] 7.6 Practice component/browser test를 작성한다
+  - [x] 7.6 Practice component/browser test를 작성한다
     - radio/checkbox 접근성, reveal timing, Markdown XSS/Safe_URL/image failure, stale version, rollback과 duplicate submit lock을 검증한다.
     - _Requirements: 5.1-6.16, 7.7, 7.10-7.12, 8.1-8.12, 16.8, 16.9_
-  - [~] 7.7 Practice interaction checkpoint - slice 검증
+  - [x] 7.7 Practice interaction checkpoint - slice 검증
     - Practice unit/property/component/browser test와 승인된 S4 visual 회귀를 통과시키고 exam interaction 착수 전에 deterministic practice flow를 확인 가능하게 한다.
-  - [~] 7.8 S5 ExamPage와 ServerTimer interaction을 구현한다
+  - [x] 7.8 S5 ExamPage와 ServerTimer interaction을 구현한다
     - serverNow/expiresAt offset과 monotonic display timer, restore, preview dialog, unanswered/flag count, expiry/finalize/result 전환을 mock API port에 연결한다.
     - 0초에서 client 점수를 만들지 않고 API port로 lazy finalize 결과를 조회한다.
     - _Requirements: 10.3-10.13, 11.1-11.12, 16.5-16.9_
-  - [~] 7.9 Exam component/browser test를 작성한다
+  - [x] 7.9 Exam component/browser test를 작성한다
     - reconnect timer, preview count, expiry 전환, stale version, duplicate submit lock과 exam DOM/serialized props의 정답·해설 필드 부재를 검증한다.
     - 이 테스트는 mock timer/상태만 검증하며 실제 server clock, persistence 또는 concurrent finalize 증거로 사용하지 않는다.
     - _Requirements: 10.3-11.12, 16.1-16.9_
-  - [~] 7.10 Exam interaction checkpoint - slice 검증
+  - [x] 7.10 Exam interaction checkpoint - slice 검증
     - Exam component/browser test와 승인된 S5 visual 회귀를 통과시키고 결과·이력 slice 착수 전에 deterministic exam flow를 확인 가능하게 한다.
-  - [~] 7.11 S6~S9 result, history와 leaderboard interaction을 구현한다
+  - [x] 7.11 S6~S9 result, history와 leaderboard interaction을 구현한다
     - practice/exam result 조회, 168시간 만료, Attempt-only history/trend, visibility 저장 실패 rollback, 서버 rank/tie/current marker와 privacy/empty 상태를 mock API port에 연결한다.
     - _Requirements: 9.1-9.11, 12.9-12.12, 13.1-13.14, 14.2-14.15, 16.1-16.9_
-  - [~] 7.12 result/history/leaderboard mock-backed component·browser test를 작성한다
+  - [x] 7.12 result/history/leaderboard mock-backed component·browser test를 작성한다
     - exact-vs-display 구분, immutable review, 만료, 빈 이력/count 0, visibility rollback, 공동 순위/current marker와 privacy를 검증한다.
     - _Requirements: 9.1-9.11, 12.9-12.12, 13.1-13.14, 14.2-14.15, 16.1-16.9_
-  - [~] 7.13 frontend mock contract와 S1~S10 E2E suite를 완성한다
+  - [x] 7.13 frontend mock contract와 S1~S10 E2E suite를 완성한다
     - 모든 fixture를 shared Zod schema로 parse하고 endpoint request/response matrix와 forbidden field 부재를 contract test로 고정한다.
     - S1~S10의 approved mock flow와 대표 loading/empty/error/retry를 Playwright로 자동화하되 mock E2E를 real backend acceptance로 간주하지 않는다.
     - _Requirements: 1.7-16.9_
-  - [~] 7.14 Frontend mock checkpoint - backend 착수 전 전체 검증
+  - [x] 7.14 Frontend mock checkpoint - backend 착수 전 전체 검증
     - frontend lint, typecheck, build, unit, Properties 8~10·25, component, contract, static visual/accessibility, slice browser와 mock-backed Playwright test를 모두 통과시킨다.
     - 정적 UI 승인본의 의도적 변경만 허용되었는지 확인하고 사용자에게 frontend mock 흐름을 검토 가능하게 제공한 뒤에만 Task 8 이후 backend 작업을 시작한다.
 
-- [ ] 8. Backend workspace와 실제 Hono API bootstrap 구성
-  - [~] 8.1 backend/domain/DB/infra workspace 구조를 추가한다
+- [x] 8. Backend workspace와 실제 Hono API bootstrap 구성
+  - [x] 8.1 backend/domain/DB/infra workspace 구조를 추가한다
     - `apps/api`, `packages/domain`, `packages/db`, `infra/terraform`, `infra/serverless`를 기존 pnpm workspace와 TypeScript project reference에 추가한다.
     - 의존 방향을 `apps/* → contracts|domain|db`, `db → domain`으로 제한하고 기존 web/contracts build를 깨지 않게 한다.
     - _Requirements: 16.1, 16.2_
-  - [~] 8.2 backend lint·test·build 경계와 루트 명령을 확장한다
+  - [x] 8.2 backend lint·test·build 경계와 루트 명령을 확장한다
     - domain이 React, Hono, AWS SDK, SQL driver를 import하지 못하게 하고 unit/property/repository/integration 명령을 watch 없는 단일 실행으로 추가한다.
     - frontend gate를 유지하면서 전체 monorepo build/typecheck/lint를 구성한다.
     - _Requirements: 16.1, 16.2, 16.8, 16.9_
-  - [~] 8.3 실제 Hono Lambda와 shared health contract를 연결한다
+  - [x] 8.3 실제 Hono Lambda와 shared health contract를 연결한다
     - 기존 health DTO와 envelope를 그대로 구현하는 Hono route, Lambda entry와 frontend HTTP adapter용 endpoint를 추가한다.
     - mock health와 real health에 동일 provider contract를 실행해 frontend bootstrap 때 확정한 contract를 비호환 변경하지 못하게 한다.
     - _Requirements: 16.1, 16.2, 16.4_

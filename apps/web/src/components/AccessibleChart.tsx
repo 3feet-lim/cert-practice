@@ -40,7 +40,11 @@ export function AccessibleChart({
             <thead>
               <tr>
                 {columns.map((column) => (
-                  <th key={column} scope="col" className="border-b border-slate-300 px-3 py-2 font-semibold">
+                  <th
+                    key={column}
+                    scope="col"
+                    className="border-b border-slate-300 px-3 py-2 font-semibold"
+                  >
                     {column}
                   </th>
                 ))}
@@ -51,11 +55,18 @@ export function AccessibleChart({
                 <tr key={row.id}>
                   {row.cells.map((cell, index) =>
                     index === 0 ? (
-                      <th key={columns[index]} scope="row" className="border-b border-slate-200 px-3 py-2 font-medium">
+                      <th
+                        key={columns[index]}
+                        scope="row"
+                        className="border-b border-slate-200 px-3 py-2 font-medium"
+                      >
                         {cell}
                       </th>
                     ) : (
-                      <td key={columns[index]} className="border-b border-slate-200 px-3 py-2">
+                      <td
+                        key={columns[index]}
+                        className="border-b border-slate-200 px-3 py-2"
+                      >
                         {cell}
                       </td>
                     ),

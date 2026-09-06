@@ -1,8 +1,12 @@
 import type {
   ExamActiveSessionDto,
+  ExamStateResponse,
   GetExamResponse,
+  PatchExamStateRequest,
+  PatchPracticeStateRequest,
   PracticeSessionDto,
   PracticeStateResponse,
+  SubmissionPreviewDto,
   SubmitExamResponse,
   SubmitPracticeQuestionResponse,
   Uuid,
@@ -38,8 +42,7 @@ export function usePracticeSessionQuery(practiceSessionId: Uuid) {
   const quizStore = useQuizStoreApi();
   const query = useQuery({
     queryKey: certQuizQueryKeys.practice(practiceSessionId),
-    queryFn: () =>
-      resolveCertQuizResult(api.resumePractice({ practiceSessionId })),
+    queryFn: () => resolveCertQuizResult(api.resumePractice({ practiceSessionId })),
   });
 
   useEffect(() => {
@@ -90,6 +93,52 @@ function setPracticeFlag(
       question.id === questionId ? { ...question, flagged } : question,
     ),
   };
+}
+
+type PracticeStatePatchVariables = Pick<
+  PatchPracticeStateRequest,
+  "answer" | "currentIndex"
+>;
+
+export function usePracticeStatePatchMutation(practiceSessionId: Uuid) {
+  const api = useCertQuizApi();
+  const queryClient = useQueryClient();
+  const key = certQuizQueryKeys.practice(practiceSessionId);
+
+  return useMutation<PracticeStateResponse, Error, PracticeStatePatchVariables>({
+    mutationFn: (patch) => {
+      const session = queryClient.getQueryData<PracticeSessionDto>(key);
+      if (!session) throw new QuizCacheMissError("Practice session");
+      return resolveCertQuizResult(
+        api.patchPracticeState({
+          practiceSessionId,
+          expectedVersion: session.stateVersion,
+          ...patch,
+        }),
+      );
+    },
+    onSuccess: (canonical, patch) => {
+      queryClient.setQueryData<PracticeSessionDto>(key, (session) =>
+        session
+          ? {
+              ...session,
+              stateVersion: canonical.stateVersion,
+              currentIndex: canonical.currentIndex,
+              questions: patch.answer
+                ? session.questions.map((question) =>
+                    question.id === patch.answer?.questionId
+                      ? {
+                          ...question,
+                          selectedChoiceIds: [...patch.answer.selectedChoiceIds],
+                        }
+                      : question,
+                  )
+                : session.questions,
+            }
+          : session,
+      );
+    },
+  });
 }
 
 function setExamFlag(
@@ -160,13 +209,73 @@ export function usePracticeFlagMutation(practiceSessionId: Uuid) {
     onError: (_error, _variables, context) => {
       if (
         context &&
-        quizStore
-          .getState()
-          .isCurrentFlagChange(context.questionTarget, context.token)
+        quizStore.getState().isCurrentFlagChange(context.questionTarget, context.token)
       ) {
         queryClient.setQueryData(key, context.previous);
         quizStore.getState().rollbackFlagChange(context.questionTarget, context.token);
       }
+    },
+  });
+}
+
+type ExamStatePatchVariables = Pick<PatchExamStateRequest, "answer" | "currentIndex">;
+
+/** Persists exam answers and navigation; the server remains the state authority. */
+export function useExamStatePatchMutation(examSessionId: Uuid) {
+  const api = useCertQuizApi();
+  const queryClient = useQueryClient();
+  const key = certQuizQueryKeys.exam(examSessionId);
+
+  return useMutation<ExamStateResponse, Error, ExamStatePatchVariables>({
+    mutationFn: (patch) => {
+      const session = queryClient.getQueryData<GetExamResponse>(key);
+      if (session?.kind !== "exam-active-session") {
+        throw new QuizCacheMissError("Active exam session");
+      }
+      return resolveCertQuizResult(
+        api.patchExamState({
+          examSessionId,
+          expectedVersion: session.stateVersion,
+          ...patch,
+        }),
+      );
+    },
+    onSuccess: (canonical, patch) => {
+      queryClient.setQueryData<GetExamResponse>(key, (session) =>
+        session?.kind === "exam-active-session"
+          ? {
+              ...session,
+              stateVersion: canonical.stateVersion,
+              currentIndex: canonical.currentIndex,
+              serverNow: canonical.serverNow,
+              remainingSeconds: canonical.remainingSeconds,
+              questions: patch.answer
+                ? session.questions.map((question) =>
+                    question.id === patch.answer?.questionId
+                      ? {
+                          ...question,
+                          selectedChoiceIds: [...patch.answer.selectedChoiceIds],
+                        }
+                      : question,
+                  )
+                : session.questions,
+            }
+          : session,
+      );
+    },
+  });
+}
+
+/** Fetches authoritative counts immediately before the user confirms submission. */
+export function useExamSubmissionPreview(examSessionId: Uuid) {
+  const api = useCertQuizApi();
+  const queryClient = useQueryClient();
+
+  return useMutation<SubmissionPreviewDto>({
+    mutationFn: () =>
+      resolveCertQuizResult(api.getExamSubmissionPreview({ examSessionId })),
+    onSuccess: (preview) => {
+      queryClient.setQueryData(certQuizQueryKeys.examPreview(examSessionId), preview);
     },
   });
 }
@@ -227,9 +336,7 @@ export function useExamFlagMutation(examSessionId: Uuid) {
     onError: (_error, _variables, context) => {
       if (
         context &&
-        quizStore
-          .getState()
-          .isCurrentFlagChange(context.questionTarget, context.token)
+        quizStore.getState().isCurrentFlagChange(context.questionTarget, context.token)
       ) {
         queryClient.setQueryData(key, context.previous);
         quizStore.getState().rollbackFlagChange(context.questionTarget, context.token);
@@ -268,9 +375,7 @@ export function usePracticeQuestionSubmit(practiceSessionId: Uuid) {
               ...session,
               stateVersion: canonical.stateVersion,
               questions: session.questions.map((question) =>
-                question.id === canonical.question.id
-                  ? canonical.question
-                  : question,
+                question.id === canonical.question.id ? canonical.question : question,
               ),
             }
           : session,
@@ -319,7 +424,10 @@ export function useExamSubmit(examSessionId: Uuid) {
   const mutation = useMutation<SubmitExamResponse>({
     mutationFn: () => resolveCertQuizResult(api.submitExam({ examSessionId })),
     onSuccess: (canonical) => {
-      queryClient.setQueryData(certQuizQueryKeys.attempt(canonical.attemptId), canonical);
+      queryClient.setQueryData(
+        certQuizQueryKeys.attempt(canonical.attemptId),
+        canonical,
+      );
       queryClient.setQueryData<GetExamResponse>(key, {
         kind: "exam-finalized",
         examSessionId,

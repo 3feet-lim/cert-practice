@@ -15,7 +15,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-function useScenario(
+function installScenario(
   scenario: MockScenario,
   delayMs?: number,
 ): { snapshot: () => MockStateSnapshot } {
@@ -54,21 +54,23 @@ describe("MSW UI-development scenarios (not backend guarantee evidence)", () => 
 
   // **Validates: Requirements 16.1-16.7**
   it("provides loading delay, empty, retryable, and non-retryable UI responses only", async () => {
-    useScenario("loading-delay", 20);
+    installScenario("loading-delay", 20);
     const startedAt = performance.now();
-    const delayed = await fetch(`${MOCK_API_BASE_URL}/catalog`);
+    const delayed = await globalThis.fetch(`${MOCK_API_BASE_URL}/catalog`);
     expect(performance.now() - startedAt).toBeGreaterThanOrEqual(10);
     expect(delayed.ok).toBe(true);
 
     server.resetHandlers();
-    useScenario("empty");
-    const empty = await responseBody(await fetch(`${MOCK_API_BASE_URL}/catalog`));
+    installScenario("empty");
+    const empty = await responseBody(
+      await globalThis.fetch(`${MOCK_API_BASE_URL}/catalog`),
+    );
     expect(empty.data).toEqual({ providers: [], dataErrors: [] });
 
     server.resetHandlers();
-    useScenario("retryable-error");
+    installScenario("retryable-error");
     const retryable = await responseBody(
-      await fetch(`${MOCK_API_BASE_URL}/catalog`),
+      await globalThis.fetch(`${MOCK_API_BASE_URL}/catalog`),
     );
     expect(retryable.error).toMatchObject({
       code: "dependency-unavailable",
@@ -76,9 +78,9 @@ describe("MSW UI-development scenarios (not backend guarantee evidence)", () => 
     });
 
     server.resetHandlers();
-    useScenario("non-retryable-error");
+    installScenario("non-retryable-error");
     const nonRetryable = await responseBody(
-      await fetch(`${MOCK_API_BASE_URL}/catalog`),
+      await globalThis.fetch(`${MOCK_API_BASE_URL}/catalog`),
     );
     expect(nonRetryable.error).toMatchObject({
       code: "validation-failed",
@@ -88,26 +90,29 @@ describe("MSW UI-development scenarios (not backend guarantee evidence)", () => 
 
   // **Validates: Requirements 6.7-6.12, 7.10-7.12, 10.10-10.12**
   it("returns stale/save errors and leaves the UI mock state unchanged without proving transaction rollback", async () => {
-    const stale = useScenario("stale-version");
+    const stale = installScenario("stale-version");
     const staleBefore = stale.snapshot();
     const staleBody = await responseBody(
-      await fetch(`${MOCK_API_BASE_URL}/practice/${MOCK_IDS.practice}/state`, {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          expectedVersion: 0,
-          flag: { questionId: MOCK_IDS.questionOne, flagged: true },
-        }),
-      }),
+      await globalThis.fetch(
+        `${MOCK_API_BASE_URL}/practice/${MOCK_IDS.practice}/state`,
+        {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            expectedVersion: 0,
+            flag: { questionId: MOCK_IDS.questionOne, flagged: true },
+          }),
+        },
+      ),
     );
     expect(errorCode(staleBody)).toBe("stale-version");
     expect(stale.snapshot()).toEqual(staleBefore);
 
     server.resetHandlers();
-    const rollback = useScenario("save-rollback");
+    const rollback = installScenario("save-rollback");
     const rollbackBefore = rollback.snapshot();
     const rollbackBody = await responseBody(
-      await fetch(`${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}/state`, {
+      await globalThis.fetch(`${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}/state`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ expectedVersion: 0, currentIndex: 1 }),
@@ -119,26 +124,26 @@ describe("MSW UI-development scenarios (not backend guarantee evidence)", () => 
 
   // **Validates: Requirements 1.7-1.12, 2.4**
   it("provides owner and role denial UI projections without proving real authorization", async () => {
-    useScenario("owner-denial");
+    installScenario("owner-denial");
     const ownerDenied = await responseBody(
-      await fetch(`${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}`),
+      await globalThis.fetch(`${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}`),
     );
     expect(errorCode(ownerDenied)).toBe("ownership-denied");
     expect(JSON.stringify(ownerDenied)).not.toContain("mock.learner@example.com");
 
     server.resetHandlers();
-    useScenario("role-denial");
+    installScenario("role-denial");
     const roleDenied = await responseBody(
-      await fetch(`${MOCK_API_BASE_URL}/admin/pending-users`),
+      await globalThis.fetch(`${MOCK_API_BASE_URL}/admin/pending-users`),
     );
     expect(errorCode(roleDenied)).toBe("admin-required");
   });
 
   // **Validates: Requirements 15.17-15.27**
   it("provides aggregate import validation, expired-token, and reused-token UI errors without proving atomic replacement", async () => {
-    useScenario("import-validation-errors");
+    installScenario("import-validation-errors");
     const validation = await responseBody(
-      await fetch(`${MOCK_API_BASE_URL}/admin/imports/dry-run`, {
+      await globalThis.fetch(`${MOCK_API_BASE_URL}/admin/imports/dry-run`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ content: "{}" }),
@@ -155,9 +160,9 @@ describe("MSW UI-development scenarios (not backend guarantee evidence)", () => 
       ["token-reused", "token-used"],
     ] as const) {
       server.resetHandlers();
-      useScenario(scenario);
+      installScenario(scenario);
       const body = await responseBody(
-        await fetch(`${MOCK_API_BASE_URL}/admin/imports/commit`, {
+        await globalThis.fetch(`${MOCK_API_BASE_URL}/admin/imports/commit`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -175,11 +180,13 @@ describe("MSW UI-development scenarios (not backend guarantee evidence)", () => 
   it.each(["duplicate-submission", "idempotent-result"] as const)(
     "%s converges on one UI result without proving backend concurrency or idempotency",
     async (scenario) => {
-      const mock = useScenario(scenario, 5);
+      const mock = installScenario(scenario, 5);
       const request = () =>
-        fetch(`${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}/submit`, {
-          method: "POST",
-        }).then(responseBody);
+        globalThis
+          .fetch(`${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}/submit`, {
+            method: "POST",
+          })
+          .then(responseBody);
 
       const [first, second] = await Promise.all([request(), request()]);
       expect(first.data).toEqual(second.data);
@@ -193,10 +200,10 @@ describe("MSW UI-development scenarios (not backend guarantee evidence)", () => 
 
   // **Validates: Requirements 10.3, 10.13**
   it("returns serverNow/expiresAt and server-saved preview counts from the UI mock", async () => {
-    useScenario("default");
+    installScenario("default");
 
     const exam = await responseBody(
-      await fetch(`${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}`),
+      await globalThis.fetch(`${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}`),
     );
     expect(exam.data).toMatchObject({
       serverNow: "2026-03-23T12:10:00.000Z",
@@ -205,7 +212,7 @@ describe("MSW UI-development scenarios (not backend guarantee evidence)", () => 
     });
 
     const preview = await responseBody(
-      await fetch(
+      await globalThis.fetch(
         `${MOCK_API_BASE_URL}/exams/${MOCK_IDS.exam}/submission-preview`,
         { method: "POST" },
       ),

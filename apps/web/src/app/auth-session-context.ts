@@ -13,6 +13,7 @@ export type AuthSessionState =
 export interface AuthSessionContextValue {
   state: AuthSessionState;
   refresh(): Promise<void>;
+  logout(): Promise<void>;
 }
 
 export const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);

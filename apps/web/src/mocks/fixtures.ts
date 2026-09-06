@@ -1,3 +1,5 @@
+import * as contracts from "@cert-quiz/contracts";
+
 import type {
   ActivePracticeSessionsDto,
   CatalogDto,
@@ -286,6 +288,7 @@ export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
   const providerId = ids.named("provider-aws");
   const certificationId = ids.named("certification-dop-c02");
   const practiceSessionId = ids.named("practice-active");
+  const replacementPracticeSessionId = ids.named("practice-replacement");
   const practiceResultId = ids.named("practice-result");
   const activeExamSessionId = ids.named("exam-active");
   const expiredExamSessionId = ids.named("exam-expired");
@@ -398,18 +401,32 @@ export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
     stateVersion: 13,
     questions: [submittedFirstQuestion, ...activePracticeQuestions.slice(1)],
   };
+  const replacementPractice: PracticeSessionDto = {
+    ...activePractice,
+    practiceSessionId: replacementPracticeSessionId,
+    currentIndex: 0,
+    stateVersion: 1,
+  };
+  const activePracticeSummary = {
+    practiceSessionId,
+    certificationId,
+    certificationCode: DOP_C02_METADATA.code,
+    currentQuestionNumber: activePractice.currentIndex + 1,
+    totalQuestions: DOP_C02_METADATA.totalQuestions,
+    stateVersion: activePractice.stateVersion,
+    updatedAt: iso(nowMs - 5 * MINUTE_MS),
+  };
+  const replacementPracticeSummary = {
+    practiceSessionId: replacementPracticeSessionId,
+    certificationId,
+    certificationCode: DOP_C02_METADATA.code,
+    currentQuestionNumber: replacementPractice.currentIndex + 1,
+    totalQuestions: DOP_C02_METADATA.totalQuestions,
+    stateVersion: replacementPractice.stateVersion,
+    updatedAt: clock.iso(),
+  };
   const activePracticeSessions: ActivePracticeSessionsDto = {
-    sessions: [
-      {
-        practiceSessionId,
-        certificationId,
-        certificationCode: DOP_C02_METADATA.code,
-        currentQuestionNumber: activePractice.currentIndex + 1,
-        totalQuestions: DOP_C02_METADATA.totalQuestions,
-        stateVersion: activePractice.stateVersion,
-        updatedAt: iso(nowMs - 5 * MINUTE_MS),
-      },
-    ],
+    sessions: [activePracticeSummary],
   };
 
   const activeExamStartedAtMs = nowMs - 30 * MINUTE_MS;
@@ -701,6 +718,46 @@ export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
     committedAt: clock.iso(),
   };
 
+  // Parse every transport-shaped value at fixture construction. This mock corpus is
+  // frontend-only and is deliberately separate from real-backend acceptance.
+  contracts.healthDtoSchema.parse(HEALTH_FIXTURE);
+  contracts.approvalStatusDtoSchema.parse({ approvalStatus: "pending" });
+  contracts.approvalStatusDtoSchema.parse({ approvalStatus: "approved" });
+  contracts.currentUserDtoSchema.parse(approvedUser);
+  contracts.currentUserDtoSchema.parse(adminUser);
+  for (const catalog of [emptyCatalog, validCatalog, invalidCatalog]) {
+    contracts.catalogDtoSchema.parse(catalog);
+  }
+  contracts.activePracticeSessionsDtoSchema.parse(activePracticeSessions);
+  for (const session of [activePractice, replacementPractice, submittedPractice]) {
+    contracts.practiceSessionDtoSchema.parse(session);
+  }
+  contracts.practiceResultDtoSchema.parse(practiceResult);
+  contracts.startExamResponseSchema.parse(startExam);
+  contracts.examActiveSessionDtoSchema.parse(activeExam);
+  contracts.examActiveSessionDtoSchema.parse(expiredExam);
+  contracts.getExamResponseSchema.parse(finalizedExam);
+  contracts.examResultDtoSchema.parse(examResult);
+  contracts.historyPageDtoSchema.parse({ attempts: [], nextCursor: null });
+  contracts.historyPageDtoSchema.parse(history);
+  contracts.historyTrendsDtoSchema.parse(historyTrends);
+  contracts.historyTrendsDtoSchema.parse({ certifications: [] });
+  contracts.leaderboardDtoSchema.parse({
+    certificationId,
+    certificationCode: DOP_C02_METADATA.code,
+    certificationName: DOP_C02_METADATA.name,
+    entries: [],
+  });
+  contracts.leaderboardDtoSchema.parse(leaderboard);
+  contracts.pendingUsersDtoSchema.parse(pendingUsers);
+  contracts.pendingUsersDtoSchema.parse({ users: [] });
+  contracts.importDocumentSchema.parse(importDocument);
+  contracts.dryRunImportRequestSchema.parse(dryRunRequest);
+  contracts.dryRunImportResponseSchema.parse(dryRunValid);
+  contracts.dryRunImportResponseSchema.parse(dryRunInvalid);
+  contracts.commitImportRequestSchema.parse(commitRequest);
+  contracts.commitImportResponseSchema.parse(commitResponse);
+
   return {
     health: HEALTH_FIXTURE,
     seed,
@@ -709,6 +766,7 @@ export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
       providerId,
       certificationId,
       practiceSessionId,
+      replacementPracticeSessionId,
       practiceResultId,
       activeExamSessionId,
       expiredExamSessionId,
@@ -742,7 +800,10 @@ export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
     }),
     practice: deepFreeze({
       activeSessions: activePracticeSessions,
+      activeSummary: activePracticeSummary,
       active: activePractice,
+      replacementSummary: replacementPracticeSummary,
+      replacement: replacementPractice,
       submitted: submittedPractice,
       immutableResult: practiceResult,
       retentionBoundary: {

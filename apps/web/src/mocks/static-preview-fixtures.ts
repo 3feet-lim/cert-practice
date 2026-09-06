@@ -70,7 +70,9 @@ function empty<Data>(
   copy: StaticEmptyCopy,
   data?: Data,
 ): StaticScreenFixture<Data> | StaticScreenFixture<never> {
-  return data === undefined ? { state: "empty", ...copy } : { state: "empty", ...copy, data };
+  return data === undefined
+    ? { state: "empty", ...copy }
+    : { state: "empty", ...copy, data };
 }
 
 function previewError(
@@ -144,10 +146,7 @@ export function createCertQuizStaticPreviewFixtures() {
   );
   const examResult = validated(examResultDtoSchema, source.exam.immutableResult);
 
-  const historyPopulated = validated(
-    historyPageDtoSchema,
-    source.history.populated,
-  );
+  const historyPopulated = validated(historyPageDtoSchema, source.history.populated);
   const historyEmpty = validated(historyPageDtoSchema, source.history.empty);
   const historyTrends = validated(historyTrendsDtoSchema, source.history.trends);
   const historyEmptyTrends = validated(
@@ -155,24 +154,15 @@ export function createCertQuizStaticPreviewFixtures() {
     source.history.emptyTrends,
   );
 
-  const leaderboardPopulated = validated(
-    leaderboardDtoSchema,
-    source.leaderboard.tied,
-  );
-  const leaderboardEmpty = validated(
-    leaderboardDtoSchema,
-    source.leaderboard.empty,
-  );
+  const leaderboardPopulated = validated(leaderboardDtoSchema, source.leaderboard.tied);
+  const leaderboardEmpty = validated(leaderboardDtoSchema, source.leaderboard.empty);
 
   const pendingUsers = validated(pendingUsersDtoSchema, source.admin.pendingUsers);
   const noPendingUsers = validated(
     pendingUsersDtoSchema,
     source.admin.emptyPendingUsers,
   );
-  const validImport = validated(
-    dryRunImportResponseSchema,
-    source.import.dryRunValid,
-  );
+  const validImport = validated(dryRunImportResponseSchema, source.import.dryRunValid);
   const invalidImport = validated(
     dryRunImportResponseSchema,
     source.import.dryRunInvalid,
@@ -270,10 +260,7 @@ export function createCertQuizStaticPreviewFixtures() {
       }),
       admin: success({
         kind: source.auth.admin.kind,
-        approval: validated(
-          approvalStatusDtoSchema,
-          source.auth.admin.approval,
-        ),
+        approval: validated(approvalStatusDtoSchema, source.auth.admin.approval),
         user: adminUser,
       }),
       callbackError: { state: "error", error: errors.callback },
@@ -381,8 +368,7 @@ export function createCertQuizStaticPreviewFixtures() {
   });
 }
 
-export const CERT_QUIZ_STATIC_PREVIEW_FIXTURES =
-  createCertQuizStaticPreviewFixtures();
+export const CERT_QUIZ_STATIC_PREVIEW_FIXTURES = createCertQuizStaticPreviewFixtures();
 
 export type CertQuizStaticPreviewFixtures = ReturnType<
   typeof createCertQuizStaticPreviewFixtures

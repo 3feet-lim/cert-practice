@@ -2,11 +2,15 @@ import type {
   ActiveQuestion,
   LanguageMode,
   PracticeSubmittedQuestion,
+  Uuid,
 } from "@cert-quiz/contracts";
 
 import { ChoiceField } from "../components/ChoiceField";
 import { SafeMarkdown } from "../components/SafeMarkdown";
-import { QuestionNavigator, type QuestionNavigatorItem } from "../components/StaticPresentation";
+import {
+  QuestionNavigator,
+  type QuestionNavigatorItem,
+} from "../components/StaticPresentation";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { cn } from "../lib/cn";
@@ -19,6 +23,13 @@ export interface QuestionPresenterProps {
   previousDisabled?: boolean;
   nextDisabled?: boolean;
   reveal?: boolean;
+  onChoiceChange?: (choiceId: Uuid) => void;
+  onLanguageChange?: (language: LanguageMode) => void;
+  onFlagChange?: (flagged: boolean) => void;
+  onNavigate?: (index: number) => void;
+  onSubmit?: () => void;
+  submitPending?: boolean;
+  interactionDisabled?: boolean;
 }
 
 function localizedText(
@@ -35,8 +46,8 @@ function isSubmittedQuestion(
 }
 
 /**
- * Props-only quiz visual shared by static practice and exam previews. It has no
- * event handlers or persistence; disabled controls describe each fixture state.
+ * Shared quiz visual. It stays props-driven for static previews, while optional
+ * callbacks make the same accessible controls usable by session interaction code.
  */
 export function QuestionPresenter({
   question,
@@ -46,12 +57,22 @@ export function QuestionPresenter({
   previousDisabled = false,
   nextDisabled = false,
   reveal = isSubmittedQuestion(question),
+  onChoiceChange,
+  onLanguageChange,
+  onFlagChange,
+  onNavigate,
+  onSubmit,
+  submitPending = false,
+  interactionDisabled = false,
 }: QuestionPresenterProps) {
   const isMultipleChoice = question.requiredChoiceCount > 1;
   const submitted = isSubmittedQuestion(question);
   const showReveal = reveal && submitted;
   const translated = language === "ko" && question.translationStatus === "translated";
   const selectedCount = question.selectedChoiceIds.length;
+  const currentIndex = navigatorItems.findIndex(({ state }) => state === "current");
+  const selectionDisabled =
+    interactionDisabled || submitted || onChoiceChange === undefined;
 
   return (
     <section aria-labelledby="question-presenter-title" className="grid gap-6">
@@ -70,15 +91,36 @@ export function QuestionPresenter({
           ) : null}
         </div>
         <div className="flex items-center gap-2" aria-label="문항 표시 언어">
-          <Button aria-pressed={language === "en"} disabled variant={language === "en" ? "primary" : "secondary"}>
+          <Button
+            aria-pressed={language === "en"}
+            disabled={interactionDisabled || onLanguageChange === undefined}
+            onClick={() => onLanguageChange?.("en")}
+            variant={language === "en" ? "primary" : "secondary"}
+          >
             English
           </Button>
-          <Button aria-pressed={language === "ko"} disabled variant={language === "ko" ? "primary" : "secondary"}>
+          <Button
+            aria-pressed={language === "ko"}
+            disabled={interactionDisabled || onLanguageChange === undefined}
+            onClick={() => onLanguageChange?.("ko")}
+            variant={language === "ko" ? "primary" : "secondary"}
+          >
             한국어
           </Button>
-          <Badge tone={question.flagged ? "warning" : "neutral"}>
-            {question.flagged ? "Flag" : "Flag 없음"}
-          </Badge>
+          {onFlagChange ? (
+            <Button
+              aria-pressed={question.flagged}
+              disabled={interactionDisabled}
+              onClick={() => onFlagChange(!question.flagged)}
+              variant={question.flagged ? "primary" : "secondary"}
+            >
+              {question.flagged ? "Flag" : "Flag 없음"}
+            </Button>
+          ) : (
+            <Badge tone={question.flagged ? "warning" : "neutral"}>
+              {question.flagged ? "Flag" : "Flag 없음"}
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -101,7 +143,10 @@ export function QuestionPresenter({
                 checked={selected}
                 className={cn(
                   correct && "border-success/50 bg-success-soft",
-                  showReveal && selected && !correct && "border-danger/40 bg-danger-soft",
+                  showReveal &&
+                    selected &&
+                    !correct &&
+                    "border-danger/40 bg-danger-soft",
                 )}
                 description={
                   showReveal
@@ -112,11 +157,12 @@ export function QuestionPresenter({
                         : undefined
                     : undefined
                 }
-                disabled
+                disabled={selectionDisabled}
                 key={choice.id}
                 label={localizedText(choice.text, language)}
                 name={`question-${question.id}`}
-                readOnly
+                onChange={() => onChoiceChange?.(choice.id)}
+                readOnly={selectionDisabled}
                 type={isMultipleChoice ? "checkbox" : "radio"}
                 value={choice.id}
               />
@@ -125,24 +171,75 @@ export function QuestionPresenter({
         </fieldset>
 
         {showReveal ? (
-          <section aria-labelledby="question-feedback-title" className="mt-6 rounded-lg border border-success/30 bg-success-soft p-5">
+          <section
+            aria-labelledby="question-feedback-title"
+            className="mt-6 rounded-lg border border-success/30 bg-success-soft p-5"
+          >
             <div className="flex flex-wrap items-center gap-3">
-              <h3 id="question-feedback-title" className="font-bold">제출 결과</h3>
+              <h3 id="question-feedback-title" className="font-bold">
+                제출 결과
+              </h3>
               <Badge tone={question.isCorrect ? "success" : "danger"}>
                 {question.isCorrect ? "정답" : "오답"}
               </Badge>
-              <span className="text-sm font-semibold">획득 점수: {question.earnedScore}</span>
+              <span className="text-sm font-semibold">
+                획득 점수: {question.earnedScore}
+              </span>
             </div>
             <h4 className="mt-5 font-bold">해설</h4>
-            <SafeMarkdown className="mt-2" content={localizedText(question.explanation, language)} />
+            <SafeMarkdown
+              className="mt-2"
+              content={localizedText(question.explanation, language)}
+            />
           </section>
+        ) : null}
+
+        {onSubmit && !submitted ? (
+          <div className="mt-6 flex justify-end">
+            <Button
+              disabled={
+                interactionDisabled ||
+                selectedCount !== question.requiredChoiceCount ||
+                submitPending
+              }
+              onClick={onSubmit}
+            >
+              {submitPending ? "제출 중..." : "답변 제출"}
+            </Button>
+          </div>
         ) : null}
       </article>
 
-      <QuestionNavigator items={[...navigatorItems]} />
-      <nav aria-label="이전 또는 다음 문항" className="flex flex-wrap justify-between gap-3">
-        <Button disabled={previousDisabled} variant="secondary">이전 문항</Button>
-        <Button disabled={nextDisabled}>다음 문항</Button>
+      <QuestionNavigator
+        items={[...navigatorItems]}
+        onNavigate={onNavigate ? (_item, index) => onNavigate(index) : undefined}
+      />
+      <nav
+        aria-label="이전 또는 다음 문항"
+        className="flex flex-wrap justify-between gap-3"
+      >
+        <Button
+          disabled={
+            interactionDisabled ||
+            previousDisabled ||
+            (onNavigate !== undefined && currentIndex <= 0)
+          }
+          onClick={() => onNavigate?.(currentIndex - 1)}
+          variant="secondary"
+        >
+          이전 문항
+        </Button>
+        <Button
+          disabled={
+            interactionDisabled ||
+            nextDisabled ||
+            (onNavigate !== undefined &&
+              (currentIndex < 0 || currentIndex >= navigatorItems.length - 1))
+          }
+          onClick={() => onNavigate?.(currentIndex + 1)}
+        >
+          다음 문항
+        </Button>
       </nav>
     </section>
   );

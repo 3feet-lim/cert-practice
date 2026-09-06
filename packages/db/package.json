@@ -1,0 +1,30 @@
+{
+  "name": "@cert-quiz/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc6 -b --pretty false",
+    "typecheck": "tsc6 -b --pretty false",
+    "test:repository": "vitest run --passWithNoTests",
+    "test:spike": "vitest run src/spike",
+    "spike:local": "pnpm run build && node dist/spike/cli.js --mode=local --dry-run",
+    "spike:check": "pnpm run test:spike && pnpm run spike:local"
+  },
+  "dependencies": {
+    "@cert-quiz/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "26.4.0",
+    "vitest": "4.1.11"
+  }
+}

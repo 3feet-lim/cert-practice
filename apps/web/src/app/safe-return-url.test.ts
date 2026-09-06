@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createLoginUrl, getSafeReturnUrl } from "./safe-return-url";
+import { createLoginUrl, createPendingUrl, getSafeReturnUrl } from "./safe-return-url";
 
 describe("safe return URL allowlist", () => {
   it.each([
@@ -22,9 +22,17 @@ describe("safe return URL allowlist", () => {
     expect(getSafeReturnUrl(search)).toBe("/app");
   });
 
-  it("creates login URLs only from allowlisted destinations", () => {
-    expect(createLoginUrl("https://evil.example/app")).toBe(
-      "/login?returnTo=%2Fapp",
+  it("creates pending URLs only from allowlisted destinations", () => {
+    expect(createPendingUrl("/app/history?period=recent#trend")).toBe(
+      "/pending?returnTo=%2Fapp%2Fhistory%3Fperiod%3Drecent%23trend",
     );
+    expect(createPendingUrl("")).toBe("/pending?returnTo=%2Fapp");
+    expect(createPendingUrl("https://evil.example/app")).toBe(
+      "/pending?returnTo=%2Fapp",
+    );
+  });
+
+  it("creates login URLs only from allowlisted destinations", () => {
+    expect(createLoginUrl("https://evil.example/app")).toBe("/login?returnTo=%2Fapp");
   });
 });

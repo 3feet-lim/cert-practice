@@ -243,7 +243,10 @@ function toIso(milliseconds: number): string {
   return new Date(milliseconds).toISOString();
 }
 
-function scoreQuestion(question: MockQuestionState, selected: readonly string[]): "0" | "1" {
+function scoreQuestion(
+  question: MockQuestionState,
+  selected: readonly string[],
+): "0" | "1" {
   return sameSet(question.correctChoiceIds, selected) ? "1" : "0";
 }
 
@@ -378,10 +381,7 @@ export class CertQuizMockStateMachine {
 
   assertOwner(resourceOwnerId: string, actorId: string): void {
     if (resourceOwnerId !== actorId) {
-      throw new MockStateError(
-        "ownership-denied",
-        "You cannot access this resource.",
-      );
+      throw new MockStateError("ownership-denied", "You cannot access this resource.");
     }
   }
 
@@ -432,7 +432,11 @@ export class CertQuizMockStateMachine {
     request: PatchPracticeStateRequest,
   ): PracticeStateResponse {
     this.requirePractice(practiceSessionId, actorId);
-    this.requireVersion(request.expectedVersion, this.practice.stateVersion, this.practice.id);
+    this.requireVersion(
+      request.expectedVersion,
+      this.practice.stateVersion,
+      this.practice.id,
+    );
 
     const answerQuestion = request.answer
       ? this.requireQuestion(this.practice.questions, request.answer.questionId)
@@ -452,7 +456,8 @@ export class CertQuizMockStateMachine {
     }
     if (
       request.currentIndex !== undefined &&
-      (request.currentIndex < 0 || request.currentIndex >= this.practice.questions.length)
+      (request.currentIndex < 0 ||
+        request.currentIndex >= this.practice.questions.length)
     ) {
       throw new MockStateError("validation-failed", "Current position is invalid.");
     }
@@ -494,7 +499,11 @@ export class CertQuizMockStateMachine {
       return this.practiceSubmitResponse(question);
     }
 
-    this.requireVersion(request.expectedVersion, this.practice.stateVersion, this.practice.id);
+    this.requireVersion(
+      request.expectedVersion,
+      this.practice.stateVersion,
+      this.practice.id,
+    );
     this.requireOwnedChoices(question, request.selectedChoiceIds);
     if (request.selectedChoiceIds.length !== question.requiredChoiceCount) {
       throw new MockStateError(
@@ -516,7 +525,11 @@ export class CertQuizMockStateMachine {
     question.earnedScore = scoreQuestion(question, request.selectedChoiceIds);
     this.practice.stateVersion += 1;
 
-    if (this.practice.questions.every(({ finalChoiceIds }) => finalChoiceIds !== undefined)) {
+    if (
+      this.practice.questions.every(
+        ({ finalChoiceIds }) => finalChoiceIds !== undefined,
+      )
+    ) {
       this.practice.status = "completed";
       this.practice.result ??= this.createPracticeResult();
     }
@@ -726,10 +739,16 @@ export class CertQuizMockStateMachine {
       );
     }
     if (validation.actorId !== actorId) {
-      throw new MockStateError("ownership-denied", "This validation belongs to another admin.");
+      throw new MockStateError(
+        "ownership-denied",
+        "This validation belongs to another admin.",
+      );
     }
     if (validation.used) {
-      throw new MockStateError("token-used", "This validation token has already been used.");
+      throw new MockStateError(
+        "token-used",
+        "This validation token has already been used.",
+      );
     }
     if (this.nowMilliseconds >= Date.parse(validation.expiresAt)) {
       throw new MockStateError("validation-expired", "This validation has expired.");
@@ -810,7 +829,10 @@ export class CertQuizMockStateMachine {
   }
 
   private requireExamActiveBeforeExpiry(): void {
-    if (this.exam.status !== "active" || this.nowMilliseconds >= Date.parse(this.exam.expiresAt)) {
+    if (
+      this.exam.status !== "active" ||
+      this.nowMilliseconds >= Date.parse(this.exam.expiresAt)
+    ) {
       throw new MockStateError(
         "exam-expired",
         "The exam has expired and can no longer be changed.",

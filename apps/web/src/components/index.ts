@@ -2,6 +2,7 @@ export * from "./AccessibleChart";
 export * from "./AccessibleDialog";
 export * from "./AppShell";
 export * from "./AsyncBoundary";
+export * from "./async-boundary-state";
 export * from "./ChoiceField";
 export * from "./SafeMarkdown";
 export * from "./StaticPresentation";

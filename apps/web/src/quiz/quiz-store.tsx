@@ -1,5 +1,5 @@
-import type { Uuid } from "@cert-quiz/contracts";
-import { createContext, type PropsWithChildren, useContext, useRef } from "react";
+import type { LanguageMode, Uuid } from "@cert-quiz/contracts";
+import { createContext, useContext } from "react";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 
@@ -14,6 +14,7 @@ type PendingFlagChange = {
 
 export type QuizTransientState = {
   currentIndexBySession: Record<QuizTarget, number>;
+  languageBySession: Record<QuizTarget, LanguageMode>;
   draftChoiceIdsByQuestion: Record<QuizQuestionTarget, Uuid[]>;
   pendingFlags: Record<QuizQuestionTarget, PendingFlagChange>;
   submittingTargets: Record<QuizQuestionTarget | QuizTarget, true>;
@@ -21,6 +22,7 @@ export type QuizTransientState = {
   nextFlagToken: number;
   hydrateSession: (target: QuizTarget, currentIndex: number) => void;
   setCurrentIndex: (target: QuizTarget, currentIndex: number) => void;
+  setLanguage: (target: QuizTarget, language: LanguageMode) => void;
   setDraftChoiceIds: (target: QuizQuestionTarget, choiceIds: Uuid[]) => void;
   beginFlagChange: (
     target: QuizQuestionTarget,
@@ -39,6 +41,7 @@ export type QuizTransientState = {
 
 const initialState = {
   currentIndexBySession: {},
+  languageBySession: {},
   draftChoiceIdsByQuestion: {},
   pendingFlags: {},
   submittingTargets: {},
@@ -47,6 +50,7 @@ const initialState = {
 } satisfies Pick<
   QuizTransientState,
   | "currentIndexBySession"
+  | "languageBySession"
   | "draftChoiceIdsByQuestion"
   | "pendingFlags"
   | "submittingTargets"
@@ -68,7 +72,14 @@ export function createQuizStore(): QuizStoreApi {
       })),
     setCurrentIndex: (target, currentIndex) =>
       set((state) => ({
-        currentIndexBySession: { ...state.currentIndexBySession, [target]: currentIndex },
+        currentIndexBySession: {
+          ...state.currentIndexBySession,
+          [target]: currentIndex,
+        },
+      })),
+    setLanguage: (target, language) =>
+      set((state) => ({
+        languageBySession: { ...state.languageBySession, [target]: language },
       })),
     setDraftChoiceIds: (target, choiceIds) =>
       set((state) => ({
@@ -88,8 +99,7 @@ export function createQuizStore(): QuizStoreApi {
       }));
       return token;
     },
-    isCurrentFlagChange: (target, token) =>
-      get().pendingFlags[target]?.token === token,
+    isCurrentFlagChange: (target, token) => get().pendingFlags[target]?.token === token,
     commitFlagChange: (target, token) => {
       if (!get().isCurrentFlagChange(target, token)) return;
       set((state) => {
@@ -125,20 +135,7 @@ export function createQuizStore(): QuizStoreApi {
   }));
 }
 
-const QuizStoreContext = createContext<QuizStoreApi | null>(null);
-
-export type QuizStoreProviderProps = PropsWithChildren<{ store?: QuizStoreApi }>;
-
-export function QuizStoreProvider({ store, children }: QuizStoreProviderProps) {
-  const storeRef = useRef<QuizStoreApi | null>(null);
-  storeRef.current ??= store ?? createQuizStore();
-
-  return (
-    <QuizStoreContext.Provider value={storeRef.current}>
-      {children}
-    </QuizStoreContext.Provider>
-  );
-}
+export const QuizStoreContext = createContext<QuizStoreApi | null>(null);
 
 export function useQuizStoreApi() {
   const store = useContext(QuizStoreContext);

@@ -9,7 +9,11 @@ function SafeImage({ src, alt = "", title }: ImgHTMLAttributes<HTMLImageElement>
 
   if (!isSafeUrl(src)) {
     return (
-      <span role="img" aria-label={alt || "차단된 이미지"} className="my-3 block rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+      <span
+        role="img"
+        aria-label={alt || "차단된 이미지"}
+        className="my-3 block rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+      >
         {alt || "이미지"} — 안전하지 않은 이미지 주소가 차단되었습니다.
       </span>
     );
@@ -17,7 +21,11 @@ function SafeImage({ src, alt = "", title }: ImgHTMLAttributes<HTMLImageElement>
 
   if (failed) {
     return (
-      <span role="img" aria-label={`${alt || "이미지"} 로드 실패`} className="my-3 block rounded-md border border-slate-300 bg-slate-50 p-3 text-sm text-slate-700">
+      <span
+        role="img"
+        aria-label={`${alt || "이미지"} 로드 실패`}
+        className="my-3 block rounded-md border border-slate-300 bg-slate-50 p-3 text-sm text-slate-700"
+      >
         {alt || "이미지"} — 이미지를 불러오지 못했습니다.
       </span>
     );
@@ -55,7 +63,10 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
           a({ href, children, title }) {
             if (!isSafeUrl(href)) {
               return (
-                <span className="text-slate-700 underline decoration-dotted" title="안전하지 않은 링크 주소가 차단되었습니다.">
+                <span
+                  className="text-slate-700 underline decoration-dotted"
+                  title="안전하지 않은 링크 주소가 차단되었습니다."
+                >
                   {children}
                 </span>
               );
@@ -66,7 +77,9 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
               <a
                 href={href}
                 title={title}
-                {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                {...(isExternal
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
                 className="font-medium text-indigo-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 {children}
@@ -78,13 +91,22 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
           },
           code({ className: codeClassName, children }) {
             return (
-              <code className={cn("rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.9em]", codeClassName)}>
+              <code
+                className={cn(
+                  "rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.9em]",
+                  codeClassName,
+                )}
+              >
                 {children}
               </code>
             );
           },
           pre({ children }) {
-            return <pre className="my-4 overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm text-slate-50">{children}</pre>;
+            return (
+              <pre className="my-4 overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm text-slate-50">
+                {children}
+              </pre>
+            );
           },
         }}
       >

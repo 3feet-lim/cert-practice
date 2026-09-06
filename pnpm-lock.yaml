@@ -36,6 +36,25 @@ importers:
         specifier: 8.69.0
         version: 8.69.0(@typescript/typescript6@6.0.2)(eslint@10.9.1(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
 
+  apps/api:
+    dependencies:
+      '@cert-quiz/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@cert-quiz/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@cert-quiz/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      hono:
+        specifier: 4.13.7
+        version: 4.13.7
+    devDependencies:
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(msw@2.12.10(@types/node@26.4.0)(@typescript/typescript6@6.0.2))(vite@8.2.2(@types/node@26.4.0)(jiti@2.7.0))
+
   apps/web:
     dependencies:
       '@cert-quiz/contracts':
@@ -118,6 +137,21 @@ importers:
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(msw@2.12.10(@types/node@26.4.0)(@typescript/typescript6@6.0.2))(vite@8.2.2(@types/node@26.4.0)(jiti@2.7.0))
+
+  packages/db:
+    dependencies:
+      '@cert-quiz/domain':
+        specifier: workspace:*
+        version: link:../domain
+    devDependencies:
+      '@types/node':
+        specifier: 26.4.0
+        version: 26.4.0
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@26.4.0)(@vitest/coverage-v8@4.1.11)(jsdom@30.0.1)(msw@2.12.10(@types/node@26.4.0)(@typescript/typescript6@6.0.2))(vite@8.2.2(@types/node@26.4.0)(jiti@2.7.0))
+
+  packages/domain: {}
 
   tests/e2e:
     devDependencies:
@@ -1346,6 +1380,10 @@ packages:
 
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
+
+  hono@4.13.7:
+    resolution: {integrity: sha512-c8/gF9ac8Y78/agExVocyLevgR+JlpNB444Py0FSX8pJoPdYUfUzRcXtYEYGwt6l19qIlVZPN5Mfsw9jFShmQQ==}
+    engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@6.0.0:
     resolution: {integrity: sha512-CV9TW3Y3f8/wT0BRFc1/KAVQ3TUHiXmaAb6VW9vtiMFf7SLoMd1PdAc4W3KFOFETBJUb90KatHqlsZMWV+R9Gg==}
@@ -3502,6 +3540,8 @@ snapshots:
   hermes-parser@0.25.1:
     dependencies:
       hermes-estree: 0.25.1
+
+  hono@4.13.7: {}
 
   html-encoding-sniffer@6.0.0:
     dependencies:

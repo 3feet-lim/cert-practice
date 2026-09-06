@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AccessibleChart } from "./AccessibleChart";
 import { AccessibleDialog } from "./AccessibleDialog";
@@ -23,14 +23,22 @@ import {
 } from "./StaticPresentation";
 import { Button } from "./ui/Button";
 
+afterEach(cleanup);
+
 describe("AsyncBoundary", () => {
   it("keeps editable input mounted and separates retry from next-action errors", async () => {
     const user = userEvent.setup();
     const retry = vi.fn();
     const nextAction = vi.fn();
-    const initialState: AsyncState<string> = { status: "loading", label: "이력 로딩 중" };
+    const initialState: AsyncState<string> = {
+      status: "loading",
+      label: "이력 로딩 중",
+    };
     const { rerender } = render(
-      <AsyncBoundary<string> state={initialState} persistentContent={<input aria-label="검색어" defaultValue="draft" />}>
+      <AsyncBoundary<string>
+        state={initialState}
+        persistentContent={<input aria-label="검색어" defaultValue="draft" />}
+      >
         {(value) => <p>{value}</p>}
       </AsyncBoundary>,
     );
@@ -55,7 +63,9 @@ describe("AsyncBoundary", () => {
     );
 
     expect(screen.getByRole("textbox", { name: "검색어" })).toHaveValue("보존할 입력");
-    expect(screen.queryByRole("button", { name: "설정으로 이동" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "설정으로 이동" }),
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "다시 시도" }));
     expect(retry).toHaveBeenCalledOnce();
 
@@ -108,7 +118,9 @@ describe("SafeMarkdown", () => {
   it("escapes raw HTML and renders unsafe links and images as inert text", () => {
     render(
       <SafeMarkdown
-        content={'<script>alert("xss")</script>\n\n[위험 링크](javascript:evil)\n\n![위험 이미지](data:image/png;base64,abc)\n\n[안전 링크](/help)'}
+        content={
+          '<script>alert("xss")</script>\n\n[위험 링크](javascript:evil)\n\n![위험 이미지](data:image/png;base64,abc)\n\n[안전 링크](/help)'
+        }
       />,
     );
 
@@ -118,12 +130,19 @@ describe("SafeMarkdown", () => {
     expect(screen.queryByRole("img", { name: "위험 이미지" })).toHaveTextContent(
       "안전하지 않은 이미지 주소가 차단되었습니다.",
     );
-    expect(screen.getByRole("link", { name: "안전 링크" })).toHaveAttribute("href", "/help");
+    expect(screen.getByRole("link", { name: "안전 링크" })).toHaveAttribute(
+      "href",
+      "/help",
+    );
   });
 
   it("replaces a failed safe image while preserving surrounding Markdown", () => {
     render(
-      <SafeMarkdown content={"설명 앞\n\n![아키텍처](https://images.example.test/chart.png)\n\n설명 뒤"} />,
+      <SafeMarkdown
+        content={
+          "설명 앞\n\n![아키텍처](https://images.example.test/chart.png)\n\n설명 뒤"
+        }
+      />,
     );
 
     fireEvent.error(screen.getByRole("img", { name: "아키텍처" }));
@@ -155,12 +174,17 @@ describe("accessible UI primitives", () => {
 
     expect(screen.getByRole("banner")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "주요 메뉴" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "홈" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "홈" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     expect(screen.getByRole("link", { name: "본문으로 건너뛰기" })).toHaveAttribute(
       "href",
       "#main-content",
     );
-    expect(screen.getByRole("main")).toContainElement(screen.getByRole("heading", { name: "대시보드" }));
+    expect(screen.getByRole("main")).toContainElement(
+      screen.getByRole("heading", { name: "대시보드" }),
+    );
   });
 
   it("associates radio and checkbox inputs with visible labels", async () => {
@@ -169,7 +193,12 @@ describe("accessible UI primitives", () => {
       <fieldset>
         <legend>답변</legend>
         <ChoiceField type="radio" name="answer" value="a" label="단일 답변" />
-        <ChoiceField type="checkbox" name="review" label="다시 검토" description="나중에 확인합니다." />
+        <ChoiceField
+          type="checkbox"
+          name="review"
+          label="다시 검토"
+          description="나중에 확인합니다."
+        />
       </fieldset>,
     );
 
@@ -177,9 +206,9 @@ describe("accessible UI primitives", () => {
     await user.click(screen.getByText("다시 검토"));
     expect(screen.getByRole("radio", { name: "단일 답변" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: /다시 검토/ })).toBeChecked();
-    expect(screen.getByRole("checkbox", { name: /다시 검토/ })).toHaveAccessibleDescription(
-      "나중에 확인합니다.",
-    );
+    expect(
+      screen.getByRole("checkbox", { name: /다시 검토/ }),
+    ).toHaveAccessibleDescription("나중에 확인합니다.");
   });
 
   it("opens a modal dialog with trapped focus and restores focus on close", async () => {
@@ -224,12 +253,13 @@ describe("accessible UI primitives", () => {
     );
 
     expect(screen.getByRole("img", { name: /정답률 추이/ })).toBeInTheDocument();
-    expect(screen.getByRole("table", { name: "정답률 추이 데이터" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("table", { name: "정답률 추이 데이터" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("rowheader", { name: "1회" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "80.00%" })).toBeInTheDocument();
   });
 });
-
 
 describe("static presentational components", () => {
   it("renders catalog and score summaries from props with semantic labels", () => {
@@ -246,25 +276,71 @@ describe("static presentational components", () => {
           href="/app/certifications/dop-c02"
           status={{ label: "연습 가능", tone: "success" }}
         />
-        <ScoreSummary rawScore="56.00" accuracyRate="74.67%" totalQuestions={75} passed={false} reference1000="747" />
+        <ScoreSummary
+          rawScore="56.00"
+          accuracyRate="74.67%"
+          totalQuestions={75}
+          passed={false}
+          reference1000="747"
+        />
       </>,
     );
 
-    expect(screen.getByRole("link", { name: /AWS Certified DevOps Engineer/ })).toHaveAttribute("href", "/app/certifications/dop-c02");
-    expect(screen.getByRole("region", { name: "점수 요약" })).toHaveTextContent("56.00");
+    expect(
+      screen.getByRole("link", { name: /AWS Certified DevOps Engineer/ }),
+    ).toHaveAttribute("href", "/app/certifications/dop-c02");
+    expect(screen.getByRole("region", { name: "점수 요약" })).toHaveTextContent(
+      "56.00",
+    );
     expect(screen.getByText("참고 환산값")).toBeVisible();
   });
 
   it("renders data summaries, navigators, and validation errors with accessible table and status semantics", () => {
     render(
       <>
-        <DomainBreakdown items={[{ id: "ci", name: "CI/CD", questionCount: 16, earnedScore: "12.00", accuracyRate: "75.00%" }]} />
-        <DataTable caption="응시 이력" columns={[{ id: "attempt", header: "응시", cell: (row: { id: string; name: string }) => row.name }]} rows={[{ id: "a-1", name: "1회" }]} />
-        <StatusBanner title="저장됨" message="변경 사항이 저장되었습니다." tone="success" />
-        <QuestionNavigator items={[{ number: 1, href: "#question-1", state: "current", flagged: true }, { number: 2, href: "#question-2", state: "answered" }]} />
+        <DomainBreakdown
+          items={[
+            {
+              id: "ci",
+              name: "CI/CD",
+              questionCount: 16,
+              earnedScore: "12.00",
+              accuracyRate: "75.00%",
+            },
+          ]}
+        />
+        <DataTable
+          caption="응시 이력"
+          columns={[
+            {
+              id: "attempt",
+              header: "응시",
+              cell: (row: { id: string; name: string }) => row.name,
+            },
+          ]}
+          rows={[{ id: "a-1", name: "1회" }]}
+        />
+        <StatusBanner
+          title="저장됨"
+          message="변경 사항이 저장되었습니다."
+          tone="success"
+        />
+        <QuestionNavigator
+          items={[
+            { number: 1, href: "#question-1", state: "current", flagged: true },
+            { number: 2, href: "#question-2", state: "answered" },
+          ]}
+        />
         <TimerFace remaining="02:59:30" />
-        <FileSummary name="questions.json" size="14 KiB" status="검증 완료" tone="success" />
-        <ValidationErrorList errors={[{ id: "e-1", path: "questions[0]", message: "정답이 필요합니다." }]} />
+        <FileSummary
+          name="questions.json"
+          size="14 KiB"
+          status="검증 완료"
+          tone="success"
+        />
+        <ValidationErrorList
+          errors={[{ id: "e-1", path: "questions[0]", message: "정답이 필요합니다." }]}
+        />
       </>,
     );
 
@@ -272,13 +348,18 @@ describe("static presentational components", () => {
     expect(screen.getByRole("table", { name: "응시 이력" })).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("변경 사항이 저장되었습니다.");
     expect(screen.getByRole("navigation", { name: "문항 탐색" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /1번 문항, 현재 문항, 플래그됨/ })).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.getByRole("link", { name: /1번 문항, 현재 문항, 플래그됨/ }),
+    ).toHaveAttribute("aria-current", "page");
     expect(screen.getByLabelText("남은 시간")).toHaveTextContent("02:59:30");
-    expect(screen.getByLabelText("선택한 파일 요약")).toHaveTextContent("questions.json");
-    expect(screen.getByRole("region", { name: /검증 오류/ })).toHaveTextContent("questions[0]: 정답이 필요합니다.");
+    expect(screen.getByLabelText("선택한 파일 요약")).toHaveTextContent(
+      "questions.json",
+    );
+    expect(screen.getByRole("region", { name: /검증 오류/ })).toHaveTextContent(
+      "questions[0]: 정답이 필요합니다.",
+    );
   });
 });
-
 
 describe("QuestionPresenter", () => {
   const baseQuestion = {
@@ -286,10 +367,19 @@ describe("QuestionPresenter", () => {
     id: "00000000-0000-4000-8000-000000000001",
     displayNumber: 2,
     domainName: "SDLC Automation",
-    stem: { en: "Which deployment option is correct?", ko: "어떤 배포 옵션이 올바릅니까?" },
+    stem: {
+      en: "Which deployment option is correct?",
+      ko: "어떤 배포 옵션이 올바릅니까?",
+    },
     choices: [
-      { id: "00000000-0000-4000-8000-000000000011", text: { en: "Blue/green", ko: "블루/그린" } },
-      { id: "00000000-0000-4000-8000-000000000012", text: { en: "Replace all", ko: "전체 교체" } },
+      {
+        id: "00000000-0000-4000-8000-000000000011",
+        text: { en: "Blue/green", ko: "블루/그린" },
+      },
+      {
+        id: "00000000-0000-4000-8000-000000000012",
+        text: { en: "Replace all", ko: "전체 교체" },
+      },
     ],
     requiredChoiceCount: 1,
     selectedChoiceIds: ["00000000-0000-4000-8000-000000000011"],
@@ -316,11 +406,14 @@ describe("QuestionPresenter", () => {
 
     expect(screen.getByRole("radio", { name: "블루/그린" })).toBeChecked();
     expect(screen.getByText("문항 2 / 2 · SDLC Automation")).toBeVisible();
-    expect(screen.getByRole("button", { name: "한국어" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "한국어" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(screen.getByText("Flag")).toBeVisible();
     expect(screen.getByRole("navigation", { name: "문항 탐색" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "제출 결과" })).toBeVisible();
-    expect(screen.getByText("블루/그린 배포를 사용합니다.")).toBeVisible();
+    expect(screen.getByText("배포를 사용합니다.")).toBeVisible();
   });
 
   it("uses checkboxes and reports exact required selection counts without revealing answers", () => {
@@ -340,6 +433,8 @@ describe("QuestionPresenter", () => {
 
     expect(screen.getAllByRole("checkbox")).toHaveLength(2);
     expect(screen.getByText("정확히 2개를 선택하세요. (1/2 선택)")).toBeVisible();
-    expect(screen.queryByRole("heading", { name: "제출 결과" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "제출 결과" }),
+    ).not.toBeInTheDocument();
   });
 });

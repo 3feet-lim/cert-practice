@@ -17,10 +17,7 @@ import { createCertQuizQueryClient, purgeCertQuizSession } from "../app/query-cl
 import { certQuizQueryKeys } from "../app/query-keys";
 import { createCertQuizFixtures } from "../mocks/fixtures";
 import { createQuizStore, type QuizQuestionTarget } from "./quiz-store";
-import {
-  usePracticeFlagMutation,
-  usePracticeQuestionSubmit,
-} from "./quiz-queries";
+import { usePracticeFlagMutation, usePracticeQuestionSubmit } from "./quiz-queries";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -64,7 +61,9 @@ describe("TanStack Query API state", () => {
     const api: CertQuizApi = {
       ...createUnavailableCertQuizApi(),
       getApprovalStatus: vi.fn(() => pendingApproval.promise),
-      getCatalog: vi.fn(async (): Promise<CertQuizApiResult<CatalogDto>> => retryableFailure),
+      getCatalog: vi.fn(
+        async (): Promise<CertQuizApiResult<CatalogDto>> => retryableFailure,
+      ),
     };
 
     const { result } = renderHook(
@@ -215,9 +214,9 @@ describe("TanStack Query API state", () => {
 
     await purgeCertQuizSession(queryClient, quizStore);
 
-    expect(queryClient.getQueryCache().findAll({ queryKey: certQuizQueryKeys.all })).toEqual(
-      [],
-    );
+    expect(
+      queryClient.getQueryCache().findAll({ queryKey: certQuizQueryKeys.all }),
+    ).toEqual([]);
     expect(quizStore.getState().draftChoiceIdsByQuestion).toEqual({});
     expect(quizStore.getState().submittingTargets).toEqual({});
   });

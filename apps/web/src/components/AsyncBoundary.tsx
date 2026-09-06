@@ -44,7 +44,10 @@ export function AsyncBoundary<T>({
   switch (state.status) {
     case "loading":
       requestContent = (
-        <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-5" role="status">
+        <div
+          className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-5"
+          role="status"
+        >
           <span
             aria-hidden="true"
             className="size-5 animate-spin rounded-full border-2 border-slate-300 border-t-indigo-600 motion-reduce:animate-none"
@@ -57,7 +60,10 @@ export function AsyncBoundary<T>({
       break;
     case "empty":
       requestContent = (
-        <section className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center" aria-labelledby="async-empty-title">
+        <section
+          className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center"
+          aria-labelledby="async-empty-title"
+        >
           <h2 id="async-empty-title" className="text-lg font-semibold text-slate-900">
             {state.title}
           </h2>
@@ -72,15 +78,24 @@ export function AsyncBoundary<T>({
       break;
     case "error":
       requestContent = (
-        <section className="rounded-lg border border-red-200 bg-red-50 p-5" role="alert">
-          <h2 className="font-semibold text-red-950">{state.title ?? "요청을 완료하지 못했습니다."}</h2>
+        <section
+          className="rounded-lg border border-red-200 bg-red-50 p-5"
+          role="alert"
+        >
+          <h2 className="font-semibold text-red-950">
+            {state.title ?? "요청을 완료하지 못했습니다."}
+          </h2>
           <p className="mt-1 text-sm leading-6 text-red-900">{state.message}</p>
           {state.retryable ? (
             <Button className="mt-4" variant="secondary" onClick={state.retry.onRetry}>
               {state.retry.label ?? "다시 시도"}
             </Button>
           ) : (
-            <Button className="mt-4" variant="secondary" onClick={state.nextAction.onAction}>
+            <Button
+              className="mt-4"
+              variant="secondary"
+              onClick={state.nextAction.onAction}
+            >
               {state.nextAction.label}
             </Button>
           )}

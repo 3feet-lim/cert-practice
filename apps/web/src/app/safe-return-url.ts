@@ -48,8 +48,11 @@ export function getSafeReturnUrl(search: string): string {
 }
 
 export function createLoginUrl(returnUrl: string): string {
-  const safeReturnUrl = getSafeReturnUrl(
-    `?returnTo=${encodeURIComponent(returnUrl)}`,
-  );
+  const safeReturnUrl = getSafeReturnUrl(`?returnTo=${encodeURIComponent(returnUrl)}`);
   return `/login?returnTo=${encodeURIComponent(safeReturnUrl)}`;
+}
+
+export function createPendingUrl(returnUrl: string): string {
+  const safeReturnUrl = getSafeReturnUrl(`?returnTo=${encodeURIComponent(returnUrl)}`);
+  return `/pending?returnTo=${encodeURIComponent(safeReturnUrl)}`;
 }

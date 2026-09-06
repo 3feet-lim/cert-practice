@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 
@@ -18,7 +17,7 @@ function renderApp(api = createMockCertQuizApi()) {
 }
 
 describe("App bootstrap", () => {
-  it("uses the mock API health contract to render validated workspace readiness", async () => {
+  it("renders the approved mock actor's catalog at the protected app route", async () => {
     renderApp();
 
     expect(
@@ -27,14 +26,11 @@ describe("App bootstrap", () => {
         name: "클라우드 자격증 연습을 시작하세요.",
       }),
     ).toBeInTheDocument();
-    expect(await screen.findByText("Mock health contract 연결 완료")).toBeVisible();
-    expect(
-      screen.getByText("workspace · bundle · schema validation (v1)"),
-    ).toBeVisible();
+    expect(screen.getByText("Approved Learner")).toBeVisible();
+    expect(await screen.findByRole("link", { name: "학습 모드 선택" })).toBeVisible();
   });
 
-  it("shows a safe schema-validation failure and retries the same mock adapter", async () => {
-    const user = userEvent.setup();
+  it("does not make the catalog route depend on the optional mock health payload", async () => {
     renderApp(
       createMockCertQuizApi({
         healthPayload: {
@@ -46,10 +42,12 @@ describe("App bootstrap", () => {
       }),
     );
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "The bootstrap health response failed schema validation.",
-    );
-    await user.click(screen.getByRole("button", { name: "다시 확인" }));
-    expect(await screen.findByRole("alert")).toBeVisible();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "클라우드 자격증 연습을 시작하세요.",
+      }),
+    ).toBeVisible();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

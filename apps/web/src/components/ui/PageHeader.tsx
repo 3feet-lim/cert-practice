@@ -36,11 +36,15 @@ export function PageHeader({
           {title}
         </h1>
         {description ? (
-          <p className="mt-3 text-base leading-7 text-muted-foreground">{description}</p>
+          <p className="mt-3 text-base leading-7 text-muted-foreground">
+            {description}
+          </p>
         ) : null}
         {metadata ? <div className="mt-4 flex flex-wrap gap-2">{metadata}</div> : null}
       </div>
-      {actions ? <div className="flex shrink-0 items-center gap-3">{actions}</div> : null}
+      {actions ? (
+        <div className="flex shrink-0 items-center gap-3">{actions}</div>
+      ) : null}
     </header>
   );
 }

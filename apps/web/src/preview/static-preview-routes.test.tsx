@@ -1,4 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -141,77 +142,84 @@ describe("static preview export manifest", () => {
 
 describe("fixture-only static React Router skeleton", () => {
   it.each([
-    ["/login?preview=success", "S1", "로그인", "actors.unauthenticated"],
+    ["/login?preview=success", "s1-login-success", "로그인", "actors.unauthenticated"],
     [
       "/auth/callback?preview=error",
-      "S1",
+      "s1-login-error",
       "로그인 callback 오류",
       "actors.callbackError",
     ],
-    ["/pending?preview=pending", "S1", "승인 대기", "actors.pending"],
-    ["/app?preview=loading", "S2", "홈", "presentation.loading"],
+    ["/pending?preview=pending", "s1-login-pending", "승인 대기", "actors.pending"],
+    ["/app?preview=loading", "s2-home-loading", "홈", "presentation.loading"],
     [
       "/app/certifications/dop-c02?preview=resume",
-      "S3",
+      "s3-mode-resume",
       "학습 모드 선택",
       "practice.success",
     ],
     [
       "/app/practice/practice-preview?preview=submitted",
-      "S4",
+      "s4-practice-submitted",
       "연습 모드",
       "practice.submittedFeedback",
     ],
     [
       "/app/exams/exam-preview?preview=preview",
-      "S5",
+      "s5-exam-preview",
       "모의고사",
       "presentation.examPreview",
     ],
     [
       "/app/exams/exam-preview?preview=finalized",
-      "S5",
+      "s5-exam-finalized",
       "모의고사",
       "presentation.examFinalized",
     ],
     [
       "/app/practice-results/result-preview?preview=expired",
-      "S6",
+      "s6-practice-result-expired",
       "연습 결과",
       "results.error",
     ],
     [
       "/app/attempts/attempt-preview?preview=success",
-      "S7",
+      "s7-exam-result-success",
       "모의고사 결과",
       "results.success",
     ],
-    ["/app/history?preview=empty", "S8", "모의고사 이력", "history.empty"],
+    [
+      "/app/history?preview=empty",
+      "s8-history-empty",
+      "모의고사 이력",
+      "history.empty",
+    ],
     [
       "/app/leaderboards/dop-c02?preview=private",
-      "S9",
+      "s9-leaderboard-private",
       "리더보드",
       "presentation.leaderboardPrivate",
     ],
     [
       "/app/admin/users?preview=empty",
-      "ADMIN-USERS",
+      "admin-users-empty",
       "승인 대기 사용자",
       "admin.users.empty",
     ],
     [
       "/app/admin/import?preview=commit",
-      "S10",
+      "s10-import-commit",
       "문제 은행 임포트",
       "presentation.importCommit",
     ],
   ])(
     "selects %s from only its preview query and read-only fixture registry",
-    (path, screenId, title, fixtureKey) => {
+    (path, entryId, _title, fixtureKey) => {
       const { container } = renderPreview(path);
 
-      expect(screen.getByRole("heading", { name: title })).toBeVisible();
-      expect(screen.getByText(screenId)).toBeVisible();
+      expect(container.firstElementChild).toHaveAttribute(
+        "data-preview-entry",
+        entryId,
+      );
       expect(container.firstElementChild).toHaveAttribute(
         "data-fixture-key",
         fixtureKey,
@@ -252,43 +260,54 @@ describe("fixture-only static React Router skeleton", () => {
   });
 });
 
-
 describe("S6-S9 static result, history, and leaderboard previews", () => {
   it("renders raw score, accuracy, domain review, pass status, and reference score from immutable fixtures", () => {
-    const { unmount } = renderPreview("/app/practice-results/practice-result-preview?preview=success");
+    const { unmount } = renderPreview(
+      "/app/practice-results/practice-result-preview?preview=success",
+    );
     expect(screen.getByRole("heading", { name: "연습 결과" })).toBeVisible();
-    expect(screen.getByRole("region", { name: "점수 요약" })).toHaveTextContent("60.00");
+    expect(screen.getByRole("region", { name: "점수 요약" })).toHaveTextContent(
+      "60.00",
+    );
     expect(screen.getByRole("table", { name: "도메인별 성과 표" })).toBeVisible();
     expect(screen.getByRole("table", { name: "문항 검토" })).toBeVisible();
     unmount();
 
     renderPreview("/app/attempts/attempt-preview?preview=success");
-    expect(screen.getByText("합격")).toBeVisible();
+    expect(screen.getAllByText("합격")).toHaveLength(2);
     expect(screen.getByText("참고 환산값")).toBeVisible();
     expect(screen.getByText("시간 만료 자동 제출")).toBeVisible();
   });
 
-  it("renders deterministic no-result, expired, history trend, and leaderboard privacy variants", () => {
-    const { unmount } = renderPreview("/app/practice-results/practice-result-preview?preview=empty");
+  it("renders deterministic no-result, expired, history trend, and leaderboard privacy variants", async () => {
+    const { unmount } = renderPreview(
+      "/app/practice-results/practice-result-preview?preview=empty",
+    );
     expect(screen.getByText("No result selected")).toBeVisible();
     unmount();
 
-    const expired = renderPreview("/app/practice-results/practice-result-preview?preview=expired");
+    const expired = renderPreview(
+      "/app/practice-results/practice-result-preview?preview=expired",
+    );
     expect(screen.getByRole("alert")).toHaveTextContent("no longer available");
     expired.unmount();
 
     const history = renderPreview("/app/history?preview=success");
     expect(screen.getByRole("table", { name: "모의고사 응시 이력" })).toBeVisible();
-    expect(screen.getByRole("table", { name: "DOP-C02 정답률 추이 데이터" })).toBeVisible();
+    expect(screen.getByText("표로 데이터 보기")).toBeVisible();
+    await userEvent.setup().click(screen.getByText("표로 데이터 보기"));
+    expect(
+      screen.getByRole("table", { name: "DOP-C02 정답률 추이 데이터" }),
+    ).toBeVisible();
     history.unmount();
 
     renderPreview("/app/leaderboards/dop-c02?preview=private");
     expect(screen.getByRole("checkbox", { name: "점수 공개" })).not.toBeChecked();
     expect(screen.getByText("비공개 상태")).toBeVisible();
+    expect(screen.queryByText("나")).not.toBeInTheDocument();
     expect(screen.getByText("Tie Breaker")).toBeVisible();
   });
 });
-
 
 describe("administrator static visual variants", () => {
   it("renders read-only pending-user rows and disabled approval controls", () => {
@@ -299,17 +318,23 @@ describe("administrator static visual variants", () => {
     for (const button of screen.getAllByRole("button", { name: /승인$/ })) {
       expect(button).toBeDisabled();
     }
-    expect(screen.getByText("이 정적 검토 화면의 승인 버튼은 동작하지 않습니다.")).toBeVisible();
+    expect(
+      screen.getByText("이 정적 검토 화면의 승인 버튼은 동작하지 않습니다."),
+    ).toBeVisible();
   });
 
   it("renders validation errors, unavailable summaries, commit confirmation, completion, and token-expiry states", () => {
     const invalid = renderPreview("/app/admin/import?preview=invalid");
-    expect(screen.getByText("계산 불가: The questions array is missing.")).toBeVisible();
+    expect(
+      screen.getByText("계산 불가: The questions array is missing."),
+    ).toBeVisible();
     expect(screen.getByRole("heading", { name: /검증 오류/ })).toBeVisible();
     invalid.unmount();
 
     const commit = renderPreview("/app/admin/import?preview=commit");
-    expect(screen.getByRole("dialog", { name: "문제 은행을 교체할까요?" })).toBeVisible();
+    expect(
+      screen.getByRole("dialog", { name: "문제 은행을 교체할까요?" }),
+    ).toBeVisible();
     commit.unmount();
 
     const completed = renderPreview("/app/admin/import?preview=completed");
@@ -317,6 +342,8 @@ describe("administrator static visual variants", () => {
     completed.unmount();
 
     renderPreview("/app/admin/import?preview=token-expired");
-    expect(screen.getByText("검증 토큰이 만료되었거나 이미 사용되었습니다")).toBeVisible();
+    expect(
+      screen.getByText("검증 토큰이 만료되었거나 이미 사용되었습니다"),
+    ).toBeVisible();
   });
 });

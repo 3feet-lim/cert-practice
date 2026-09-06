@@ -9,9 +9,7 @@ describe("quiz transient store", () => {
   it("keeps drafts through flag rollback and rejects a duplicate submit lock", () => {
     const store = createQuizStore();
     const state = store.getState();
-    state.setDraftChoiceIds(questionTarget, [
-      "00000000-0000-4000-8000-000000000003",
-    ]);
+    state.setDraftChoiceIds(questionTarget, ["00000000-0000-4000-8000-000000000003"]);
     const token = state.beginFlagChange(questionTarget, false, true);
 
     expect(store.getState().pendingFlags[questionTarget]).toMatchObject({

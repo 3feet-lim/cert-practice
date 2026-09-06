@@ -2,8 +2,10 @@ import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 
 import { cn } from "../lib/cn";
 
-export interface ChoiceFieldProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
+export interface ChoiceFieldProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "type"
+> {
   type: "radio" | "checkbox";
   label: ReactNode;
   description?: ReactNode;
@@ -24,7 +26,12 @@ export function ChoiceField({
   const descriptionId = description ? `${inputId}-description` : undefined;
 
   return (
-    <div className={cn("relative rounded-lg border border-slate-200 bg-white p-4", className)}>
+    <div
+      className={cn(
+        "relative rounded-lg border border-slate-200 bg-white p-4",
+        className,
+      )}
+    >
       <div className="flex items-start gap-3">
         <input
           {...inputProps}

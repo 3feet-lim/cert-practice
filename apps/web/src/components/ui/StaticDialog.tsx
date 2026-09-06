@@ -28,7 +28,10 @@ export function StaticDialog({
   const descriptionId = description ? `${id}-description` : undefined;
 
   return (
-    <div className="relative rounded-2xl bg-foreground/45 p-8" data-static-dialog-overlay="true">
+    <div
+      className="relative rounded-2xl bg-foreground/45 p-8"
+      data-static-dialog-overlay="true"
+    >
       <section
         role="dialog"
         aria-modal="true"
@@ -40,11 +43,17 @@ export function StaticDialog({
         )}
       >
         <header>
-          <h2 id={titleId} className="text-xl font-extrabold tracking-tight text-foreground">
+          <h2
+            id={titleId}
+            className="text-xl font-extrabold tracking-tight text-foreground"
+          >
             {title}
           </h2>
           {description ? (
-            <p id={descriptionId} className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p
+              id={descriptionId}
+              className="mt-2 text-sm leading-6 text-muted-foreground"
+            >
               {description}
             </p>
           ) : null}

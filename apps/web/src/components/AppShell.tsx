@@ -86,12 +86,17 @@ export function PublicShell({
       >
         <div className="min-w-0">{children}</div>
         {aside ? (
-          <aside className="rounded-2xl border border-border bg-muted p-8" aria-label="안내">
+          <aside
+            className="rounded-2xl border border-border bg-muted p-8"
+            aria-label="안내"
+          >
             {aside}
           </aside>
         ) : null}
       </main>
-      {footer ? <footer className="border-t border-border bg-card px-8 py-6">{footer}</footer> : null}
+      {footer ? (
+        <footer className="border-t border-border bg-card px-8 py-6">{footer}</footer>
+      ) : null}
     </div>
   );
 }
@@ -174,7 +179,9 @@ export function AppShell({
             productHref={productHref}
             eyebrow={productEyebrow}
           />
-          {userActions ? <div className="flex items-center gap-3">{userActions}</div> : null}
+          {userActions ? (
+            <div className="flex items-center gap-3">{userActions}</div>
+          ) : null}
         </div>
       </header>
       <div

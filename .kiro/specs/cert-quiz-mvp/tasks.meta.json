@@ -2888,6 +2888,16 @@
         "executionId": "5d4dc531-35e7-4bfe-b659-b169d4cc8f98",
         "chatSessionId": "sess_544362e7-beea-4488-8356-c1a6fc7cdbe5",
         "timestamp": 1788644807301
+      },
+      {
+        "executionId": "5bb1cf90-02ff-497b-811e-bda4916edd1f",
+        "chatSessionId": "sess_38c758c3-4a69-4cc0-a3cf-68cd137de26e",
+        "timestamp": 1788676399059
+      },
+      {
+        "executionId": "5bb1cf90-02ff-497b-811e-bda4916edd1f",
+        "chatSessionId": "sess_38c758c3-4a69-4cc0-a3cf-68cd137de26e",
+        "timestamp": 1788676670183
       }
     ],
     "6.5 auth/catalog/admin/import mock-backed component·browser test를 작성한다": [
@@ -2895,6 +2905,11 @@
         "executionId": "5d4dc531-35e7-4bfe-b659-b169d4cc8f98",
         "chatSessionId": "sess_544362e7-beea-4488-8356-c1a6fc7cdbe5",
         "timestamp": 1788644807335
+      },
+      {
+        "executionId": "5bb1cf90-02ff-497b-811e-bda4916edd1f",
+        "chatSessionId": "sess_38c758c3-4a69-4cc0-a3cf-68cd137de26e",
+        "timestamp": 1788676676768
       }
     ],
     "6.6 Auth/catalog/admin/import checkpoint - slice 검증": [

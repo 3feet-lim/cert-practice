@@ -13,8 +13,10 @@ const variants: Record<ButtonVariant, string> = {
     "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover disabled:bg-muted-foreground",
   secondary:
     "border border-border bg-card text-foreground shadow-sm hover:bg-muted disabled:text-muted-foreground",
-  danger: "bg-danger text-white shadow-sm hover:bg-danger-hover disabled:bg-muted-foreground",
-  ghost: "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground disabled:text-muted-foreground",
+  danger:
+    "bg-danger text-white shadow-sm hover:bg-danger-hover disabled:bg-muted-foreground",
+  ghost:
+    "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground disabled:text-muted-foreground",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

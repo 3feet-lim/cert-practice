@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Link,
   Navigate,
@@ -11,12 +11,20 @@ import {
 } from "react-router-dom";
 
 import type { CertQuizApiError } from "../api/port";
-import { useCertQuizApi } from "../api/useCertQuizApi";
+import { ImportPage } from "../admin/ImportPage";
+import { PendingUsersPage } from "../admin/PendingUsersPage";
 import {
-  createAdminRequiredError,
-  useAuthSession,
-} from "./auth-session-context";
-import { createLoginUrl, getSafeReturnUrl } from "./safe-return-url";
+  AttemptResultPage,
+  HistoryPage,
+  LeaderboardPage,
+  PracticeResultPage,
+} from "./ResultHistoryLeaderboardPages";
+import { CatalogHomePage, ModeSelectPage } from "./CatalogModePages";
+import { ExamPage } from "../quiz/ExamPage";
+import { PracticePage } from "../quiz/PracticePage";
+import { createAdminRequiredError, useAuthSession } from "./auth-session-context";
+import { useMockAuthCallback } from "./mock-auth-capability";
+import { createLoginUrl, createPendingUrl, getSafeReturnUrl } from "./safe-return-url";
 
 function LoadingRoute() {
   return (
@@ -27,7 +35,6 @@ function LoadingRoute() {
     </main>
   );
 }
-
 function CanonicalError({
   error,
   onRetry,
@@ -55,33 +62,32 @@ function CanonicalError({
     </main>
   );
 }
-
 function RootRedirect() {
   const { state, refresh } = useAuthSession();
-
   if (state.status === "loading") return <LoadingRoute />;
   if (state.status === "unauthenticated") return <Navigate replace to="/login" />;
-  if (state.status === "pending") return <Navigate replace to="/pending" />;
+  if (state.status === "pending") {
+    return <Navigate replace to={createPendingUrl("/app")} />;
+  }
   if (state.status === "error") {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
   return <Navigate replace to="/app" />;
 }
-
 function LoginRoute() {
   const { state, refresh } = useAuthSession();
   const [searchParams] = useSearchParams();
-  const returnUrl = getSafeReturnUrl(`?returnTo=${encodeURIComponent(
-    searchParams.get("returnTo") ?? "",
-  )}`);
-
+  const returnUrl = getSafeReturnUrl(
+    `?returnTo=${encodeURIComponent(searchParams.get("returnTo") ?? "")}`,
+  );
   if (state.status === "loading") return <LoadingRoute />;
-  if (state.status === "pending") return <Navigate replace to="/pending" />;
+  if (state.status === "pending") {
+    return <Navigate replace to={createPendingUrl(returnUrl)} />;
+  }
   if (state.status === "approved") return <Navigate replace to={returnUrl} />;
   if (state.status === "error") {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
-
   return (
     <main className="app-shell">
       <section className="route-card" aria-labelledby="login-title" data-screen="S1">
@@ -100,14 +106,26 @@ function LoginRoute() {
     </main>
   );
 }
-
 function CallbackRoute() {
   const { state, refresh } = useAuthSession();
+  const mockAuthCallback = useMockAuthCallback();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const returnUrl = getSafeReturnUrl(location.search);
+  const hasCallbackError = searchParams.has("error");
 
-  if (searchParams.has("error")) {
+  useEffect(() => {
+    if (
+      !hasCallbackError &&
+      mockAuthCallback !== undefined &&
+      state.status === "unauthenticated"
+    ) {
+      mockAuthCallback.completeMockLogin();
+      void refresh();
+    }
+  }, [hasCallbackError, mockAuthCallback, refresh, state.status]);
+
+  if (hasCallbackError) {
     const error: CertQuizApiError = {
       code: "authentication-invalid",
       message: "로그인을 완료하지 못했습니다.",
@@ -117,14 +135,19 @@ function CallbackRoute() {
     };
     return <CanonicalError error={error} />;
   }
-
-  if (state.status === "loading") return <LoadingRoute />;
-  if (state.status === "pending") return <Navigate replace to="/pending" />;
+  if (
+    state.status === "loading" ||
+    (mockAuthCallback !== undefined && state.status === "unauthenticated")
+  ) {
+    return <LoadingRoute />;
+  }
+  if (state.status === "pending") {
+    return <Navigate replace to={createPendingUrl(returnUrl)} />;
+  }
   if (state.status === "approved") return <Navigate replace to={returnUrl} />;
   if (state.status === "error") {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
-
   const callbackError: CertQuizApiError = {
     code: "authentication-invalid",
     message: "로그인 세션을 확인할 수 없습니다.",
@@ -134,17 +157,18 @@ function CallbackRoute() {
   };
   return <CanonicalError error={callbackError} />;
 }
-
 function PendingRoute() {
   const { state, refresh } = useAuthSession();
-
+  const location = useLocation();
+  const returnUrl = getSafeReturnUrl(location.search);
   if (state.status === "loading") return <LoadingRoute />;
-  if (state.status === "unauthenticated") return <Navigate replace to="/login" />;
-  if (state.status === "approved") return <Navigate replace to="/app" />;
+  if (state.status === "unauthenticated") {
+    return <Navigate replace to={createLoginUrl(returnUrl)} />;
+  }
+  if (state.status === "approved") return <Navigate replace to={returnUrl} />;
   if (state.status === "error") {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
-
   return (
     <main className="app-shell">
       <section className="route-card" aria-labelledby="pending-title">
@@ -160,40 +184,36 @@ function PendingRoute() {
     </main>
   );
 }
-
 /** UX navigation only. API authentication and authorization remain canonical. */
 function ApprovedRouteGuard() {
   const { state, refresh } = useAuthSession();
   const location = useLocation();
-
   if (state.status === "loading") return <LoadingRoute />;
   if (state.status === "unauthenticated") {
     const returnUrl = `${location.pathname}${location.search}${location.hash}`;
     return <Navigate replace to={createLoginUrl(returnUrl)} />;
   }
-  if (state.status === "pending") return <Navigate replace to="/pending" />;
+  if (state.status === "pending") {
+    const returnUrl = `${location.pathname}${location.search}${location.hash}`;
+    return <Navigate replace to={createPendingUrl(returnUrl)} />;
+  }
   if (state.status === "error") {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
-
   return <Outlet />;
 }
-
 /** UX role hint only; every admin API still enforces the server-side role. */
 function AdminRouteGuard() {
   const { state } = useAuthSession();
-
   if (state.status !== "approved") return <LoadingRoute />;
   if (state.user.role !== "admin") {
     return <CanonicalError error={createAdminRequiredError()} />;
   }
   return <Outlet />;
 }
-
 function ApprovedLayout() {
-  const { state } = useAuthSession();
+  const { state, logout } = useAuthSession();
   if (state.status !== "approved") return null;
-
   return (
     <div className="approved-shell">
       <header className="app-header">
@@ -209,6 +229,9 @@ function ApprovedLayout() {
           ) : null}
         </nav>
         <span>{state.user.displayName}</span>
+        <button type="button" onClick={() => void logout()}>
+          로그아웃
+        </button>
       </header>
       <main className="route-content">
         <Outlet />
@@ -216,7 +239,6 @@ function ApprovedLayout() {
     </div>
   );
 }
-
 function AdminLayout() {
   return (
     <section aria-labelledby="admin-layout-title">
@@ -230,79 +252,6 @@ function AdminLayout() {
     </section>
   );
 }
-
-function ScreenPlaceholder({ screen, title }: { screen: string; title: string }) {
-  return (
-    <section className="route-card" aria-labelledby={`${screen}-title`} data-screen={screen}>
-      <p className="eyebrow">{screen}</p>
-      <h1 id={`${screen}-title`}>{title}</h1>
-      <p className="description">이 화면은 typed API port를 통해 데이터를 불러옵니다.</p>
-    </section>
-  );
-}
-
-type BootstrapState =
-  | { status: "loading" }
-  | { status: "ready"; contractVersion: string }
-  | { status: "error"; message: string };
-
-function HomePage() {
-  const api = useCertQuizApi();
-  const [bootstrap, setBootstrap] = useState<BootstrapState>({ status: "loading" });
-
-  const checkHealth = useCallback(async () => {
-    setBootstrap({ status: "loading" });
-    const result = await api.getHealth();
-    setBootstrap(
-      result.ok
-        ? { status: "ready", contractVersion: result.data.contractVersion }
-        : { status: "error", message: result.error.message },
-    );
-  }, [api]);
-
-  useEffect(() => {
-    let active = true;
-    void api.getHealth().then((result) => {
-      if (active) {
-        setBootstrap(
-          result.ok
-            ? { status: "ready", contractVersion: result.data.contractVersion }
-            : { status: "error", message: result.error.message },
-        );
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [api]);
-
-  return (
-    <section className="welcome-card" aria-labelledby="welcome-title" data-screen="S2">
-      <p className="eyebrow">CERTQUIZ</p>
-      <h1 id="welcome-title">클라우드 자격증 연습을 시작하세요.</h1>
-      <p className="description">사용 가능한 자격증을 Provider별로 확인할 수 있습니다.</p>
-      {bootstrap.status === "loading" ? (
-        <p className="bootstrap-status" role="status">
-          프론트엔드 bootstrap을 확인하는 중입니다.
-        </p>
-      ) : bootstrap.status === "ready" ? (
-        <div className="bootstrap-status bootstrap-status--ready" role="status">
-          <strong>Mock health contract 연결 완료</strong>
-          <span>workspace · bundle · schema validation ({bootstrap.contractVersion})</span>
-        </div>
-      ) : (
-        <div className="bootstrap-status bootstrap-status--error" role="alert">
-          <strong>Bootstrap 확인에 실패했습니다.</strong>
-          <span>{bootstrap.message}</span>
-          <button type="button" onClick={() => void checkHealth()}>
-            다시 확인
-          </button>
-        </div>
-      )}
-    </section>
-  );
-}
-
 function NotFoundRoute() {
   return (
     <main className="app-shell">
@@ -313,7 +262,6 @@ function NotFoundRoute() {
     </main>
   );
 }
-
 export function AppRoutes() {
   return (
     <Routes>
@@ -323,47 +271,18 @@ export function AppRoutes() {
       <Route path="pending" element={<PendingRoute />} />
       <Route element={<ApprovedRouteGuard />}>
         <Route path="app" element={<ApprovedLayout />}>
-          <Route index element={<HomePage />} />
-          <Route
-            path="certifications/:id"
-            element={<ScreenPlaceholder screen="S3" title="학습 모드 선택" />}
-          />
-          <Route
-            path="practice/:sessionId"
-            element={<ScreenPlaceholder screen="S4" title="연습 모드" />}
-          />
-          <Route
-            path="exams/:sessionId"
-            element={<ScreenPlaceholder screen="S5" title="모의고사" />}
-          />
-          <Route
-            path="practice-results/:id"
-            element={<ScreenPlaceholder screen="S6" title="연습 결과" />}
-          />
-          <Route
-            path="attempts/:id"
-            element={<ScreenPlaceholder screen="S7" title="모의고사 결과" />}
-          />
-          <Route
-            path="history"
-            element={<ScreenPlaceholder screen="S8" title="모의고사 이력" />}
-          />
-          <Route
-            path="leaderboards/:certId?"
-            element={<ScreenPlaceholder screen="S9" title="리더보드" />}
-          />
+          <Route index element={<CatalogHomePage />} />
+          <Route path="certifications/:id" element={<ModeSelectPage />} />
+          <Route path="practice/:sessionId" element={<PracticePage />} />
+          <Route path="exams/:sessionId" element={<ExamPage />} />
+          <Route path="practice-results/:id" element={<PracticeResultPage />} />
+          <Route path="attempts/:id" element={<AttemptResultPage />} />
+          <Route path="history" element={<HistoryPage />} />
+          <Route path="leaderboards/:certId?" element={<LeaderboardPage />} />
           <Route element={<AdminRouteGuard />}>
             <Route path="admin" element={<AdminLayout />}>
-              <Route
-                path="users"
-                element={
-                  <ScreenPlaceholder screen="ADMIN-USERS" title="승인 대기 사용자" />
-                }
-              />
-              <Route
-                path="import"
-                element={<ScreenPlaceholder screen="S10" title="문제 은행 임포트" />}
-              />
+              <Route path="users" element={<PendingUsersPage />} />
+              <Route path="import" element={<ImportPage />} />
             </Route>
           </Route>
         </Route>

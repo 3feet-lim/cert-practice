@@ -100,15 +100,27 @@ describe("presentational UI primitives", () => {
   it("renders explicit loading, empty, error, and success panels", () => {
     render(
       <div>
-        <StatePanel status="loading" title="불러오는 중" message="이력 데이터를 확인합니다." />
-        <StatePanel status="empty" title="결과 없음" message="적용된 조건에 결과가 없습니다." />
+        <StatePanel
+          status="loading"
+          title="불러오는 중"
+          message="이력 데이터를 확인합니다."
+        />
+        <StatePanel
+          status="empty"
+          title="결과 없음"
+          message="적용된 조건에 결과가 없습니다."
+        />
         <StatePanel
           status="error"
           title="조회 실패"
           message="보호 정보가 없는 안전한 오류입니다."
           action={<Button variant="secondary">다시 시도</Button>}
         />
-        <StatePanel status="success" title="완료" message="정적 검토가 준비되었습니다." />
+        <StatePanel
+          status="success"
+          title="완료"
+          message="정적 검토가 준비되었습니다."
+        />
       </div>,
     );
 
@@ -116,7 +128,9 @@ describe("presentational UI primitives", () => {
       "aria-busy",
       "true",
     );
-    expect(document.querySelector('[data-state="empty"]')).toHaveTextContent("결과 없음");
+    expect(document.querySelector('[data-state="empty"]')).toHaveTextContent(
+      "결과 없음",
+    );
     expect(screen.getByRole("alert")).toHaveTextContent("보호 정보가 없는 안전한 오류");
     expect(screen.getByRole("button", { name: "다시 시도" })).toBeVisible();
     expect(document.querySelector('[data-state="success"]')).toHaveTextContent("완료");
@@ -146,7 +160,11 @@ describe("presentational UI primitives", () => {
           description="하나를 선택합니다."
           error="필수 항목입니다."
           required
-          control={<select className={formControlClassName}><option value="">선택</option></select>}
+          control={
+            <select className={formControlClassName}>
+              <option value="">선택</option>
+            </select>
+          }
         />
         <Table aria-label="자격증 목록">
           <TableCaption>현재 제공되는 자격증</TableCaption>
@@ -176,17 +194,17 @@ describe("presentational UI primitives", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "학습 홈" })).toBeVisible();
     expect(screen.getByText("준비됨")).toBeVisible();
-    expect(screen.getByRole("combobox", { name: /자격증/ })).toHaveAccessibleDescription(
-      "하나를 선택합니다. 필수 항목입니다.",
-    );
+    expect(
+      screen.getByRole("combobox", { name: /자격증/ }),
+    ).toHaveAccessibleDescription("하나를 선택합니다. 필수 항목입니다.");
     expect(screen.getByRole("combobox", { name: /자격증/ })).toHaveAttribute(
       "aria-invalid",
       "true",
     );
     const table = screen.getByRole("table", { name: "자격증 목록" });
     expect(within(table).getByRole("rowheader", { name: "DOP-C02" })).toBeVisible();
-    expect(screen.getByRole("dialog", { name: "모의고사를 시작할까요?" })).toHaveAccessibleDescription(
-      "이 화면은 정적 확인 표현입니다.",
-    );
+    expect(
+      screen.getByRole("dialog", { name: "모의고사를 시작할까요?" }),
+    ).toHaveAccessibleDescription("이 화면은 정적 확인 표현입니다.");
   });
 });

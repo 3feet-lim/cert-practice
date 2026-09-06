@@ -47,7 +47,10 @@ export function AccessibleDialog({
               <Button variant="secondary">{cancelLabel}</Button>
             </DialogPrimitive.Close>
             {confirmAction ? (
-              <Button disabled={confirmAction.disabled} onClick={confirmAction.onConfirm}>
+              <Button
+                disabled={confirmAction.disabled}
+                onClick={confirmAction.onConfirm}
+              >
                 {confirmAction.label}
               </Button>
             ) : null}

@@ -4,5 +4,5 @@ packages:
   - tests/*
   - infra/*
 allowBuilds:
-  '@tailwindcss/oxide': true
+  "@tailwindcss/oxide": true
   msw: false

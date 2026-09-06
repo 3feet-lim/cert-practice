@@ -22,7 +22,10 @@ test("static preview export emits deterministic, self-contained S1-S10 documents
       assert.match(gallery, new RegExp(`href="${entry.outputPath}"`));
       assert.match(document, new RegExp(`data-static-fixture="${entry.fixtureKey}"`));
       assert.match(document, /href="\.\.\/\.\.\/index\.html"/);
-      assert.doesNotMatch(document, /<(?:script|iframe|form)\b|\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/i);
+      assert.doesNotMatch(
+        document,
+        /<(?:script|iframe|form)\b|\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/i,
+      );
       assert.doesNotMatch(document, /\b(?:src|href)=["'](?:https?:|\/\/|\/|data:)/i);
     }
   } finally {

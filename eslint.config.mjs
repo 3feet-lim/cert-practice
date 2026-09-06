@@ -42,6 +42,70 @@ const webBoundaryRules = {
   ],
 };
 
+const domainBoundaryRules = {
+  "no-restricted-imports": [
+    "error",
+    {
+      patterns: [
+        {
+          regex: "^react(?:/|$)|^react-dom(?:/|$)",
+          message: "Domain code must not depend on React.",
+        },
+        {
+          regex: "^hono(?:/|$)|^@hono(?:/|$)",
+          message: "Domain code must not depend on HTTP framework implementations.",
+        },
+        {
+          regex: "^@aws-sdk(?:/|$)|^aws-sdk$",
+          message: "Domain code must not depend on AWS SDK implementations.",
+        },
+        {
+          regex:
+            "^(?:pg|postgres|mysql2|better-sqlite3|sqlite3|drizzle-orm|kysely|sequelize|prisma|@prisma/client)(?:/|$)",
+          message: "Domain code must not depend on SQL drivers or ORMs.",
+        },
+      ],
+    },
+  ],
+};
+
+const dbBoundaryRules = {
+  "no-restricted-imports": [
+    "error",
+    {
+      patterns: [
+        {
+          regex: "^@cert-quiz/(?:api|web)(?:/|$)",
+          message: "Database code must not depend on application or web code.",
+        },
+        {
+          regex: "(?:^|/)apps/(?:api|web)(?:/|$)",
+          message: "Database code must not import application or web source paths.",
+        },
+      ],
+    },
+  ],
+};
+
+const apiBoundaryRules = {
+  "no-restricted-imports": [
+    "error",
+    {
+      patterns: [
+        {
+          regex: "^@cert-quiz/(?!contracts(?:/|$)|domain(?:/|$)|db(?:/|$))",
+          message:
+            "API code may cross workspace boundaries only through contracts, domain, and db.",
+        },
+        {
+          regex: "(?:^|/)apps/web(?:/|$)",
+          message: "API code must not import web source paths.",
+        },
+      ],
+    },
+  ],
+};
+
 export default tseslint.config(
   {
     ignores: [
@@ -81,6 +145,18 @@ export default tseslint.config(
     rules: {
       "no-restricted-globals": "off",
     },
+  },
+  {
+    files: ["packages/domain/src/**/*.ts"],
+    rules: domainBoundaryRules,
+  },
+  {
+    files: ["packages/db/src/**/*.ts"],
+    rules: dbBoundaryRules,
+  },
+  {
+    files: ["apps/api/src/**/*.ts"],
+    rules: apiBoundaryRules,
   },
   prettier,
 );

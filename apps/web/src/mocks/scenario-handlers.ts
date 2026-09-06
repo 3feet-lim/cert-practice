@@ -180,8 +180,10 @@ export function createMockScenarioHandlers(
         "Return to your own sessions.",
       );
     }
-    if ((scenario === "role-denial" && kind === "admin") ||
-        (kind === "admin" && actorRole(request) !== "admin")) {
+    if (
+      (scenario === "role-denial" && kind === "admin") ||
+      (kind === "admin" && actorRole(request) !== "admin")
+    ) {
       return errorResponse(
         403,
         "admin-required",
@@ -278,16 +280,19 @@ export function createMockScenarioHandlers(
           ),
         ),
       ),
-      http.patch("*/v1/practice/:practiceSessionId/state", async ({ params, request }) => {
-        const body = (await request.json()) as PatchPracticeStateRequest;
-        return execute("save", request, () =>
-          state.patchPractice(
-            parameter(params.practiceSessionId),
-            actorId(request),
-            body,
-          ),
-        );
-      }),
+      http.patch(
+        "*/v1/practice/:practiceSessionId/state",
+        async ({ params, request }) => {
+          const body = (await request.json()) as PatchPracticeStateRequest;
+          return execute("save", request, () =>
+            state.patchPractice(
+              parameter(params.practiceSessionId),
+              actorId(request),
+              body,
+            ),
+          );
+        },
+      ),
       http.post(
         "*/v1/practice/:practiceSessionId/questions/:questionId/submit",
         async ({ params, request }) => {
@@ -313,15 +318,13 @@ export function createMockScenarioHandlers(
           state.patchExam(parameter(params.examSessionId), actorId(request), body),
         );
       }),
-      http.post(
-        "*/v1/exams/:examSessionId/submission-preview",
-        ({ params, request }) =>
-          execute("owner", request, () =>
-            state.getExamSubmissionPreview(
-              parameter(params.examSessionId),
-              actorId(request),
-            ),
+      http.post("*/v1/exams/:examSessionId/submission-preview", ({ params, request }) =>
+        execute("owner", request, () =>
+          state.getExamSubmissionPreview(
+            parameter(params.examSessionId),
+            actorId(request),
           ),
+        ),
       ),
       http.post("*/v1/exams/:examSessionId/submit", ({ params, request }) =>
         execute("submit", request, () =>
