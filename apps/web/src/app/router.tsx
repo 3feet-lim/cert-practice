@@ -13,15 +13,16 @@ import {
 import type { CertQuizApiError } from "../api/port";
 import { ImportPage } from "../admin/ImportPage";
 import { PendingUsersPage } from "../admin/PendingUsersPage";
+import { Button } from "../components/ui/Button";
+import { ExamPage } from "../quiz/ExamPage";
+import { PracticePage } from "../quiz/PracticePage";
+import { CatalogHomePage, ModeSelectPage } from "./CatalogModePages";
 import {
   AttemptResultPage,
   HistoryPage,
   LeaderboardPage,
   PracticeResultPage,
 } from "./ResultHistoryLeaderboardPages";
-import { CatalogHomePage, ModeSelectPage } from "./CatalogModePages";
-import { ExamPage } from "../quiz/ExamPage";
-import { PracticePage } from "../quiz/PracticePage";
 import { createAdminRequiredError, useAuthSession } from "./auth-session-context";
 import { useMockAuthCallback } from "./mock-auth-capability";
 import { createLoginUrl, createPendingUrl, getSafeReturnUrl } from "./safe-return-url";
@@ -211,29 +212,78 @@ function AdminRouteGuard() {
   }
   return <Outlet />;
 }
+
+const navigationLinkClass = ({ isActive }: { isActive: boolean }) =>
+  [
+    "rounded-md px-3 py-2 text-sm font-semibold transition-colors",
+    "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
+    isActive
+      ? "bg-primary-soft text-primary"
+      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+  ].join(" ");
+
 function ApprovedLayout() {
   const { state, logout } = useAuthSession();
   if (state.status !== "approved") return null;
+
   return (
-    <div className="approved-shell">
-      <header className="app-header">
-        <Link className="brand-link" to="/app">
-          CERTQUIZ
-        </Link>
-        <nav aria-label="주요 메뉴">
-          <NavLink to="/app">홈</NavLink>
-          <NavLink to="/app/history">이력</NavLink>
-          <NavLink to="/app/leaderboards">리더보드</NavLink>
-          {state.user.role === "admin" ? (
-            <NavLink to="/app/admin/users">관리</NavLink>
-          ) : null}
-        </nav>
-        <span>{state.user.displayName}</span>
-        <button type="button" onClick={() => void logout()}>
-          로그아웃
-        </button>
+    <div className="min-h-screen bg-background text-foreground">
+      <a
+        href="#main-content"
+        className="fixed left-4 top-4 z-50 -translate-y-24 rounded-md bg-primary px-4 py-2 font-semibold text-primary-foreground shadow-card focus:translate-y-0 focus:outline-none focus:ring-3 focus:ring-focus/30"
+      >
+        본문으로 건너뛰기
+      </a>
+      <header className="border-b border-border bg-card shadow-sm" role="banner">
+        <div className="mx-auto flex min-h-18 max-w-screen-2xl items-center gap-8 px-8">
+          <Link
+            className="inline-flex items-center gap-3 rounded-md text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30"
+            to="/app"
+          >
+            <span
+              aria-hidden="true"
+              className="grid size-9 place-items-center rounded-lg bg-primary text-sm font-black text-primary-foreground shadow-sm"
+            >
+              CQ
+            </span>
+            <span className="grid leading-tight">
+              <span className="text-base font-extrabold tracking-tight">CertQuiz</span>
+              <span className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                Certification practice
+              </span>
+            </span>
+          </Link>
+          <nav aria-label="주요 메뉴" className="flex items-center gap-1">
+            <NavLink className={navigationLinkClass} end to="/app">
+              홈
+            </NavLink>
+            <NavLink className={navigationLinkClass} to="/app/history">
+              이력
+            </NavLink>
+            <NavLink className={navigationLinkClass} to="/app/leaderboards">
+              리더보드
+            </NavLink>
+            {state.user.role === "admin" ? (
+              <NavLink className={navigationLinkClass} to="/app/admin/users">
+                관리
+              </NavLink>
+            ) : null}
+          </nav>
+          <div className="ml-auto flex items-center gap-3">
+            <span className="text-sm font-medium text-muted-foreground">
+              {state.user.displayName}
+            </span>
+            <Button variant="ghost" onClick={() => void logout()}>
+              로그아웃
+            </Button>
+          </div>
+        </div>
       </header>
-      <main className="route-content">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto w-full max-w-screen-2xl px-8 py-10 focus:outline-none"
+      >
         <Outlet />
       </main>
     </div>
@@ -241,12 +291,25 @@ function ApprovedLayout() {
 }
 function AdminLayout() {
   return (
-    <section aria-labelledby="admin-layout-title">
-      <p className="eyebrow">ADMIN</p>
-      <h1 id="admin-layout-title">관리자 콘솔</h1>
-      <nav aria-label="관리 메뉴" className="sub-navigation">
-        <NavLink to="/app/admin/users">승인 대기 사용자</NavLink>
-        <NavLink to="/app/admin/import">문제 은행 임포트</NavLink>
+    <section aria-labelledby="admin-layout-title" className="grid gap-6">
+      <div>
+        <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
+          Admin
+        </p>
+        <h1 id="admin-layout-title" className="text-3xl">
+          관리자 콘솔
+        </h1>
+      </div>
+      <nav
+        aria-label="관리 메뉴"
+        className="flex items-center gap-1 border-b border-border pb-4"
+      >
+        <NavLink className={navigationLinkClass} to="/app/admin/users">
+          승인 대기 사용자
+        </NavLink>
+        <NavLink className={navigationLinkClass} to="/app/admin/import">
+          문제 은행 임포트
+        </NavLink>
       </nav>
       <Outlet />
     </section>
