@@ -1,3 +1,4 @@
+export * from "./database-adapter.js";
 export * from "./spike/adapter-selection.js";
 export * from "./spike/local-model-executor.js";
 export * from "./spike/migrations.js";

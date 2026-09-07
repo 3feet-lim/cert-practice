@@ -1,26 +1,42 @@
 # ADR-0001: Database adapter selection
 
-- **Status:** pending
-- **Report SHA-256:** `350ae2eb547469de929272a276a0f61a39d38e6b813596467c4c904829b0db10`
+- **Status:** accepted
+- **Decision:** dsql
+- **Region:** ap-northeast-2
+- **Report SHA-256:** `d5dff7d56c5e1adeaf9e12a8017f866aab2e86ea2f74a269667023bba0eb8107`
 
-## Local preflight scope
+## Context
 
-This report ran only deterministic manifest and in-memory model checks. It did not attempt network access, AWS credential access, TLS, IAM token generation, or a database connection.
+The Task 9 spike ran against the live dev Aurora DSQL endpoint using the official AWS node-postgres connector, IAM authentication, TLS certificate and hostname validation, versioned candidate DDL, representative query plans, latency samples, and barrier/fault-injection atomicity probes.
 
-## Required live evidence
+The connector gate combines the local pool lifecycle probe with deployed Lambda evidence: a warm execution environment reused the same backend connection, remained active beyond the 15-minute token window, then successfully opened a fresh IAM-authenticated TLS connection after forced eviction. The temporary Lambda, IAM role, and log group were deleted after evidence capture.
 
-- `connector-lifecycle`: not_run — Requires approved IAM, TLS, and Lambda freeze/thaw target execution.
-- `sql-capabilities`: not_run — Requires a target DSQL migration transaction and DDL inspection.
-- `migration-replay`: not_run — Requires repeated migration and recovery runs against the target engine.
-- `history-query`: not_run — Requires EXPLAIN ANALYZE against representative target data.
-- `leaderboard-query`: not_run — Requires window-function query plan and latency evidence on the target engine.
-- `retention-cleanup-query`: not_run — Requires bounded delete plan and latency evidence on the target engine.
-- `profile-get-or-create`: not_run — Requires concurrent target transactions and rollback observation.
-- `active-practice-slot`: not_run — Requires concurrent target transactions and active-slot constraint evidence.
-- `practice-replace`: not_run — Requires target transaction rollback after snapshot insertion failure.
-- `exam-finalize`: not_run — Requires manual/expiry target concurrency and idempotent attempt evidence.
-- `import-head-switch`: not_run — Requires target transaction rollback and staged revision visibility evidence.
+## Gates
+
+| Gate | Result |
+|---|---|
+| migrationRepeatability | pass |
+| connectorLifecycle | pass |
+| sqlCapabilities | pass |
+| queryPlans | pass |
+| p95Latency | pass |
+| atomicity | pass |
+| overall | pass |
+
+## Query evidence
+
+| Query | Expected index | Index used | Contract verified | Workload | p95 ms | Limit ms |
+|---|---|---:|---:|---|---:|---:|
+| history-query | spike_attempt_history_cursor | true | true | 12000 attempts / 1200 retention rows | 58.26 | 500 |
+| leaderboard-query | spike_attempt_leaderboard_candidates | true | true | 12000 attempts / 1200 retention rows | 206.29 | 500 |
+| retention-cleanup-query | spike_practice_result_expiry | true | true | 12000 attempts / 1200 retention rows | 29 | 500 |
+
+## Cost estimate
+
+Aurora DSQL is usage-based and scales database activity to zero when idle. The current AWS free tier includes the first 100,000 DPUs and 1 GB of storage per month; this disposable dev spike is expected to remain within that allowance unless the account has already consumed it. Aurora Serverless v2 retains provisioned ACU capacity and is therefore the fallback only when a required compatibility gate fails. Verify current Seoul Region rates before production provisioning.
 
 ## Decision
 
-No target-engine evidence; local preflight cannot select DSQL or PostgreSQL.
+Every required live DSQL compatibility gate passed.
+
+Application deployments must set `CERT_QUIZ_DATABASE_ADAPTER=dsql` explicitly. Dev and prod use separate clusters, migrations, IAM database-role mappings, and SSM endpoint parameters.

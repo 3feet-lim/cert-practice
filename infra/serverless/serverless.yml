@@ -1,0 +1,50 @@
+service: certquiz-api
+frameworkVersion: "4"
+configValidationMode: error
+
+stages:
+  default:
+    params:
+      dsqlDatabase: postgres
+      dsqlUser: app
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  architecture: x86_64
+  region: ${opt:region, "ap-northeast-2"}
+  stage: ${opt:stage, "dev"}
+  versionFunctions: true
+  timeout: 29
+  memorySize: 256
+  iam:
+    role: ${param:lambdaRoleArn}
+  environment:
+    STAGE: ${sls:stage}
+    CERT_QUIZ_DATABASE_ADAPTER: ${file(../../artifacts/dsql-spike/database-adapter.json):adapter}
+    DSQL_ENDPOINT: ${param:databaseEndpoint}
+    DSQL_DATABASE: ${param:dsqlDatabase}
+    DSQL_USER: ${param:dsqlUser}
+    NODE_OPTIONS: --enable-source-maps
+  stackTags:
+    Service: certquiz
+    Environment: ${sls:stage}
+    ManagedBy: serverless-framework
+  tags:
+    Service: certquiz
+    Environment: ${sls:stage}
+    ManagedBy: serverless-framework
+
+package:
+  individually: true
+
+functions:
+  api:
+    name: certquiz-${sls:stage}-api
+    description: CertQuiz Hono API
+    handler: handler.handler
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /v1/health
+          method: GET

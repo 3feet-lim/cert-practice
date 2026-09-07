@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "aurora-dsql-lambda-lifecycle-evidence",
+  "status": "pass",
+  "run": {
+    "region": "ap-northeast-2",
+    "endpoint": "6bub5ifge3eqfufzieojj35dnu.dsql.ap-northeast-2.on.aws",
+    "functionName": "certquiz-dev-dsql-spike-20260907",
+    "functionArn": "arn:aws:lambda:ap-northeast-2:370489250264:function:certquiz-dev-dsql-spike-20260907",
+    "runtime": "nodejs22.x",
+    "nodeVersion": "v22.23.1",
+    "handler": "dist/spike/lambda-connector-smoke.handler",
+    "codeSha256": "xf/hCa1CvByn6ZhC7kyau/9Z4GOML9gOHRYKMM4/q0k=",
+    "startedAt": "2026-09-07T07:55:13.853Z",
+    "completedAt": "2026-09-07T08:12:19.779Z",
+    "reservedConcurrency": 1
+  },
+  "iam": {
+    "roleArn": "arn:aws:iam::370489250264:role/certquiz/spike/certquiz-dev-dsql-spike-20260907",
+    "connectAction": "dsql:DbConnectAdmin",
+    "connectResource": "arn:aws:dsql:ap-northeast-2:370489250264:cluster/6bub5ifge3eqfufzieojj35dnu"
+  },
+  "firstInvocation": {
+    "environmentId": "41deb6e8-f52d-4161-8b95-18b9854ba707",
+    "invocationCount": 1,
+    "processId": -508415338,
+    "coldStart": true
+  },
+  "warmInvocation": {
+    "environmentId": "41deb6e8-f52d-4161-8b95-18b9854ba707",
+    "invocationCount": 2,
+    "processId": -508415338,
+    "elapsedSinceFirstConnectMs": 22827,
+    "coldStart": false
+  },
+  "rolloverInvocation": {
+    "environmentId": "41deb6e8-f52d-4161-8b95-18b9854ba707",
+    "invocationCount": 19,
+    "elapsedSinceFirstConnectMs": 1025390,
+    "tokenValidityWindowMs": 900000,
+    "processIdBeforeEviction": -508415338,
+    "processIdAfterEviction": -827723957,
+    "coldStart": false
+  },
+  "assertions": {
+    "sameLambdaEnvironment": true,
+    "warmPoolConnectionReused": true,
+    "tokenWindowElapsed": true,
+    "freshIamAuthenticatedConnectionAfterTokenWindow": true,
+    "tlsHostnameAndCaVerified": true,
+    "nodeDefaultRootStoreUsed": true
+  },
+  "cleanup": {
+    "lambdaDeleted": true,
+    "iamRoleDeleted": true,
+    "logGroupDeleted": true
+  }
+}

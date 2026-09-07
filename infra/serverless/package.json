@@ -1,0 +1,17 @@
+{
+  "name": "@cert-quiz/serverless",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "package:dev": "node ./run-serverless.mjs package --stage dev --region ap-northeast-2",
+    "deploy:dev": "node ./run-serverless.mjs deploy --stage dev --region ap-northeast-2",
+    "remove:dev": "serverless remove --stage dev --region ap-northeast-2"
+  },
+  "dependencies": {
+    "@cert-quiz/api": "workspace:*"
+  },
+  "devDependencies": {
+    "serverless": "4.41.1"
+  }
+}

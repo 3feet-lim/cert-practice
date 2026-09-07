@@ -199,16 +199,16 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - mock health와 real health에 동일 provider contract를 실행해 frontend bootstrap 때 확정한 contract를 비호환 변경하지 못하게 한다.
     - _Requirements: 16.1, 16.2, 16.4_
 
-- [ ] 9. Aurora DSQL compatibility spike와 데이터베이스 선택 게이트 구현
-  - [~] 9.1 실제 DSQL에서 실행 가능한 connector·migration·query spike를 작성한다
+- [x] 9. Aurora DSQL compatibility spike와 데이터베이스 선택 게이트 구현
+  - [x] 9.1 실제 DSQL에서 실행 가능한 connector·migration·query spike를 작성한다
     - Node.js DSQL connector의 IAM token/TLS/pool freeze-thaw, UUID, `timestamptz`, exact score 정수쌍, JSON 후보 타입, index, 제약과 migration checksum을 검사하는 CLI를 구현한다.
     - history, leaderboard, cleanup query plan과 p95 500ms 게이트를 machine-readable 결과로 출력한다.
     - _Requirements: 3.1-3.5, 9.4-9.7, 12.5-12.8, 13.10-13.13_
-  - [~] 9.2 핵심 원자성과 동시성 probe를 spike에 추가한다
+  - [x] 9.2 핵심 원자성과 동시성 probe를 spike에 추가한다
     - 동시 profile get-or-create, active practice slot, practice replace, manual/expired finalize와 import head switch를 barrier와 fault injection으로 실행한다.
     - 중복 profile/session/Attempt, partial snapshot 또는 mixed catalog revision이 관찰되면 gate를 실패시킨다.
     - _Requirements: 1.5, 1.6, 1.14, 4.10, 7.4, 7.8, 7.9, 11.6-11.10, 15.21, 15.27_
-  - [~] 9.3 spike 결과로 DSQL 또는 Aurora Serverless v2 adapter를 선택하도록 구성한다
+  - [x] 9.3 spike 결과로 DSQL 또는 Aurora Serverless v2 adapter를 선택하도록 구성한다
     - 통과 시 DSQL adapter, 실패 시 PostgreSQL adapter를 선택하는 명시적 runtime/build 설정을 구현하고 동일 repository contract를 유지한다.
     - 측정 결과와 실패 gate에서 선택 근거를 생성하는 ADR 산출 단계를 spike 명령에 연결한다.
     - _Requirements: 1.6, 4.10-4.12, 11.8-11.10, 15.27, 15.28_

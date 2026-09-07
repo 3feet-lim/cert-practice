@@ -44,7 +44,7 @@ export const targetProbePlan: readonly SpikeProbe[] = [
     reason:
       "Requires window-function query plan and latency evidence on the target engine.",
     invariant: "Exact score ranking and tie order use the required index/plan.",
-    expectedIndex: "spike_attempt_leaderboard",
+    expectedIndex: "spike_attempt_leaderboard_candidates",
     p95MsMax: 500,
   },
   {

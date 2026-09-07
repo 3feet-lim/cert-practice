@@ -30,7 +30,7 @@ export type MigrationEntry = {
 export type SpikeProbe = {
   id: ProbeId;
   required: true;
-  targetStatus: Extract<GateStatus, "not_run" | "inconclusive">;
+  targetStatus: GateStatus;
   reason: string;
   invariant: string;
   expectedIndex?: string;

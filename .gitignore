@@ -5,5 +5,14 @@ dist/
 coverage/
 playwright-report/
 test-results/
+.serverless/
 .env*
 !.env.example
+
+# Terraform working data and local state
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log

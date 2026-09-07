@@ -18,13 +18,18 @@
     "test:repository": "vitest run --passWithNoTests",
     "test:spike": "vitest run src/spike",
     "spike:local": "pnpm run build && node dist/spike/cli.js --mode=local --dry-run",
+    "spike:live": "pnpm run build && node dist/spike/live-cli.js",
     "spike:check": "pnpm run test:spike && pnpm run spike:local"
   },
   "dependencies": {
-    "@cert-quiz/domain": "workspace:*"
+    "@aws/aurora-dsql-node-postgres-connector": "0.1.9",
+    "@cert-quiz/domain": "workspace:*",
+    "pg": "8.23.0",
+    "pg-connection-string": "2.14.0"
   },
   "devDependencies": {
     "@types/node": "26.4.0",
+    "@types/pg": "8.23.1",
     "vitest": "4.1.11"
   }
 }
