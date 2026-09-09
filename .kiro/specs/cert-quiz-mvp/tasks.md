@@ -216,28 +216,28 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
 - [x] 10. Backend foundation checkpoint - Ensure all foundation tests pass
   - Ensure workspace, contract compatibility and database spike gates pass; ask the user if questions arise.
 
-- [ ] 11. Shared backend primitive와 contract-compatible projection 구현
-  - [~] 11.1 exact `Fraction`과 점수 계산 primitive를 구현한다
+- [x] 11. Shared backend primitive와 contract-compatible projection 구현
+  - [x] 11.1 exact `Fraction`과 점수 계산 primitive를 구현한다
     - bigint 기약분수, 사칙연산, cross multiplication 비교, decimal parsing, 둘째 자리 half-up 표시와 Reference_1000 half-up을 구현한다.
     - binary floating point와 중간 반올림이 판정·정렬 source of truth에 들어가지 않게 한다.
     - _Requirements: 9.1, 9.2, 12.1-12.12, 12.14_
-  - [~] 11.2 `Clock`, `RandomSource`, UUID와 canonical 시간 primitive를 구현한다
+  - [x] 11.2 `Clock`, `RandomSource`, UUID와 canonical 시간 primitive를 구현한다
     - 주입 가능한 UTC clock, `nextInt(maxExclusive)` RNG port, crypto rejection-sampling adapter와 deterministic fake를 제공한다.
     - 만료·보관 경계를 반개구간으로 표현하는 helper를 추가한다.
     - _Requirements: 4.6, 4.7, 9.4-9.7, 10.1-10.3, 10.6, 10.9_
-  - [~] 11.3 domain error와 안전한 HTTP error mapper를 구현한다
+  - [x] 11.3 domain error와 안전한 HTTP error mapper를 구현한다
     - 인증, 승인, 소유권, stale version, 만료, validation과 retryable dependency 오류를 discriminated union으로 정의한다.
     - 중앙 mapper가 기존 shared error schema의 allowlist details와 request ID만 생성하게 한다.
     - _Requirements: 1.2, 1.3, 1.8, 1.12, 2.4, 16.3-16.7_
-  - [~] 11.4 strict SnapshotProjector와 backend contract provider test를 구현한다
+  - [x] 11.4 strict SnapshotProjector와 backend contract provider test를 구현한다
     - mode/reveal 상태를 기존 practice-unsubmitted, practice-submitted, exam-active, review DTO에만 투영하고 response 직전에 `.strict()` 검증을 수행한다.
     - backend DTO가 frontend mock fixture corpus와 endpoint contract matrix를 호환하며 새 필수 필드나 유출 필드를 추가하지 않는지 CI에서 검사한다.
     - _Requirements: 5.6-5.8, 8.8-8.10, 10.7, 13.1-13.3, 16.4_
-  - [~] 11.5 exact 채점 의미 property test를 작성한다
+  - [x] 11.5 exact 채점 의미 property test를 작성한다
     - **Property 19: exact 채점 의미**
     - 유효한 집합과 scoring mode를 생성해 all-or-nothing, partial, 합계, 정답률, 합격과 Reference_1000을 독립 oracle과 비교한다.
     - **Validates: Requirements 12.1-12.8**
-  - [~] 11.6 표시값·판정값 분리와 설정 오류 property test를 작성한다
+  - [x] 11.6 표시값·판정값 분리와 설정 오류 property test를 작성한다
     - **Property 20: 표시값과 판정값의 분리 및 설정 오류 비원자성 방지**
     - 표시 반올림이 exact 비교를 바꾸지 않고 잘못된 mode/threshold/choice 설정에서 결과가 확정되지 않음을 검증한다.
     - **Validates: Requirements 12.9-12.17**

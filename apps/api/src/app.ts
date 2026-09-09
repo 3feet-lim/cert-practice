@@ -1,6 +1,9 @@
 import { healthSuccessEnvelopeSchema } from "@cert-quiz/contracts";
 import { Hono } from "hono";
 
+import { mapError } from "./error-mapper.js";
+import { requestContext, requestIdFromContextHeader } from "./request-context.js";
+
 const healthResponse = healthSuccessEnvelopeSchema.parse({
   data: {
     status: "ok",
@@ -15,6 +18,13 @@ const healthResponse = healthSuccessEnvelopeSchema.parse({
  * Dependencies such as authentication and repositories are introduced by later
  * tasks, keeping this bootstrap endpoint safe for in-memory contract tests.
  */
-export const app = new Hono().get("/v1/health", (context) =>
+export const app = new Hono();
+
+app.use("/v1/*", requestContext);
+app.onError((error, context) => {
+  const mapped = mapError(error, requestIdFromContextHeader(context));
+  return context.json(mapped.body, mapped.status);
+});
+app.get("/v1/health", (context) =>
   context.json(healthSuccessEnvelopeSchema.parse(healthResponse)),
 );
