@@ -1,6 +1,10 @@
 import {
   approvalStatusDtoSchema,
   approveUserResponseSchema,
+  commitImportRequestSchema,
+  commitImportResponseSchema,
+  dryRunImportRequestSchema,
+  dryRunImportResponseSchema,
   catalogDtoSchema,
   currentUserDtoSchema,
   healthSuccessEnvelopeSchema,
@@ -14,6 +18,8 @@ import {
   domainFailure,
   isDomainFailure,
   projectActiveCatalog,
+  sha256Hex,
+  type ImportService,
   type TransactionRepositories,
   type UserProfile,
 } from "@cert-quiz/domain";
@@ -39,7 +45,10 @@ const healthResponse = healthSuccessEnvelopeSchema.parse({
   meta: { requestId: "api:health" },
 });
 
-export type CreateAppDependencies = AuthenticationDependencies;
+export type CreateAppDependencies = AuthenticationDependencies & {
+  /** Optional while composition roots migrate; import routes fail closed without it. */
+  importService?: ImportService;
+};
 export type { CognitoTokenVerifier };
 
 function toStateVersion(version: bigint): number {
@@ -68,6 +77,17 @@ function responseMeta(context: Context<ApiEnvironment>) {
 async function parseVisibilityRequest(context: Context<ApiEnvironment>) {
   try {
     return updateScoreVisibilityRequestSchema.parse(await context.req.json());
+  } catch {
+    throw domainFailure("validation-failed");
+  }
+}
+
+async function parseImportRequest<Schema extends { parse(input: unknown): unknown }>(
+  context: Context<ApiEnvironment>,
+  schema: Schema,
+): Promise<ReturnType<Schema["parse"]>> {
+  try {
+    return schema.parse(await context.req.json()) as ReturnType<Schema["parse"]>;
   } catch {
     throw domainFailure("validation-failed");
   }
@@ -164,6 +184,63 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
         data: {
           scorePublic: profile.scorePublic,
           stateVersion: toStateVersion(profile.version),
+        },
+        meta: responseMeta(context),
+      }),
+    );
+  });
+
+  created.post("/v1/admin/imports/dry-run", adminPolicy, async (context) => {
+    const request = await parseImportRequest(context, dryRunImportRequestSchema);
+    const service = dependencies.importService;
+    if (!service) throw domainFailure("dependency-unavailable");
+    const result = await service.dryRun(request.content, context.get("actor").userId);
+    if (result.materialization?.validation) {
+      await inTransaction((repositories) =>
+        repositories.catalog.saveValidation(result.materialization!.validation!),
+      );
+    }
+    return context.json(
+      successEnvelopeSchema(dryRunImportResponseSchema).parse({
+        data: result.response,
+        meta: responseMeta(context),
+      }),
+    );
+  });
+
+  created.post("/v1/admin/imports/commit", adminPolicy, async (context) => {
+    const request = await parseImportRequest(context, commitImportRequestSchema);
+    const service = dependencies.importService;
+    if (!service) throw domainFailure("dependency-unavailable");
+    let materialized: Awaited<ReturnType<ImportService["materializeCommit"]>>;
+    try {
+      materialized = await service.materializeCommit(
+        request.content,
+        context.get("actor").userId,
+      );
+    } catch {
+      throw domainFailure("validation-failed");
+    }
+    const tokenDigest = await sha256Hex(request.commitToken);
+    await inTransaction((repositories) =>
+      repositories.catalog.commitValidatedImport({
+        validationId: request.validationId,
+        actorUserId: context.get("actor").userId,
+        tokenDigest,
+        contentHash: materialized.contentHash,
+        materialization: materialized.materialization,
+        now: dependencies.now(),
+      }),
+    );
+    const certificationId = materialized.materialization.source.certifications[0]?.id;
+    if (!certificationId) throw domainFailure("dependency-unavailable");
+    return context.json(
+      successEnvelopeSchema(commitImportResponseSchema).parse({
+        data: {
+          validationId: request.validationId,
+          certificationId,
+          activatedRevisionId: materialized.materialization.revision.id,
+          committedAt: dependencies.now().toISOString(),
         },
         meta: responseMeta(context),
       }),

@@ -375,3 +375,120 @@ describe("revisioned catalog repository reads", () => {
     ).toEqual([17, 13, 13, 11, 11, 10]);
   });
 });
+
+describe("atomic imported catalog activation", () => {
+  it("binds the validation to actor/content/token/TTL and restores head/token on faults", async () => {
+    const { ImportService, SequenceRandomSource, SequenceUuidFactory } =
+      await import("@cert-quiz/domain");
+    const database = new InMemoryUnitOfWork();
+    const now = new Date("2026-01-01T00:00:00.000Z");
+    const ids = [
+      "00000000-0000-4000-8000-000000000701",
+      "00000000-0000-4000-8000-000000000702",
+      "00000000-0000-4000-8000-000000000703",
+      "00000000-0000-4000-8000-000000000704",
+    ];
+    const service = new ImportService({
+      ids: new SequenceUuidFactory(ids),
+      random: new SequenceRandomSource([7]),
+      now: () => new Date(now),
+    });
+    const content = JSON.stringify({
+      provider: { id: "provider", name: "Provider" },
+      certification: {
+        id: "cert",
+        code: "CERT-IMPORT",
+        name: "Import",
+        totalQuestions: 1,
+        timeLimitMinutes: 10,
+        passThreshold: "75",
+        scoringMode: "all_or_nothing",
+        domains: [{ id: "domain", name: "Domain", weightPercent: "100" }],
+        questions: [
+          {
+            id: "question",
+            domainId: "domain",
+            stemEn: "Stem",
+            explanationEn: "Explanation",
+            requiredChoiceCount: 1,
+            correctChoiceIds: ["a"],
+            choices: [{ id: "a", textEn: "A" }],
+          },
+        ],
+      },
+    });
+    const dryRun = await service.dryRun(content, "admin-a");
+    if (!dryRun.materialization?.validation || !dryRun.response.commitToken)
+      throw new Error("fixture must validate");
+    await database.transaction((repos) =>
+      repos.catalog.saveValidation(dryRun.materialization!.validation!),
+    );
+    const commit = await service.materializeCommit(content, "admin-a");
+    const { sha256Hex } = await import("@cert-quiz/domain");
+    const command = {
+      validationId: dryRun.materialization.validation.id,
+      actorUserId: "admin-a",
+      tokenDigest: await sha256Hex(dryRun.response.commitToken),
+      contentHash: commit.contentHash,
+      materialization: commit.materialization,
+      now,
+    };
+    database.failNext("catalog-switch");
+    await expect(
+      database.transaction((repos) => repos.catalog.commitValidatedImport(command)),
+    ).rejects.toThrow("catalog-switch");
+    await database.transaction(async (repos) =>
+      expect(await repos.catalog.activeRevision("CERT-IMPORT")).toBeNull(),
+    );
+    await expect(
+      database.transaction((repos) => repos.catalog.commitValidatedImport(command)),
+    ).resolves.toBeUndefined();
+    await database.transaction(async (repos) => {
+      expect((await repos.catalog.activeRevision("CERT-IMPORT"))?.contentHash).toBe(
+        commit.contentHash,
+      );
+      expect(
+        await repos.catalog.fullGenerationSource(
+          commit.materialization.source.certifications[0]!.id,
+        ),
+      ).not.toBeNull();
+    });
+    const { SessionFactory } = await import("@cert-quiz/domain");
+    const generation = await database.transaction((repos) =>
+      repos.catalog.fullGenerationSource(
+        commit.materialization.source.certifications[0]!.id,
+      ),
+    );
+    if (!generation) throw new Error("generation fixture must be present");
+    const sessions = new SessionFactory({
+      ids: new SequenceUuidFactory([
+        "00000000-0000-4000-8000-000000000706",
+        "00000000-0000-4000-8000-000000000707",
+      ]),
+      random: new SequenceRandomSource([0]),
+      now: () => now,
+    });
+    await database.transaction((repos) =>
+      sessions.createPractice(repos, "user-a", generation),
+    );
+    database.failNext("practice-replace");
+    await expect(
+      database.transaction((repos) =>
+        sessions.createPractice(repos, "user-a", generation),
+      ),
+    ).rejects.toThrow("practice-replace");
+    await database.transaction(async (repos) =>
+      expect((await repos.practice.findActiveOwned("user-a", "CERT-IMPORT"))?.id).toBe(
+        "00000000-0000-4000-8000-000000000706",
+      ),
+    );
+    await expect(
+      database.transaction((repos) => repos.catalog.commitValidatedImport(command)),
+    ).rejects.toThrow("not consumable");
+    await expect(
+      database.transaction((repos) =>
+        repos.catalog.commitValidatedImport({ ...command, actorUserId: "admin-b" }),
+      ),
+    ).rejects.toThrow("not consumable");
+  });
+});

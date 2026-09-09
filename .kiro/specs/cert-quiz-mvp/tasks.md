@@ -313,14 +313,14 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - **Validates: Requirements 3.1-3.8, 3.10, 3.11**
 
 - [ ] 15. JSON import dry-run과 atomic revision commit 구현
-  - [~] 15.1 byte-limit parser와 구조/schema validation pipeline을 구현한다
+  - [x] 15.1 byte-limit parser와 구조/schema validation pipeline을 구현한다
     - 10 MiB를 parsing 전에 검사하고 JSON syntax 위치, depth 20, Question 10,000, Choice 20, 필수 필드·타입 오류를 가능한 범위에서 누적한다.
     - _Requirements: 15.1-15.3, 15.15-15.17_
-  - [~] 15.2 semantic validator와 summary 계산을 구현한다
+  - [x] 15.2 semantic validator와 summary 계산을 구현한다
     - weight exact 합, 관계, 중복 ID, 정답 부분집합, 선택 수, 영어 필드, 번역 상태와 domain/전체 pool 크기를 검증한다.
     - 계산 가능한 전체/domain/translation/error summary를 유지하고 불가능한 값만 unavailable로 표시한다.
     - _Requirements: 15.4-15.14, 15.17-15.19_
-  - [~] 15.3 RFC 8785 원칙의 canonical JSON, SHA-256와 commit token을 구현한다
+  - [x] 15.3 RFC 8785 원칙의 canonical JSON, SHA-256와 commit token을 구현한다
     - object key/공백/동등 숫자 차이는 같은 hash, 배열 순서는 다른 hash가 되게 하고 256-bit token은 digest만 저장한다.
     - actor binding, constant-time hash 비교, `[createdAt, createdAt+15m)` TTL과 single-use 상태를 구현한다.
     - _Requirements: 15.20, 15.22-15.26_
@@ -328,7 +328,7 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - transaction 직전 source/head와 row count를 재검증하고 revision 전체 insert, head 전환과 token consume을 한 transaction으로 처리한다.
     - 실패 시 head/token을 복원하고 기존 Attempt/snapshot을 변경하지 않는다.
     - _Requirements: 15.21, 15.27, 15.28_
-  - [~] 15.5 관리자 dry-run/commit API를 기존 frontend contract에 구현한다
+  - [x] 15.5 관리자 dry-run/commit API를 기존 frontend contract에 구현한다
     - admin middleware, safe error list/summary, 동일 JSON+token commit을 contracts와 repository에 연결하고 원문·정답·token 로그를 차단한다.
     - mock fixture corpus와 provider contract를 실행해 UI가 기대하는 성공·오류 shape를 호환한다.
     - _Requirements: 2.2-2.4, 15.1-15.28, 16.4-16.7_
@@ -345,11 +345,11 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - _Requirements: 15.20-15.28_
 
 - [ ] 16. Domain allocation, sampling과 immutable snapshot 구현
-  - [~] 16.1 largest-remainder allocator를 exact arithmetic으로 구현한다
+  - [x] 16.1 largest-remainder allocator를 exact arithmetic으로 구현한다
     - floor 후 remainder 내림차순·import order 오름차순으로 잔여 문항을 배정하고 합을 회차 문항 수와 일치시킨다.
     - practice와 exam이 같은 allocator를 사용하게 한다.
     - _Requirements: 4.1-4.4, 4.8_
-  - [~] 16.2 unbiased question sampling과 전체 shuffle을 구현한다
+  - [x] 16.2 unbiased question sampling과 전체 shuffle을 구현한다
     - domain별 partial Fisher–Yates와 전체 Fisher–Yates를 주입된 rejection-sampling RNG에 연결한다.
     - 중복 없는 정확한 allocation과 고정 choice/display order를 만든다.
     - _Requirements: 4.5-4.7_
@@ -365,7 +365,7 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - **Property 5: largest-remainder 배정 정확성**
     - 임의 양수 weight와 문항 수에서 floor/floor+1, 합과 remainder/import-order 수혜 domain을 검증한다.
     - **Validates: Requirements 4.1-4.4, 4.8**
-  - [~] 16.6 uniform sampling·permutation property test를 작성한다
+  - [x] 16.6 uniform sampling·permutation property test를 작성한다
     - **Property 6: 중복 없는 균등 추출과 순열**
     - 작은 pool의 모든 deterministic RNG outcome을 전수 열거해 subset과 전체 순열 multiplicity가 같음을 검증한다.
     - **Validates: Requirements 4.5-4.7**
@@ -373,11 +373,13 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - **Property 7: 회차 생성의 all-or-nothing과 snapshot 불변성**
     - 부족 pool과 각 실패 지점에서 row 수 비변경, 성공 후 원본 revision 변경에도 snapshot 동일성을 검증한다.
     - **Validates: Requirements 4.9-4.12**
-  - [~] 16.8 strict projection leak contract test를 작성한다
+  - [x] 16.8 strict projection leak contract test를 작성한다
     - active practice/exam DTO와 실제 JSON에 forbidden field가 없고 주입 시 `.strict()`가 응답을 폐기하는지 검증한다.
     - _Requirements: 8.8-8.10, 10.7, 16.4_
 
 - [~] 17. Backend domain checkpoint - Ensure all domain and repository tests pass
+  - [x] Offline boundary, contract, domain/property, in-memory repository, API/provider, lint, format, typecheck, and local spike gates pass.
+  - [~] Live DSQL/Postgres transaction, migration, concurrency, and production-adapter gates remain blocked: no network/DB calls were permitted.
   - Ensure backend unit, property, migration, repository contract, concurrency and contract-provider tests pass; ask the user if questions arise.
 
 - [ ] 18. Practice session, result와 retention 수직 기능 구현

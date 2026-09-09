@@ -1,4 +1,4 @@
-import { findGenerationSource } from "@cert-quiz/domain";
+import { constantTimeEqual, findGenerationSource } from "@cert-quiz/domain";
 import type {
   Attempt,
   CatalogGenerationSource,
@@ -9,6 +9,7 @@ import type {
   ExamRepository,
   ExamSession,
   FinalizeExam,
+  FullCatalogGenerationSource,
   ImportValidation,
   NewCompletedPracticeResult,
   NewExamSession,
@@ -38,6 +39,7 @@ type State = {
   validations: Map<string, ImportValidation>;
   revisions: Map<string, CatalogRevision>;
   catalogSources: Map<string, CatalogRevisionSource>;
+  fullGenerationSources: Map<string, FullCatalogGenerationSource>;
   heads: Map<string, string>;
   practices: Map<string, PracticeSession>;
   results: Map<string, CompletedPracticeResult>;
@@ -53,6 +55,7 @@ const emptyState = (): State => ({
   validations: new Map(),
   revisions: new Map(),
   catalogSources: new Map(),
+  fullGenerationSources: new Map(),
   heads: new Map(),
   practices: new Map(),
   results: new Map(),
@@ -258,6 +261,55 @@ class InMemoryRepositories implements TransactionRepositories {
         });
         this.fault("catalog-switch");
       },
+      commitValidatedImport: async ({
+        validationId,
+        actorUserId,
+        tokenDigest,
+        contentHash,
+        materialization,
+        now,
+      }) => {
+        const validation = this.state.validations.get(validationId);
+        if (
+          !validation ||
+          validation.status !== "validated" ||
+          validation.expiresAt <= now ||
+          validation.actorUserId !== actorUserId ||
+          !constantTimeEqual(validation.tokenDigest, tokenDigest) ||
+          !constantTimeEqual(validation.contentHash, contentHash)
+        ) {
+          throw new Error("Import validation is not consumable.");
+        }
+        const { revision, source, generation } = materialization;
+        if (
+          revision.certificationKey !== validation.certificationKey ||
+          revision.contentHash !== validation.contentHash ||
+          revision.importedBy !== actorUserId ||
+          source.revisionId !== revision.id ||
+          source.certificationKey !== revision.certificationKey ||
+          generation.revisionId !== revision.id ||
+          generation.certification.id !== source.certifications[0]?.id ||
+          generation.questions.length !== source.questions.length
+        ) {
+          throw new Error("Import materialization is invalid.");
+        }
+        const valid = findGenerationSource([source], generation.certification.id);
+        if (!valid)
+          throw new Error("Import materialization cannot generate a session.");
+        this.state.revisions.set(revision.id, copyRevision(revision));
+        this.state.catalogSources.set(revision.id, copyCatalogSource(source));
+        this.state.fullGenerationSources.set(
+          revision.id,
+          copyFullGenerationSource(generation),
+        );
+        this.state.heads.set(revision.certificationKey, revision.id);
+        this.state.validations.set(validation.id, {
+          ...validation,
+          status: "consumed",
+          version: validation.version + 1n,
+        });
+        this.fault("catalog-switch");
+      },
       activeRevision: async (certificationKey) => {
         const revisionId = this.state.heads.get(certificationKey);
         return revisionId
@@ -283,6 +335,19 @@ class InMemoryRepositories implements TransactionRepositories {
             }),
           certificationId,
         ),
+      fullGenerationSource: async (certificationId) => {
+        for (const [, revisionId] of [...this.state.heads.entries()].sort(
+          ([left], [right]) => left.localeCompare(right),
+        )) {
+          const source = this.state.catalogSources.get(revisionId);
+          const full = this.state.fullGenerationSources.get(revisionId);
+          if (!source || !full) continue;
+          const publicGeneration = findGenerationSource([source], certificationId);
+          if (publicGeneration && full.certification.id === certificationId)
+            return copyFullGenerationSource(full);
+        }
+        return null;
+      },
     };
   }
 
@@ -556,6 +621,12 @@ function copyState(state: State): State {
     catalogSources: new Map(
       [...state.catalogSources].map(([id, item]) => [id, copyCatalogSource(item)]),
     ),
+    fullGenerationSources: new Map(
+      [...state.fullGenerationSources].map(([id, item]) => [
+        id,
+        copyFullGenerationSource(item),
+      ]),
+    ),
     heads: new Map(state.heads),
     practices: new Map(
       [...state.practices].map(([id, item]) => [id, copyPractice(item)]),
@@ -595,6 +666,29 @@ function copyCatalogSource(item: CatalogRevisionSource): CatalogRevisionSource {
     })),
     domains: item.domains.map((domain) => ({ ...domain })),
     questions: item.questions.map((question) => ({ ...question })),
+  };
+}
+function copyFullGenerationSource(
+  item: FullCatalogGenerationSource,
+): FullCatalogGenerationSource {
+  return {
+    revisionId: item.revisionId,
+    certification: {
+      ...item.certification,
+      passThreshold: item.certification.passThreshold,
+    },
+    provider: { ...item.provider },
+    domains: item.domains.map((domain) => ({ ...domain })),
+    questions: item.questions.map((question) => ({
+      ...question,
+      stem: { ...question.stem },
+      explanation: { ...question.explanation },
+      choices: question.choices.map((choice) => ({
+        ...choice,
+        text: { ...choice.text },
+      })),
+      correctChoiceIndexes: [...question.correctChoiceIndexes],
+    })),
   };
 }
 function copyQuestion(item: PersistedQuestionSnapshot): PersistedQuestionSnapshot {

@@ -1,4 +1,5 @@
 import type { CatalogGenerationSource, CatalogRevisionSource } from "./catalog.js";
+import type { FullCatalogGenerationSource } from "./session-factory.js";
 import { Fraction } from "./fraction.js";
 
 /**
@@ -53,6 +54,22 @@ export type ImportValidation = {
   expiresAt: Date;
   status: "validated" | "consumed" | "expired";
   version: bigint;
+};
+
+export type CatalogImportMaterialization = {
+  revision: CatalogRevision;
+  source: CatalogRevisionSource;
+  generation: FullCatalogGenerationSource;
+  validation?: ImportValidation;
+};
+
+export type ImportCommitCommand = {
+  validationId: string;
+  actorUserId: string;
+  tokenDigest: string;
+  contentHash: string;
+  materialization: CatalogImportMaterialization;
+  now: Date;
 };
 
 export type PersistedQuestionSnapshot = {
@@ -199,11 +216,17 @@ export interface CatalogRepository {
     revision: CatalogRevision,
     now: Date,
   ): Promise<void>;
+  /** Atomically verifies credentials, materializes one closed revision and moves its head. */
+  commitValidatedImport(command: ImportCommitCommand): Promise<void>;
   activeRevision(certificationKey: string): Promise<CatalogRevision | null>;
   /** Typed active-head read; callers never receive storage rows or documents. */
   activeCatalogSources(): Promise<readonly CatalogRevisionSource[]>;
   /** A closed, valid source from the selected certification's active revision only. */
   generationSource(certificationId: string): Promise<CatalogGenerationSource | null>;
+  /** Internal full-content read used exclusively by SessionFactory. */
+  fullGenerationSource(
+    certificationId: string,
+  ): Promise<FullCatalogGenerationSource | null>;
 }
 
 export interface PracticeRepository {

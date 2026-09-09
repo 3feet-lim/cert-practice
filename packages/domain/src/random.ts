@@ -32,6 +32,20 @@ export class SequenceRandomSource implements RandomSource {
   }
 }
 
+/** Browser/Node Web Crypto adapter using rejection sampling, never modulo bias. */
+export class CryptoRandomSource implements RandomSource {
+  nextInt(maxExclusive: number): number {
+    validateMaximum(maxExclusive);
+    const limit = Math.floor(0x1_0000_0000 / maxExclusive) * maxExclusive;
+    const bytes = new Uint32Array(1);
+    for (;;) {
+      crypto.getRandomValues(bytes);
+      const value = bytes[0];
+      if (value !== undefined && value < limit) return value % maxExclusive;
+    }
+  }
+}
+
 export class SequenceUuidFactory implements UuidFactory {
   private index = 0;
 

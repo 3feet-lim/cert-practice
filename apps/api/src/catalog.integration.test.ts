@@ -1,5 +1,7 @@
 import {
   catalogDtoSchema,
+  commitImportResponseSchema,
+  dryRunImportResponseSchema,
   errorEnvelopeSchema,
   successEnvelopeSchema,
 } from "@cert-quiz/contracts";
@@ -8,7 +10,12 @@ import {
   InMemoryUnitOfWork,
   createDopC02CatalogFixture,
 } from "@cert-quiz/db";
-import type { UserProfile } from "@cert-quiz/domain";
+import {
+  ImportService,
+  SequenceRandomSource,
+  SequenceUuidFactory,
+  type UserProfile,
+} from "@cert-quiz/domain";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -35,6 +42,13 @@ class FixtureVerifier implements CognitoTokenVerifier {
         identities: JSON.stringify([{ providerName: "Google", userId: "pending" }]),
         email: "pending@example.test",
         name: "Pending",
+      };
+    }
+    if (token === "admin") {
+      return {
+        identities: JSON.stringify([{ providerName: "Google", userId: "admin" }]),
+        email: "admin@example.test",
+        name: "Admin",
       };
     }
     throw new Error("Invalid fixture token.");
@@ -159,5 +173,95 @@ describe("approved revisioned catalog API", () => {
       })),
     );
     expect(JSON.stringify(payload)).not.toContain("revisionId");
+  });
+});
+
+describe("admin import API", () => {
+  it("returns only contract-safe credentials on a dry-run and atomically activates the same content", async () => {
+    const database = new InMemoryUnitOfWork();
+    database.seedUser({
+      ...approvedProfile(),
+      id: "00000000-0000-4000-8000-000000000099",
+      googleSub: "admin",
+      email: "admin@example.test",
+      role: "admin",
+    });
+    const importService = new ImportService({
+      ids: new SequenceUuidFactory([
+        "00000000-0000-4000-8000-000000000201",
+        "00000000-0000-4000-8000-000000000202",
+        "00000000-0000-4000-8000-000000000203",
+        "00000000-0000-4000-8000-000000000204",
+        "00000000-0000-4000-8000-000000000205",
+      ]),
+      random: new SequenceRandomSource([1]),
+      now: () => new Date(NOW),
+    });
+    const app = createApp({
+      tokenVerifier: new FixtureVerifier(),
+      unitOfWork: database,
+      now: () => new Date(NOW),
+      createUserId: () => "00000000-0000-4000-8000-000000000299",
+      importService,
+    });
+    const content = JSON.stringify({
+      provider: { id: "provider", name: "Provider" },
+      certification: {
+        id: "cert",
+        code: "CERT-API",
+        name: "API import",
+        totalQuestions: 1,
+        timeLimitMinutes: 10,
+        passThreshold: "75",
+        scoringMode: "all_or_nothing",
+        domains: [{ id: "domain", name: "Domain", weightPercent: "100" }],
+        questions: [
+          {
+            id: "question",
+            domainId: "domain",
+            stemEn: "Stem",
+            explanationEn: "Explanation",
+            requiredChoiceCount: 1,
+            correctChoiceIds: ["a"],
+            choices: [{ id: "a", textEn: "A" }],
+          },
+        ],
+      },
+    });
+    const dry = await app.request("http://localhost/v1/admin/imports/dry-run", {
+      method: "POST",
+      headers: { authorization: "Bearer admin", "content-type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+    expect(dry.status).toBe(200);
+    const dryPayload = successEnvelopeSchema(dryRunImportResponseSchema).parse(
+      await dry.json(),
+    ).data;
+    expect(dryPayload).toMatchObject({ valid: true, errors: [] });
+    expect(JSON.stringify(dryPayload)).not.toContain("correctChoiceIds");
+    const commit = await app.request("http://localhost/v1/admin/imports/commit", {
+      method: "POST",
+      headers: { authorization: "Bearer admin", "content-type": "application/json" },
+      body: JSON.stringify({
+        validationId: dryPayload.validationId,
+        commitToken: dryPayload.commitToken,
+        content,
+      }),
+    });
+    expect(commit.status).toBe(200);
+    const committed = successEnvelopeSchema(commitImportResponseSchema).parse(
+      await commit.json(),
+    ).data;
+    expect(committed.validationId).toBe(dryPayload.validationId);
+    const replay = await app.request("http://localhost/v1/admin/imports/commit", {
+      method: "POST",
+      headers: { authorization: "Bearer admin", "content-type": "application/json" },
+      body: JSON.stringify({
+        validationId: dryPayload.validationId,
+        commitToken: dryPayload.commitToken,
+        content,
+      }),
+    });
+    expect(replay.status).toBe(503);
   });
 });
