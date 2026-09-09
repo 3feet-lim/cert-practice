@@ -242,15 +242,16 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - 표시 반올림이 exact 비교를 바꾸지 않고 잘못된 mode/threshold/choice 설정에서 결과가 확정되지 않음을 검증한다.
     - **Validates: Requirements 12.9-12.17**
 
-- [ ] 12. Migration과 repository contract 구현
-  - [~] 12.1 identity, revisioned catalog와 import validation migration을 구현한다
+- [~] 12. Migration과 repository contract 구현
+  - offline migration/manifest·in-memory contract 구현은 완료했다. 실제 DSQL/PostgreSQL adapter·migration 실행·live contract suite는 외부 DB 권한/연결 설정이 필요하다.
+  - [x] 12.1 identity, revisioned catalog와 import validation migration을 구현한다
     - user uniqueness, active revision head, import token digest/actor/TTL/status, exact threshold 분자·분모와 필요한 index·제약을 versioned SQL로 만든다.
     - 선택 DB adapter에서 migration checksum과 schema version fail-fast를 구현한다.
     - _Requirements: 1.5, 1.6, 2.5, 3.1-3.5, 14.1, 15.20-15.27_
-  - [~] 12.2 practice session, snapshot과 completed result migration을 구현한다
+  - [x] 12.2 practice session, snapshot과 completed result migration을 구현한다
     - 사용자+자격증 active slot uniqueness, optimistic version, immutable snapshot, session당 단일 completed result, exact score와 168시간 index를 구성한다.
     - _Requirements: 4.10-4.12, 7.1-7.4, 7.8-7.12, 8.11, 8.12, 9.1-9.7_
-  - [~] 12.3 exam session, Attempt와 immutable item migration을 구현한다
+  - [x] 12.3 exam session, Attempt와 immutable item migration을 구현한다
     - start idempotency key, state version, `attempt.exam_session_id` uniqueness, cutoff timestamps, exact score와 이력/리더보드 index를 구성한다.
     - _Requirements: 10.1, 10.2, 10.10-10.12, 11.4-11.10, 13.4-13.9, 14.7-14.12_
   - [~] 12.4 repository ports, UnitOfWork와 DSQL/PostgreSQL adapter를 배선한다
@@ -264,12 +265,13 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - barrier로 profile singleton, active practice slot, first submit, finalize, import switch를 충돌시키고 각 write 지점 실패 시 rollback을 검증한다.
     - _Requirements: 1.6, 1.14, 4.10, 7.9, 8.11, 11.6-11.10, 15.27_
 
-- [ ] 13. Cognito 인증, 승인, 관리자와 소유권 경계 구현
+- [~] 13. Cognito 인증, 승인, 관리자와 소유권 경계 구현
+  - injected verifier와 offline route/property 검증은 완료했다. 실제 Cognito JWKS verifier, API Gateway authorizer, deployed Lambda composition 및 live IDOR 검증은 Cognito/IaC 설정이 필요하다.
   - [~] 13.1 Cognito token verifier와 Google identity extractor middleware를 구현한다
     - signature, issuer, audience/client, expiry, token use를 검증하고 Google provider subject만 정규화한다.
     - JWT와 전체 claim을 로그에 남기지 않고 identity 오류에서는 profile mutation 전에 종료한다.
     - _Requirements: 1.1-1.4, 1.13_
-  - [~] 13.2 원자적 profile get-or-create와 승인 상태 조회를 구현한다
+  - [x] 13.2 원자적 profile get-or-create와 승인 상태 조회를 구현한다
     - `google_sub` conflict 재조회로 단일 pending/user/private profile을 만들고 `/v1/me/approval`만 pending에 허용한다.
     - 생성 실패 시 모든 보호 상태를 유지한다.
     - _Requirements: 1.4-1.8, 1.13, 1.14, 14.1_
@@ -277,10 +279,10 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - approved/user/admin route matrix, owner predicate, pending 목록, idempotent approve와 atomic failure 처리를 구현한다.
     - 권한 오류에서 존재 여부와 보호 데이터를 노출하지 않고 기존 frontend contracts를 반환한다.
     - _Requirements: 1.9-1.12, 1.15, 2.1-2.6_
-  - [~] 13.4 본인 profile과 점수 공개 설정 API를 구현한다
+  - [x] 13.4 본인 profile과 점수 공개 설정 API를 구현한다
     - approved 사용자만 visibility를 변경하고 pending 요청은 profile을 변경하지 않게 한다.
     - _Requirements: 1.11, 14.1-14.3_
-  - [~] 13.5 외부 신원·신규 profile property test를 작성한다
+  - [x] 13.5 외부 신원·신규 profile property test를 작성한다
     - **Property 1: 외부 신원과 신규 프로필 불변식**
     - 동시 로그인, 이메일 변화와 transaction 실패를 model과 비교한다.
     - **Validates: Requirements 1.4-1.6, 1.13, 1.14, 14.1**
@@ -288,7 +290,7 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - **Property 2: 인증·인가 실패의 비간섭성과 역할 경계**
     - 임의 token/role/owner 요청에서 허용 행렬과 거부 전후 aggregate 동일성·오류 redaction을 검증한다.
     - **Validates: Requirements 1.1-1.3, 1.7, 1.8, 1.11, 1.12, 2.1-2.4**
-  - [~] 13.7 승인 전이·pending 목록 property test를 작성한다
+  - [x] 13.7 승인 전이·pending 목록 property test를 작성한다
     - **Property 3: 승인 전이와 pending 목록의 결정성**
     - 목록 유일성, 빈 목록, approve replay와 rollback을 검증한다.
     - **Validates: Requirements 1.9, 1.10, 1.15, 2.5, 2.6**
@@ -296,16 +298,16 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - 유효/만료/wrong issuer/wrong audience/missing Google identity fixture와 IDOR·role bypass를 실제 middleware/repository에 대해 검증한다.
     - _Requirements: 1.1-1.15, 2.1-2.6_
 
-- [ ] 14. Revisioned certification catalog 구현
-  - [~] 14.1 active revision 기반 catalog validator와 repository query를 구현한다
+- [x] 14. Revisioned certification catalog 구현
+  - [x] 14.1 active revision 기반 catalog validator와 repository query를 구현한다
     - Provider→Certification→Domain→Question 관계, 설정·weight·pool 충분성과 invalid item 원인 수집을 구현한다.
     - DOP-C02 75문항, 180분, 75%, 도메인 비율 fixture를 seed/import 가능한 데이터로 제공한다.
     - _Requirements: 3.1-3.5, 3.9-3.11_
-  - [~] 14.2 approved catalog API를 기존 Provider별 projection contract에 연결한다
+  - [x] 14.2 approved catalog API를 기존 Provider별 projection contract에 연결한다
     - 유효하고 출제 가능한 Certification만 그룹화하고 invalid certification은 노출하지 않으며 안전한 데이터 오류를 제공한다.
     - 모든 생성 source가 선택 certification의 active revision 관계 안에 있도록 한다.
     - _Requirements: 3.6-3.8, 3.10, 3.11_
-  - [~] 14.3 catalog 관계·노출 property test를 작성한다
+  - [x] 14.3 catalog 관계·노출 property test를 작성한다
     - **Property 4: 카탈로그 관계 폐쇄성과 노출 안전성**
     - 임의 revision에서 관계·설정·weight·pool oracle과 노출 결과 및 모든 부족 domain 오류를 비교한다.
     - **Validates: Requirements 3.1-3.8, 3.10, 3.11**

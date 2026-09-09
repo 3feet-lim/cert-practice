@@ -1,4 +1,7 @@
 export * from "./database-adapter.js";
+export * from "./dop-c02-fixture.js";
+export * from "./in-memory-unit-of-work.js";
+export * from "./migrations.js";
 export * from "./spike/adapter-selection.js";
 export * from "./spike/local-model-executor.js";
 export * from "./spike/migrations.js";

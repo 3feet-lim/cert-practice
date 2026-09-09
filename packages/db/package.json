@@ -10,12 +10,13 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "migrations"
   ],
   "scripts": {
     "build": "tsc6 -b --pretty false",
     "typecheck": "tsc6 -b --pretty false",
-    "test:repository": "vitest run --passWithNoTests",
+    "test:repository": "vitest run src/in-memory-unit-of-work.test.ts src/migrations.test.ts",
     "test:spike": "vitest run src/spike",
     "spike:local": "pnpm run build && node dist/spike/cli.js --mode=local --dry-run",
     "spike:live": "pnpm run build && node dist/spike/live-cli.js",

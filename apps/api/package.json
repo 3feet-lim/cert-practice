@@ -29,6 +29,7 @@
     "hono": "4.13.7"
   },
   "devDependencies": {
+    "fast-check": "4.9.0",
     "vitest": "4.1.11"
   }
 }

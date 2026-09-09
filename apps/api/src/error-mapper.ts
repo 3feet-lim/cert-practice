@@ -10,12 +10,15 @@ export type HttpErrorStatus = 400 | 401 | 403 | 404 | 409 | 410 | 422 | 500 | 50
 export type MappedHttpError = {
   status: HttpErrorStatus;
   body: ErrorEnvelope;
+  headers?: Readonly<Record<string, string>>;
 };
 
 const messages = {
   unauthenticated: "Authentication is required.",
   "invalid-google-identity": "A valid Google identity is required.",
   "approval-required": "Account approval is required.",
+  "admin-required": "Administrator approval is required.",
+  "ownership-denied": "This action is not available.",
   forbidden: "This action is not available.",
   "not-found": "The requested resource was not found.",
   expired: "The requested resource has expired.",
@@ -31,6 +34,8 @@ const statuses = {
   unauthenticated: 401,
   "invalid-google-identity": 401,
   "approval-required": 403,
+  "admin-required": 403,
+  "ownership-denied": 403,
   forbidden: 404,
   "not-found": 404,
   expired: 410,
@@ -56,6 +61,9 @@ export function mapError(error: unknown, requestId: RequestId): MappedHttpError 
           ...(details === undefined ? {} : { details }),
         },
       }),
+      ...(code === "unauthenticated" || code === "invalid-google-identity"
+        ? { headers: { "WWW-Authenticate": "Bearer" } }
+        : {}),
     };
   }
 

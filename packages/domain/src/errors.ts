@@ -10,6 +10,8 @@ export type DomainErrorCode =
   | "unauthenticated"
   | "invalid-google-identity"
   | "approval-required"
+  | "admin-required"
+  | "ownership-denied"
   | "forbidden"
   | "not-found"
   | "expired"
