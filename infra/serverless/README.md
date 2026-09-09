@@ -1,19 +1,19 @@
 # Serverless deployment
 
-`serverless.yml` owns the Hono Lambda, its published versions, and the HTTP API route. Terraform owns DSQL/Cognito resources, SSM values, the permanent Lambda execution role, and the Lambda log group/retention policy. `disableLogs: true` prevents Serverless from creating a conflicting default log group.
+`serverless.yml` owns the Hono Lambda, its published versions, HTTP API route, and Lambda log group with 30-day retention. Terraform owns DSQL/Cognito resources, SSM values, and the permanent Lambda execution role.
 
 ## Current deployment boundary
 
 Serverless Framework v4 requires either an interactive `serverless login` or a `SERVERLESS_ACCESS_KEY`/license key before `package` or `deploy`. No Dashboard `app` is configured; authentication is only for the v4 CLI license check.
 
-The current Terraform root publishes `/certquiz/dev/dsql-endpoint`, but it does not yet create the permanent application execution role, `/certquiz/dev/lambda-role-arn`, or `/aws/lambda/certquiz-dev-api`. Packaging is available now with a package-only placeholder role ARN. Deployment remains intentionally blocked until Terraform owns and applies all three application resources.
+The dev Terraform root defines the permanent API Lambda execution role directly. Packaging is available with a package-only placeholder role ARN, but deployment requires applying Terraform first and passing its `api_lambda_execution_role_arn` output.
 
-The future execution role must:
+The Terraform-owned execution role:
 
-- trust Lambda;
-- allow `dsql:DbConnect` only on the matching stage cluster (`dsql:DbConnectAdmin` remains limited to migrations or disposable spikes);
-- allow `logs:CreateLogStream` and `logs:PutLogEvents` only on the pre-created application log group;
-- omit `logs:CreateLogGroup`, so Terraform remains the only log-group owner.
+- trusts only Lambda;
+- allows `dsql:DbConnect` only on the dev cluster (`dsql:DbConnectAdmin` remains limited to migrations or disposable spikes);
+- allows `logs:CreateLogStream` and `logs:PutLogEvents` only under `/aws/lambda/certquiz-dev-api`;
+- omits `logs:CreateLogGroup`, because Serverless creates the log group.
 
 ## Report-backed package
 
@@ -37,14 +37,12 @@ pnpm --dir infra/serverless run package:dev \
   --param="databaseEndpoint=$CERT_QUIZ_DSQL_ENDPOINT"
 ```
 
-After Terraform creates the permanent role and log group and publishes the role ARN, deploy with real values:
+After applying the dev Terraform root, resolve its role output and the published DSQL endpoint, then deploy:
 
 ```bash
-export CERT_QUIZ_LAMBDA_ROLE_ARN="$(aws ssm get-parameter \
-  --region ap-northeast-2 \
-  --name /certquiz/dev/lambda-role-arn \
-  --query Parameter.Value \
-  --output text)"
+export CERT_QUIZ_LAMBDA_ROLE_ARN="$(terraform \
+  -chdir=infra/terraform/environments/dev \
+  output -raw api_lambda_execution_role_arn)"
 export CERT_QUIZ_DSQL_ENDPOINT="$(aws ssm get-parameter \
   --region ap-northeast-2 \
   --name /certquiz/dev/dsql-endpoint \

@@ -17,6 +17,7 @@ provider:
   versionFunctions: true
   timeout: 29
   memorySize: 256
+  logRetentionInDays: 30
   iam:
     role: ${param:lambdaRoleArn}
   environment:
@@ -43,7 +44,6 @@ functions:
     name: certquiz-${sls:stage}-api
     description: CertQuiz Hono API
     handler: handler.handler
-    disableLogs: true
     events:
       - httpApi:
           path: /v1/health
