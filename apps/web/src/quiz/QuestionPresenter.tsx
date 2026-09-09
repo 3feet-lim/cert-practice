@@ -14,6 +14,7 @@ import {
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { cn } from "../lib/cn";
+import { localizedQuestionText } from "./quiz-presentation";
 
 export interface QuestionPresenterProps {
   question: ActiveQuestion;
@@ -30,13 +31,6 @@ export interface QuestionPresenterProps {
   onSubmit?: () => void;
   submitPending?: boolean;
   interactionDisabled?: boolean;
-}
-
-function localizedText(
-  value: { en: string; ko: string | null },
-  language: LanguageMode,
-): string {
-  return language === "ko" && value.ko !== null ? value.ko : value.en;
 }
 
 function isSubmittedQuestion(
@@ -126,7 +120,7 @@ export function QuestionPresenter({
 
       <article className="rounded-xl border border-border bg-card p-6 shadow-card">
         <p className="whitespace-pre-wrap text-base font-medium leading-7 text-foreground">
-          {localizedText(question.stem, language)}
+          {localizedQuestionText(question.stem, language)}
         </p>
         <fieldset className="mt-6 grid gap-3" aria-describedby="required-choice-count">
           <legend className="font-bold">답변 선택</legend>
@@ -159,7 +153,7 @@ export function QuestionPresenter({
                 }
                 disabled={selectionDisabled}
                 key={choice.id}
-                label={localizedText(choice.text, language)}
+                label={localizedQuestionText(choice.text, language)}
                 name={`question-${question.id}`}
                 onChange={() => onChoiceChange?.(choice.id)}
                 readOnly={selectionDisabled}
@@ -189,7 +183,7 @@ export function QuestionPresenter({
             <h4 className="mt-5 font-bold">해설</h4>
             <SafeMarkdown
               className="mt-2"
-              content={localizedText(question.explanation, language)}
+              content={localizedQuestionText(question.explanation, language)}
             />
           </section>
         ) : null}

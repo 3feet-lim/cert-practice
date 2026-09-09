@@ -213,7 +213,7 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - 측정 결과와 실패 gate에서 선택 근거를 생성하는 ADR 산출 단계를 spike 명령에 연결한다.
     - _Requirements: 1.6, 4.10-4.12, 11.8-11.10, 15.27, 15.28_
 
-- [~] 10. Backend foundation checkpoint - Ensure all foundation tests pass
+- [x] 10. Backend foundation checkpoint - Ensure all foundation tests pass
   - Ensure workspace, contract compatibility and database spike gates pass; ask the user if questions arise.
 
 - [ ] 11. Shared backend primitive와 contract-compatible projection 구현

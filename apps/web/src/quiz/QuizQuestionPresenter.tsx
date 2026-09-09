@@ -1,14 +1,14 @@
 import type { ActiveQuestion, Uuid } from "@cert-quiz/contracts";
 import { useEffect } from "react";
 
-import type { QuestionNavigatorItem } from "../components/StaticPresentation";
 import { QuestionPresenter } from "./QuestionPresenter";
 import {
-  type QuizQuestionTarget,
-  type QuizTarget,
-  useQuizStore,
-  useQuizStoreApi,
-} from "./quiz-store";
+  clampQuestionIndex,
+  createQuestionNavigatorItems,
+  nextSelectedChoiceIds,
+  questionTarget,
+} from "./quiz-presentation";
+import { type QuizTarget, useQuizStore, useQuizStoreApi } from "./quiz-store";
 
 export interface QuizQuestionPresenterProps {
   sessionTarget: QuizTarget;
@@ -20,54 +20,6 @@ export interface QuizQuestionPresenterProps {
   onSubmit?: (questionId: Uuid, selectedChoiceIds: Uuid[]) => void;
   submitPending?: boolean;
   interactionDisabled?: boolean;
-}
-
-function clampIndex(index: number, questionCount: number): number {
-  return Math.min(Math.max(index, 0), questionCount - 1);
-}
-
-function questionTarget(
-  sessionTarget: QuizTarget,
-  questionId: Uuid,
-): QuizQuestionTarget {
-  return `${sessionTarget}:${questionId}`;
-}
-
-function nextSelection(
-  question: ActiveQuestion,
-  selectedChoiceIds: readonly Uuid[],
-  choiceId: Uuid,
-): Uuid[] {
-  if (question.requiredChoiceCount === 1) return [choiceId];
-  if (selectedChoiceIds.includes(choiceId)) {
-    return selectedChoiceIds.filter((selectedId) => selectedId !== choiceId);
-  }
-  return selectedChoiceIds.length < question.requiredChoiceCount
-    ? [...selectedChoiceIds, choiceId]
-    : [...selectedChoiceIds];
-}
-
-function navigatorItems(
-  sessionTarget: QuizTarget,
-  questions: readonly ActiveQuestion[],
-  currentIndex: number,
-  drafts: Record<QuizQuestionTarget, Uuid[]>,
-): QuestionNavigatorItem[] {
-  return questions.map((question, index) => {
-    const selectedChoiceIds =
-      drafts[questionTarget(sessionTarget, question.id)] ?? question.selectedChoiceIds;
-    return {
-      number: question.displayNumber,
-      href: `#question-${question.displayNumber}`,
-      state:
-        index === currentIndex
-          ? "current"
-          : selectedChoiceIds.length === question.requiredChoiceCount
-            ? "answered"
-            : "unanswered",
-      flagged: question.flagged,
-    };
-  });
 }
 
 /**
@@ -100,17 +52,25 @@ export function QuizQuestionPresenter({
 
   if (questions.length === 0) return null;
 
-  const currentIndex = clampIndex(storedIndex ?? initialIndex, questions.length);
+  const currentIndex = clampQuestionIndex(
+    storedIndex ?? initialIndex,
+    questions.length,
+  );
   const question = questions[currentIndex];
   if (!question) return null;
 
   const target = questionTarget(sessionTarget, question.id);
   const selectedChoiceIds = drafts[target] ?? question.selectedChoiceIds;
   const presentedQuestion: ActiveQuestion = { ...question, selectedChoiceIds };
-  const items = navigatorItems(sessionTarget, questions, currentIndex, drafts);
+  const items = createQuestionNavigatorItems(
+    sessionTarget,
+    questions,
+    currentIndex,
+    drafts,
+  );
 
   const selectChoice = (choiceId: Uuid) => {
-    const next = nextSelection(question, selectedChoiceIds, choiceId);
+    const next = nextSelectedChoiceIds(question, selectedChoiceIds, choiceId);
     if (
       next.length === selectedChoiceIds.length &&
       next.every((selectedId, index) => selectedId === selectedChoiceIds[index])
@@ -122,7 +82,7 @@ export function QuizQuestionPresenter({
   };
 
   const navigate = (nextIndex: number) => {
-    const boundedIndex = clampIndex(nextIndex, questions.length);
+    const boundedIndex = clampQuestionIndex(nextIndex, questions.length);
     quizStore.getState().setCurrentIndex(sessionTarget, boundedIndex);
     onNavigate?.(boundedIndex);
   };
