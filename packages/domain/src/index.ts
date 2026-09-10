@@ -9,6 +9,7 @@ export * from "./errors.js";
 export * from "./fraction.js";
 export * from "./import-service.js";
 export * from "./random.js";
+export * from "./lifecycle-services.js";
 export * from "./persistence.js";
 export * from "./scoring.js";
 export * from "./session-factory.js";

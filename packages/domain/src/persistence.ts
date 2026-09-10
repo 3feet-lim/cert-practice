@@ -80,6 +80,8 @@ export type PersistedQuestionSnapshot = {
   finalChoiceIds: readonly string[] | null;
   earnedScore: Fraction | null;
   flagged: boolean;
+  /** Latest server-accepted answer/state time; immutable Attempt scoring uses it as a cutoff. */
+  savedAt?: Date;
   version: bigint;
 };
 
@@ -182,6 +184,8 @@ export type Attempt = {
   passThreshold: Fraction;
   passed: boolean;
   reference1000Score: number;
+  startedAt: Date;
+  expiresAt: Date;
   submittedAt: Date;
   submissionReason: "manual" | "expired";
   items: readonly PersistedQuestionSnapshot[];
@@ -189,10 +193,12 @@ export type Attempt = {
 
 export type FinalizeExam = Omit<
   Attempt,
-  "examSessionId" | "userId" | "certificationKey" | "items"
+  "examSessionId" | "userId" | "certificationKey" | "startedAt" | "expiresAt" | "items"
 > & {
   userId: string;
   sessionId: string;
+  /** Service-supplied immutable scoring view; legacy adapter callers fall back to session items. */
+  items?: readonly PersistedQuestionSnapshot[];
 };
 
 export type ScoreVisibilityUpdate = {
@@ -234,7 +240,15 @@ export interface PracticeRepository {
     userId: string,
     certificationKey: string,
   ): Promise<PracticeSession | null>;
+  getOwned(userId: string, sessionId: string): Promise<PracticeSession | null>;
   replaceAtomically(input: NewPracticeSession): Promise<PracticeSession>;
+  /** Replaces a service-validated aggregate through one optimistic conditional write. */
+  replaceState(command: {
+    userId: string;
+    sessionId: string;
+    expectedVersion: bigint;
+    session: PracticeSession;
+  }): Promise<PracticeSession | null>;
   saveState(command: PracticeStateCommand): Promise<PracticeSession | null>;
   submitFirstAnswer(
     command: SubmitPracticeAnswer,
@@ -247,9 +261,26 @@ export interface PracticeRepository {
   deleteExpired(cutoffInclusive: Date, batchSize: number): Promise<number>;
 }
 
+export interface HistoryRepository {
+  getAttemptOwned(userId: string, attemptId: string): Promise<Attempt | null>;
+  listAttempts(userId: string): Promise<readonly Attempt[]>;
+  listPublicAttempts(
+    certificationId: string,
+  ): Promise<readonly { user: UserProfile; attempt: Attempt }[]>;
+}
+
 export interface ExamRepository {
   createWithSnapshots(input: NewExamSession): Promise<ExamSession>;
   getOwned(userId: string, sessionId: string): Promise<ExamSession | null>;
+  listExpiredOwned(userId: string, now: Date): Promise<readonly ExamSession[]>;
+  /** Replaces a service-validated aggregate through one optimistic conditional write. */
+  replaceState(command: {
+    userId: string;
+    sessionId: string;
+    expectedVersion: bigint;
+    session: ExamSession;
+    now: Date;
+  }): Promise<ExamSession | null>;
   saveBeforeExpiry(command: SaveExamState): Promise<ExamSession | null>;
   finalizeOnce(command: FinalizeExam): Promise<Attempt | null>;
 }
@@ -259,6 +290,7 @@ export type TransactionRepositories = {
   catalog: CatalogRepository;
   practice: PracticeRepository;
   exams: ExamRepository;
+  history: HistoryRepository;
 };
 
 export interface UnitOfWork {

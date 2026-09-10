@@ -85,7 +85,7 @@ export function sampleSession(
   return {
     certificationKey: source.certification.externalKey,
     questions: ordered.map((question, displayIndex) =>
-      snapshot(question, displayIndex, random),
+      snapshot(question, displayIndex, random, source),
     ),
   };
 }
@@ -171,6 +171,7 @@ function snapshot(
   question: GenerationQuestion,
   displayIndex: number,
   random: RandomSource,
+  source: FullCatalogGenerationSource,
 ): PersistedQuestionSnapshot {
   const choices = fullSnapshotChoices(fullShuffle(question.choices, random));
   const correctChoiceIds = question.correctChoiceIndexes
@@ -178,8 +179,16 @@ function snapshot(
     .filter((id): id is string => id !== undefined);
   const content: JsonValue = {
     revisionId: question.revisionId,
-    certificationId: question.certificationId,
-    domainId: question.domainId,
+    certification: {
+      id: source.certification.id,
+      code: source.certification.code,
+      name: source.certification.name,
+      scoringMode: source.certification.scoringMode,
+      passThreshold: source.certification.passThreshold
+        .displayDecimal(12)
+        .replace(/\.0+$/, "")
+        .replace(/(\.\d*?)0+$/, "$1"),
+    },
     domainName: question.domainName,
     stem: question.stem,
     explanation: question.explanation,

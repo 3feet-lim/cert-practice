@@ -10,6 +10,7 @@ import type {
   ExamSession,
   FinalizeExam,
   FullCatalogGenerationSource,
+  HistoryRepository,
   ImportValidation,
   NewCompletedPracticeResult,
   NewExamSession,
@@ -106,6 +107,20 @@ export class InMemoryUnitOfWork implements UnitOfWork {
     if (active) this.#state.heads.set(source.certificationKey, source.revisionId);
   }
 
+  /** Seeds a full generation source for deterministic offline lifecycle and route tests. */
+  seedFullGenerationSource(source: FullCatalogGenerationSource): void {
+    if (!this.#state.catalogSources.has(source.revisionId))
+      throw new Error(
+        "Seed the matching catalog source before its full generation source.",
+      );
+    if (this.#state.fullGenerationSources.has(source.revisionId))
+      throw new Error("Seed generation revision ID must be unique.");
+    this.#state.fullGenerationSources.set(
+      source.revisionId,
+      copyFullGenerationSource(source),
+    );
+  }
+
   async transaction<T>(
     work: (repos: TransactionRepositories) => Promise<T>,
   ): Promise<T> {
@@ -131,6 +146,7 @@ class InMemoryRepositories implements TransactionRepositories {
   readonly catalog: CatalogRepository;
   readonly practice: PracticeRepository;
   readonly exams: ExamRepository;
+  readonly history: HistoryRepository;
 
   constructor(
     private readonly state: State,
@@ -140,6 +156,7 @@ class InMemoryRepositories implements TransactionRepositories {
     this.catalog = this.catalogRepository();
     this.practice = this.practiceRepository();
     this.exams = this.examRepository();
+    this.history = this.historyRepository();
   }
 
   private fault(point: InMemoryFaultPoint): void {
@@ -362,6 +379,10 @@ class InMemoryRepositories implements TransactionRepositories {
         );
         return session ? copyPractice(session) : null;
       },
+      getOwned: async (userId, sessionId) => {
+        const session = this.state.practices.get(sessionId);
+        return session?.userId === userId ? copyPractice(session) : null;
+      },
       replaceAtomically: async (input) => {
         for (const session of this.state.practices.values()) {
           if (
@@ -376,6 +397,14 @@ class InMemoryRepositories implements TransactionRepositories {
         this.state.practices.set(created.id, created);
         this.fault("practice-replace");
         return copyPractice(created);
+      },
+      replaceState: async ({ userId, sessionId, expectedVersion, session }) => {
+        const current = this.ownedActivePractice(userId, sessionId);
+        if (!current || current.version !== expectedVersion) return null;
+        const updated = copyPractice(session);
+        updated.version = current.version + 1n;
+        this.state.practices.set(updated.id, updated);
+        return copyPractice(updated);
       },
       saveState: async (command) => {
         const session = this.ownedActivePractice(command.userId, command.sessionId);
@@ -461,7 +490,12 @@ class InMemoryRepositories implements TransactionRepositories {
       },
       getCompletedOwned: async (userId, resultId, now) => {
         const result = this.state.results.get(resultId);
-        if (!result || result.userId !== userId || result.expiresAt <= now) return null;
+        if (!result || result.userId !== userId) return null;
+        if (result.expiresAt <= now) {
+          // Offline adapter mirrors the logical boundary with an inline conditional delete.
+          this.state.results.delete(resultId);
+          return null;
+        }
         return copyResult(result);
       },
       deleteExpired: async (cutoffInclusive, batchSize) => {
@@ -498,12 +532,39 @@ class InMemoryRepositories implements TransactionRepositories {
         const session = this.state.exams.get(sessionId);
         return session?.userId === userId ? copyExam(session) : null;
       },
+      listExpiredOwned: async (userId, now) =>
+        [...this.state.exams.values()]
+          .filter(
+            (session) =>
+              session.userId === userId &&
+              session.status === "active" &&
+              session.expiresAt <= now,
+          )
+          .sort((left, right) =>
+            compareDateThenId(left.expiresAt, left.id, right.expiresAt, right.id),
+          )
+          .map(copyExam),
+      replaceState: async ({ userId, sessionId, expectedVersion, session, now }) => {
+        const current = this.ownedExam(userId, sessionId);
+        if (
+          !current ||
+          current.status !== "active" ||
+          current.version !== expectedVersion ||
+          current.expiresAt <= now
+        )
+          return null;
+        const updated = copyExam(session);
+        updated.version = current.version + 1n;
+        this.state.exams.set(updated.id, updated);
+        return copyExam(updated);
+      },
       saveBeforeExpiry: async (command: SaveExamState) => {
         const session = this.ownedExam(command.userId, command.sessionId);
         if (
           !session ||
           session.version !== command.expectedVersion ||
-          session.expiresAt <= command.now
+          session.expiresAt <= command.now ||
+          session.status !== "active"
         )
           return null;
         const question = session.questions.find(
@@ -518,6 +579,7 @@ class InMemoryRepositories implements TransactionRepositories {
                 ...item,
                 selectedChoiceIds: [...command.selectedChoiceIds],
                 flagged: command.flagged,
+                savedAt: copyDate(command.now),
                 version: item.version + 1n,
               }
             : item,
@@ -541,7 +603,9 @@ class InMemoryRepositories implements TransactionRepositories {
           examSessionId: session.id,
           userId: session.userId,
           certificationKey: session.certificationKey,
-          items: session.questions.map(copyQuestion),
+          startedAt: copyDate(session.startedAt),
+          expiresAt: copyDate(session.expiresAt),
+          items: (command.items ?? session.questions).map(copyQuestion),
         };
         const existingAttemptId = this.state.attemptIdsByExam.get(session.id);
         if (existingAttemptId)
@@ -559,6 +623,32 @@ class InMemoryRepositories implements TransactionRepositories {
         this.fault("exam-finalize");
         return copyAttempt(attempt);
       },
+    };
+  }
+
+  private historyRepository(): HistoryRepository {
+    return {
+      getAttemptOwned: async (userId, attemptId) => {
+        const attempt = this.state.attempts.get(attemptId);
+        return attempt?.userId === userId ? copyAttempt(attempt) : null;
+      },
+      listAttempts: async (userId) =>
+        [...this.state.attempts.values()]
+          .filter((attempt) => attempt.userId === userId)
+          .sort((left, right) =>
+            compareDateThenId(right.submittedAt, left.id, left.submittedAt, right.id),
+          )
+          .map(copyAttempt),
+      listPublicAttempts: async (certificationId) =>
+        [...this.state.attempts.values()].flatMap((attempt) => {
+          const profile = this.state.users.get(attempt.userId);
+          return profile &&
+            profile.approvalStatus === "approved" &&
+            profile.scorePublic &&
+            certificationIdFor(attempt) === certificationId
+            ? [{ user: copyUser(profile), attempt: copyAttempt(attempt) }]
+            : [];
+        }),
     };
   }
 
@@ -697,6 +787,7 @@ function copyQuestion(item: PersistedQuestionSnapshot): PersistedQuestionSnapsho
     content: structuredClone(item.content),
     selectedChoiceIds: [...item.selectedChoiceIds],
     finalChoiceIds: item.finalChoiceIds && [...item.finalChoiceIds],
+    savedAt: item.savedAt && copyDate(item.savedAt),
   };
 }
 function copyPractice(item: PracticeSession): PracticeSession {
@@ -734,13 +825,18 @@ function copyNewExam(item: NewExamSession): NewExamSession {
 function copyAttempt(item: Attempt): Attempt {
   return {
     ...item,
+    startedAt: copyDate(item.startedAt),
+    expiresAt: copyDate(item.expiresAt),
     submittedAt: copyDate(item.submittedAt),
     items: item.items.map(copyQuestion),
   };
 }
 function copyAttemptInput(
   item: FinalizeExam,
-): Omit<Attempt, "examSessionId" | "userId" | "certificationKey" | "items"> {
+): Omit<
+  Attempt,
+  "examSessionId" | "userId" | "certificationKey" | "startedAt" | "expiresAt" | "items"
+> {
   return { ...item, submittedAt: copyDate(item.submittedAt) };
 }
 function copyDate(value: Date): Date {
@@ -753,6 +849,19 @@ function compareDateThenId(
   rightId: string,
 ): number {
   return left.getTime() - right.getTime() || leftId.localeCompare(rightId);
+}
+function certificationIdFor(attempt: Attempt): string | null {
+  const content = attempt.items[0]?.content;
+  if (!content || typeof content !== "object" || Array.isArray(content)) return null;
+  const certification = (content as Record<string, unknown>).certification;
+  if (
+    !certification ||
+    typeof certification !== "object" ||
+    Array.isArray(certification)
+  )
+    return null;
+  const id = (certification as Record<string, unknown>).id;
+  return typeof id === "string" ? id : null;
 }
 function required<T>(value: T | undefined, name: string): T {
   if (!value) throw new Error(`Missing ${name}.`);

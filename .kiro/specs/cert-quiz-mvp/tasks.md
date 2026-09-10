@@ -382,35 +382,36 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
   - [~] Live DSQL/Postgres transaction, migration, concurrency, and production-adapter gates remain blocked: no network/DB calls were permitted.
   - Ensure backend unit, property, migration, repository contract, concurrency and contract-provider tests pass; ask the user if questions arise.
 
-- [ ] 18. Practice session, result와 retention 수직 기능 구현
-  - [~] 18.1 start/resume/replace lifecycle을 구현한다
+- [~] 18. Practice session, result와 retention 수직 기능 구현
+  - Offline-safe domain services, strict Hono routes, 200-run in-memory property coverage and focused API integration are implemented. Real DSQL/PostgreSQL conditional writes, EventBridge execution, and live integration remain blocked by the no-network/no-DB constraint.
+  - [x] 18.1 start/resume/replace lifecycle을 구현한다
     - active가 없으면 version 0 session을 만들고 있으면 선택 전 비변경 응답, resume round-trip과 확인 nonce 기반 atomic replace를 구현한다.
     - _Requirements: 7.1-7.9_
-  - [~] 18.2 answer draft, Flag와 position의 versioned state mutation을 구현한다
+  - [x] 18.2 answer draft, Flag와 position의 versioned state mutation을 구현한다
     - owner와 question membership을 검증하고 expectedVersion 일치 시 한 번 증가시키며 저장 실패/stale에서는 기존 상태와 최신 ID/version을 반환한다.
     - _Requirements: 6.7-6.12, 7.10-7.12_
-  - [~] 18.3 최초 question submit 잠금과 exact scoring을 구현한다
+  - [x] 18.3 최초 question submit 잠금과 exact scoring을 구현한다
     - choice 소속·정확한 선택 수를 검증하고 최초 final answer/score를 잠그며 동일 집합 replay와 다른 집합 conflict를 구분한다.
     - _Requirements: 8.1-8.7, 12.1-12.8, 12.13-12.17_
-  - [~] 18.4 마지막 제출과 Completed_Practice_Result 생성을 원자적으로 구현한다
+  - [x] 18.4 마지막 제출과 Completed_Practice_Result 생성을 원자적으로 구현한다
     - session 완료, 단일 result/items, 전체·domain exact score와 immutable review snapshot을 함께 저장하고 replay에 기존 result를 반환한다.
     - _Requirements: 8.8-8.12, 9.1-9.3_
-  - [~] 18.5 168시간 visibility와 idempotent retention cleanup을 구현한다
+  - [x] 18.5 168시간 visibility와 idempotent retention cleanup을 구현한다
     - `[completedAt, completedAt+168h)` owner 조회, 경계 이후 inline conditional delete와 만료 응답, EventBridge용 batch cleanup command를 구현한다.
     - _Requirements: 9.4-9.7_
-  - [~] 18.6 practice API routes를 기존 shared contracts에 연결한다
+  - [x] 18.6 practice API routes를 기존 shared contracts에 연결한다
     - start/resume/replace/state/submit/result endpoint를 owner repository와 projector에 배선하고 mock adapter와 같은 성공·오류 union을 반환한다.
     - duplicate submit pending과 retry metadata가 일관되게 제공되게 한다.
     - _Requirements: 6.7-6.16, 7.1-7.12, 8.1-8.12, 9.1-9.7, 16.6-16.9_
-  - [~] 18.7 practice lifecycle property test를 작성한다
+  - [x] 18.7 practice lifecycle property test를 작성한다
     - **Property 11: 활성 연습 세션 단일성과 재개·상태 저장 round-trip**
     - 임의 start/resume/replace/save 순서를 model과 비교해 단일 active, atomic replace와 version 동작을 검증한다.
     - **Validates: Requirements 7.1-7.12**
-  - [~] 18.8 최초 제출 잠금 property test를 작성한다
+  - [x] 18.8 최초 제출 잠금 property test를 작성한다
     - **Property 12: 연습 최초 제출 잠금 상태 머신**
     - 임의 선택 집합과 replay에서 유효 최초 제출만 commit되고 다른 요청은 locked state를 바꾸지 않음을 검증한다.
     - **Validates: Requirements 8.1-8.7**
-  - [~] 18.9 공개 격리·단일 완료 property test를 작성한다
+  - [x] 18.9 공개 격리·단일 완료 property test를 작성한다
     - **Property 13: 연습 공개 격리와 단일 완료 결과**
     - question별 reveal 조건과 마지막 동시 제출에서 result가 정확히 하나임을 검증한다.
     - **Validates: Requirements 8.8-8.12**
@@ -419,12 +420,13 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - 경계 전/정확한 경계/이후 visibility와 cleanup 지연을 검증하고 practice result 변화가 Attempt 기반 분석에 영향을 주지 않음을 검증한다.
     - **Validates: Requirements 9.1-9.11**
 
-- [ ] 19. Exam timer, lazy expiration과 idempotent finalize 수직 기능 구현
-  - [~] 19.1 idempotent exam start와 server-clock state mutation을 구현한다
+- [~] 19. Exam timer, lazy expiration과 idempotent finalize 수직 기능 구현
+  - Offline-safe domain services, strict Hono routes, in-memory cutoff/finalization and 200-run property coverage are implemented. The all-route finalizer is composition-safe when lifecycle dependencies are supplied; production auth/DB transaction and failure-telemetry semantics remain blocked.
+  - [x] 19.1 idempotent exam start와 server-clock state mutation을 구현한다
     - request 수신 시각으로 startedAt/expiresAt을 저장하고 `(userId, Idempotency-Key)` replay에 같은 session을 반환한다.
     - `remaining=max(0,floor(expiresAt-now))`와 만료 전 versioned save, 경계 이후 mutation 거부를 구현한다.
     - _Requirements: 10.1-10.3, 10.6, 10.8-10.12_
-  - [~] 19.2 exam restore와 submission preview를 구현한다
+  - [x] 19.2 exam restore와 submission preview를 구현한다
     - snapshot/choice order/answer/Flag/index/version/remaining을 복원하고 실패 시 대체 세션을 만들지 않는다.
     - 서버 저장 상태의 unanswered/flagged count만 preview에 제공하고 active projection에서 답을 제거한다.
     - _Requirements: 10.4, 10.5, 10.7, 10.13_
@@ -432,26 +434,26 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - authentication/user 식별 직후 approval·role·정상 handler 전에 소유자의 만료 미제출 세션을 `(expiresAt,id)` 순서로 처리한다.
     - 하나가 실패하면 이전 commit을 유지하고 이후 finalize와 원 요청을 중단하며 실패 session ID만 안전하게 반환한다.
     - _Requirements: 11.2, 11.3, 11.11, 11.12_
-  - [~] 19.4 cutoff 기반 `finalizeOnce`와 immutable Attempt 생성을 구현한다
+  - [x] 19.4 cutoff 기반 `finalizeOnce`와 immutable Attempt 생성을 구현한다
     - manual은 request 수신 전 commit된 최신 응답, expired는 `savedAt<=expiresAt`만 채점하고 미응답은 0점으로 처리한다.
     - Attempt/items와 session submitted를 한 transaction으로 commit하고 unique conflict/replay에는 같은 Attempt를 반환한다.
     - _Requirements: 11.1, 11.4-11.10, 12.1-12.17, 13.4-13.7_
-  - [~] 19.5 exam start/get/state/preview/submit API를 기존 shared contracts에 연결한다
+  - [x] 19.5 exam start/get/state/preview/submit API를 기존 shared contracts에 연결한다
     - lazy finalizer, owner repository, strict projector와 result redirect를 Hono route pipeline에 배선하고 mock adapter의 contract를 호환한다.
     - _Requirements: 10.1-10.13, 11.1-11.12, 16.6-16.9_
-  - [~] 19.6 exam 시간 함수 property test를 작성한다
+  - [x] 19.6 exam 시간 함수 property test를 작성한다
     - **Property 15: 서버 시계 기반 exam 시간 함수**
     - 임의 시작/제한/조회 시각과 replay·재접속에서 timestamps/remaining 불변식 및 만료 경계 mutation 차단을 검증한다.
     - **Validates: Requirements 10.1-10.3, 10.6, 10.8, 10.9**
-  - [~] 19.7 exam 저장·복원 property test를 작성한다
+  - [x] 19.7 exam 저장·복원 property test를 작성한다
     - **Property 16: Exam 저장·복원의 versioned round-trip과 비공개 projection**
     - 저장 성공/실패/stale/복원 실패와 preview count를 model과 비교하고 forbidden field 부재를 검증한다.
     - **Validates: Requirements 10.4, 10.5, 10.7, 10.10-10.13**
-  - [~] 19.8 lazy expiration·cutoff property test를 작성한다
+  - [x] 19.8 lazy expiration·cutoff property test를 작성한다
     - **Property 17: lazy expiration, 순차 실패와 채점 cutoff**
     - 임의 세션/요청 시퀀스에서 시간 경과만으로 Attempt가 생기지 않고 정렬·cutoff·중단 규칙이 유지됨을 검증한다.
     - **Validates: Requirements 11.1-11.5, 11.11, 11.12**
-  - [~] 19.9 concurrent finalize property test를 작성한다
+  - [x] 19.9 concurrent finalize property test를 작성한다
     - **Property 18: 동시 finalize의 선형 가능 멱등성**
     - manual/expired/retry interleaving model에서 단일 Attempt·동일 결과 또는 완전 rollback만 관찰됨을 검증한다.
     - **Validates: Requirements 11.6-11.10**
@@ -460,24 +462,25 @@ TypeScript 모노레포에서 **정적 UI를 가장 먼저 만들고 사용자�
     - barrier로 manual/expired 충돌과 중간 실패를 만들고 committed prefix 보존, 이후 route 미실행과 retry 결과를 검증한다.
     - _Requirements: 11.1-11.12_
 
-- [ ] 20. Immutable result, history와 leaderboard 구현
-  - [~] 20.1 Attempt detail, history와 trend query를 구현한다
+- [~] 20. Immutable result, history와 leaderboard 구현
+  - Offline-safe immutable snapshot projections, owner history/trends, exact in-memory public leaderboard, strict Hono routes, and 200-run P21/P22 coverage are implemented. Live repository query plans, cursor pagination, and DB privacy/performance integration remain blocked.
+  - [x] 20.1 Attempt detail, history와 trend query를 구현한다
     - 원본 catalog join 없이 snapshot result를 제공하고 owner Attempt만 `(submittedAt DESC,id ASC)`, trend는 `(submittedAt ASC,id ASC)`로 반환한다.
     - 빈 사용자에게 빈 이력·추이와 certification별 count 0을 제공한다.
     - _Requirements: 13.1-13.14_
-  - [~] 20.2 score visibility 기반 exact leaderboard를 구현한다
+  - [x] 20.2 score visibility 기반 exact leaderboard를 구현한다
     - approved/public/Attempt 보유자만 후보로 만들고 대표를 exact accuracy DESC, submittedAt ASC, attemptId ASC로 선택한다.
     - standard competition rank와 동률 출력 순서, current marker와 빈 leaderboard를 구현한다.
     - _Requirements: 9.10, 9.11, 12.12, 14.4-14.15_
-  - [~] 20.3 result/history/trend/leaderboard API를 기존 shared contracts에 연결한다
+  - [x] 20.3 result/history/trend/leaderboard API를 기존 shared contracts에 연결한다
     - owner와 privacy projection을 적용하고 email, Google_Sub와 비공개 사용자 존재를 반환하지 않는다.
     - frontend mock fixture와 backend provider response를 contract test로 비교한다.
     - _Requirements: 1.12, 13.1-13.14, 14.4-14.15, 16.3-16.7_
-  - [~] 20.4 Attempt 불변성·이력 property test를 작성한다
+  - [x] 20.4 Attempt 불변성·이력 property test를 작성한다
     - **Property 21: Attempt 불변성과 이력 정렬**
     - 임의 catalog 교체와 동률 시각에서 snapshot 불변성, owner filtering, 이력·추이 순서와 빈 상태를 검증한다.
     - **Validates: Requirements 13.1-13.14**
-  - [~] 20.5 leaderboard property test를 작성한다
+  - [x] 20.5 leaderboard property test를 작성한다
     - **Property 22: 리더보드 후보·대표·동률 규칙**
     - 임의 profile/Attempt 집합에서 후보, 대표, exact rank, 출력 tie-break와 marker를 독립 oracle과 비교한다.
     - **Validates: Requirements 14.2-14.15**
