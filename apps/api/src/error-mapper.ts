@@ -4,15 +4,13 @@ import {
   type RequestId,
 } from "@cert-quiz/contracts";
 import { isDomainFailure } from "@cert-quiz/domain";
-
-export type HttpErrorStatus = 400 | 401 | 403 | 404 | 409 | 410 | 422 | 500 | 503;
-
+import { isRateLimitExceeded } from "./rate-limit.js";
+export type HttpErrorStatus = 400 | 401 | 403 | 404 | 409 | 410 | 422 | 429 | 500 | 503;
 export type MappedHttpError = {
   status: HttpErrorStatus;
   body: ErrorEnvelope;
   headers?: Readonly<Record<string, string>>;
 };
-
 const messages = {
   unauthenticated: "Authentication is required.",
   "invalid-google-identity": "A valid Google identity is required.",
@@ -29,7 +27,6 @@ const messages = {
   "dependency-unavailable": "The service is temporarily unavailable. Please retry.",
   "submission-failed": "Submission could not be completed. Please retry.",
 } as const;
-
 const statuses = {
   unauthenticated: 401,
   "invalid-google-identity": 401,
@@ -46,15 +43,46 @@ const statuses = {
   "dependency-unavailable": 503,
   "submission-failed": 503,
 } as const;
+const transportCodes = {
+  unauthenticated: "authentication-invalid",
+  "invalid-google-identity": "google-identity-missing",
+  "approval-required": "approval-required",
+  "admin-required": "admin-required",
+  "ownership-denied": "ownership-denied",
+  forbidden: "ownership-denied",
+  "not-found": "not-found",
+  expired: "practice-result-expired",
+  "validation-failed": "validation-failed",
+  "stale-version": "stale-version",
+  conflict: "answer-locked",
+  "invalid-scoring-configuration": "invalid-scoring-config",
+  "dependency-unavailable": "dependency-unavailable",
+  "submission-failed": "dependency-unavailable",
+} as const;
 
 export function mapError(error: unknown, requestId: RequestId): MappedHttpError {
+  if (isRateLimitExceeded(error)) {
+    return {
+      status: 429,
+      headers: { "Retry-After": String(error.retryAfterSeconds) },
+      body: errorEnvelopeSchema.parse({
+        error: {
+          code: "rate-limited",
+          message: "Too many requests. Retry after the indicated delay.",
+          requestId,
+          retryable: true,
+          nextAction: "Retry after the Retry-After delay.",
+        },
+      }),
+    };
+  }
   if (isDomainFailure(error)) {
     const { code, details } = error.error;
     return {
       status: statuses[code],
       body: errorEnvelopeSchema.parse({
         error: {
-          code,
+          code: transportCodes[code],
           message: messages[code],
           requestId,
           retryable: code === "dependency-unavailable" || code === "submission-failed",
@@ -66,7 +94,6 @@ export function mapError(error: unknown, requestId: RequestId): MappedHttpError 
         : {}),
     };
   }
-
   return {
     status: 500,
     body: errorEnvelopeSchema.parse({

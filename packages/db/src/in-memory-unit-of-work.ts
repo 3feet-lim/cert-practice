@@ -31,6 +31,7 @@ export type InMemoryFaultPoint =
   | "approval-write"
   | "practice-replace"
   | "practice-submit"
+  | "exam-create"
   | "exam-finalize"
   | "catalog-switch";
 
@@ -379,6 +380,14 @@ class InMemoryRepositories implements TransactionRepositories {
         );
         return session ? copyPractice(session) : null;
       },
+      listActiveOwned: async (userId) =>
+        [...this.state.practices.values()]
+          .filter((candidate) => candidate.userId === userId && candidate.status === "active")
+          .sort((left, right) =>
+            left.createdAt.getTime() - right.createdAt.getTime() ||
+            left.id.localeCompare(right.id),
+          )
+          .map(copyPractice),
       getOwned: async (userId, sessionId) => {
         const session = this.state.practices.get(sessionId);
         return session?.userId === userId ? copyPractice(session) : null;
@@ -526,6 +535,7 @@ class InMemoryRepositories implements TransactionRepositories {
         };
         this.state.exams.set(exam.id, exam);
         this.state.examIdsByRequest.set(key, exam.id);
+        this.fault("exam-create");
         return copyExam(exam);
       },
       getOwned: async (userId, sessionId) => {

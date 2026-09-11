@@ -234,7 +234,7 @@ describe("Property 2: authorization non-interference and role boundaries", () =>
           const payload: unknown = await response.json();
           if (!allowed) {
             expect(errorEnvelopeSchema.parse(payload).error.code).toMatch(
-              /^(unauthenticated|approval-required|admin-required)$/,
+              /^(authentication-invalid|approval-required|admin-required)$/,
             );
             expect(JSON.stringify(payload)).not.toContain(TARGET_ID);
             expect(JSON.stringify(payload)).not.toContain("sensitive-google-sub");

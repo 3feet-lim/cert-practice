@@ -1,0 +1,75 @@
+name: Protected release and rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Deploy a release or restore a recorded release.
+        required: true
+        type: choice
+        options: [release, rollback]
+      stage:
+        description: Target stage. Production protection rules apply to prod.
+        required: true
+        type: choice
+        options: [dev, prod]
+      catalog_file:
+        description: Repository-relative JSON catalog used for release or validated catalog rollback.
+        required: true
+        type: string
+      release_id:
+        description: Required only for rollback; identifies releases/<id>/release-manifest.json.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: certquiz-${{ inputs.stage }}-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: ${{ inputs.action }} · ${{ inputs.stage }}
+    runs-on: ubuntu-latest
+    environment: release-${{ inputs.stage }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.CERTQUIZ_RELEASE_ROLE_ARN }}
+          aws-region: ap-northeast-2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ci:pr
+      - id: release-started
+        run: echo "iso=$(node -p 'new Date().toISOString()')" >> "$GITHUB_OUTPUT"
+      - run: pnpm ci:db-adapter
+        env:
+          DSQL_ENDPOINT: ${{ secrets.CERTQUIZ_DSQL_ENDPOINT }}
+          DSQL_DATABASE: ${{ secrets.CERTQUIZ_DSQL_DATABASE }}
+          DSQL_USER: ${{ secrets.CERTQUIZ_DSQL_USER }}
+          PGSSLROOTCERT: /etc/ssl/certs/ca-certificates.crt
+          CERTQUIZ_DSQL_SPIKE_NOT_BEFORE: ${{ steps.release-started.outputs.iso }}
+      - if: inputs.action == 'release'
+        run: pnpm release:apply -- --stage "${{ inputs.stage }}" --catalog-file "${{ inputs.catalog_file }}"
+        env:
+          CERTQUIZ_ADMIN_TOKEN: ${{ secrets.CERTQUIZ_RELEASE_ADMIN_TOKEN }}
+          CERTQUIZ_API_ORIGIN: ${{ secrets.CERTQUIZ_API_ORIGIN }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          DSQL_DATABASE: ${{ secrets.CERTQUIZ_DSQL_DATABASE }}
+          DSQL_USER: ${{ secrets.CERTQUIZ_DSQL_USER }}
+          PGSSLROOTCERT: /etc/ssl/certs/ca-certificates.crt
+      - if: inputs.action == 'rollback'
+        run: pnpm release:rollback -- --stage "${{ inputs.stage }}" --release-id "${{ inputs.release_id }}" --catalog-file "${{ inputs.catalog_file }}" --confirm-rollback
+        env:
+          CERTQUIZ_ADMIN_TOKEN: ${{ secrets.CERTQUIZ_RELEASE_ADMIN_TOKEN }}
+          CERTQUIZ_API_ORIGIN: ${{ secrets.CERTQUIZ_API_ORIGIN }}

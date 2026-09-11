@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "baseUrl": "${env:CERTQUIZ_RUNBOOK_BASE_URL, 'https://github.com/certquiz/cert-practice/blob/main/infra/serverless/runbooks'}",
+  "runbooks": {
+    "api-5xx": { "href": "api-5xx.md", "firstAction": "Correlate request IDs and evaluate Lambda rollback." },
+    "finalize-failure": { "href": "finalize-failure.md", "firstAction": "Preserve attempts and verify retryable exam-session state." },
+    "cleanup-failure": { "href": "cleanup-failure.md", "firstAction": "Check EventBridge delivery, Lambda permissions, and rerun the bounded cleanup." },
+    "import-rollback": { "href": "import-rollback.md", "firstAction": "Confirm active catalog head and validation token state before any retry." },
+    "projection-leak": { "href": "projection-leak.md", "firstAction": "Stop deployment progression and roll back the Lambda alias without collecting response payloads." },
+    "db-latency": { "href": "db-latency.md", "firstAction": "Inspect connection and transaction latency, then re-evaluate DSQL gate evidence." },
+    "budget": { "href": "budget.md", "firstAction": "Review traffic, log retention, and DSQL consumption before changing capacity or retention." }
+  }
+}

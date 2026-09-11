@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import {
   Link,
   Navigate,
@@ -11,21 +11,53 @@ import {
 } from "react-router-dom";
 
 import type { CertQuizApiError } from "../api/port";
-import { ImportPage } from "../admin/ImportPage";
-import { PendingUsersPage } from "../admin/PendingUsersPage";
 import { Button } from "../components/ui/Button";
-import { ExamPage } from "../quiz/ExamPage";
-import { PracticePage } from "../quiz/PracticePage";
-import { CatalogHomePage, ModeSelectPage } from "./CatalogModePages";
-import {
-  AttemptResultPage,
-  HistoryPage,
-  LeaderboardPage,
-  PracticeResultPage,
-} from "./ResultHistoryLeaderboardPages";
 import { createAdminRequiredError, useAuthSession } from "./auth-session-context";
 import { useMockAuthCallback } from "./mock-auth-capability";
 import { createLoginUrl, createPendingUrl, getSafeReturnUrl } from "./safe-return-url";
+
+const ImportPage = lazy(() =>
+  import("../admin/ImportPage").then(({ ImportPage: Page }) => ({ default: Page })),
+);
+const PendingUsersPage = lazy(() =>
+  import("../admin/PendingUsersPage").then(({ PendingUsersPage: Page }) => ({
+    default: Page,
+  })),
+);
+const ExamPage = lazy(() =>
+  import("../quiz/ExamPage").then(({ ExamPage: Page }) => ({ default: Page })),
+);
+const PracticePage = lazy(() =>
+  import("../quiz/PracticePage").then(({ PracticePage: Page }) => ({
+    default: Page,
+  })),
+);
+const CatalogHomePage = lazy(() =>
+  import("./CatalogModePages").then(({ CatalogHomePage: Page }) => ({ default: Page })),
+);
+const ModeSelectPage = lazy(() =>
+  import("./CatalogModePages").then(({ ModeSelectPage: Page }) => ({ default: Page })),
+);
+const PracticeResultPage = lazy(() =>
+  import("./ResultHistoryLeaderboardPages").then(({ PracticeResultPage: Page }) => ({
+    default: Page,
+  })),
+);
+const AttemptResultPage = lazy(() =>
+  import("./ResultHistoryLeaderboardPages").then(({ AttemptResultPage: Page }) => ({
+    default: Page,
+  })),
+);
+const HistoryPage = lazy(() =>
+  import("./ResultHistoryLeaderboardPages").then(({ HistoryPage: Page }) => ({
+    default: Page,
+  })),
+);
+const LeaderboardPage = lazy(() =>
+  import("./ResultHistoryLeaderboardPages").then(({ LeaderboardPage: Page }) => ({
+    default: Page,
+  })),
+);
 
 function LoadingRoute() {
   return (
@@ -327,30 +359,32 @@ function NotFoundRoute() {
 }
 export function AppRoutes() {
   return (
-    <Routes>
-      <Route index element={<RootRedirect />} />
-      <Route path="login" element={<LoginRoute />} />
-      <Route path="auth/callback" element={<CallbackRoute />} />
-      <Route path="pending" element={<PendingRoute />} />
-      <Route element={<ApprovedRouteGuard />}>
-        <Route path="app" element={<ApprovedLayout />}>
-          <Route index element={<CatalogHomePage />} />
-          <Route path="certifications/:id" element={<ModeSelectPage />} />
-          <Route path="practice/:sessionId" element={<PracticePage />} />
-          <Route path="exams/:sessionId" element={<ExamPage />} />
-          <Route path="practice-results/:id" element={<PracticeResultPage />} />
-          <Route path="attempts/:id" element={<AttemptResultPage />} />
-          <Route path="history" element={<HistoryPage />} />
-          <Route path="leaderboards/:certId?" element={<LeaderboardPage />} />
-          <Route element={<AdminRouteGuard />}>
-            <Route path="admin" element={<AdminLayout />}>
-              <Route path="users" element={<PendingUsersPage />} />
-              <Route path="import" element={<ImportPage />} />
+    <Suspense fallback={<LoadingRoute />}>
+      <Routes>
+        <Route index element={<RootRedirect />} />
+        <Route path="login" element={<LoginRoute />} />
+        <Route path="auth/callback" element={<CallbackRoute />} />
+        <Route path="pending" element={<PendingRoute />} />
+        <Route element={<ApprovedRouteGuard />}>
+          <Route path="app" element={<ApprovedLayout />}>
+            <Route index element={<CatalogHomePage />} />
+            <Route path="certifications/:id" element={<ModeSelectPage />} />
+            <Route path="practice/:sessionId" element={<PracticePage />} />
+            <Route path="exams/:sessionId" element={<ExamPage />} />
+            <Route path="practice-results/:id" element={<PracticeResultPage />} />
+            <Route path="attempts/:id" element={<AttemptResultPage />} />
+            <Route path="history" element={<HistoryPage />} />
+            <Route path="leaderboards/:certId?" element={<LeaderboardPage />} />
+            <Route element={<AdminRouteGuard />}>
+              <Route path="admin" element={<AdminLayout />}>
+                <Route path="users" element={<PendingUsersPage />} />
+                <Route path="import" element={<ImportPage />} />
+              </Route>
             </Route>
           </Route>
         </Route>
-      </Route>
-      <Route path="*" element={<NotFoundRoute />} />
-    </Routes>
+        <Route path="*" element={<NotFoundRoute />} />
+      </Routes>
+    </Suspense>
   );
 }

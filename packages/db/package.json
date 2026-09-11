@@ -15,8 +15,9 @@
   ],
   "scripts": {
     "build": "tsc6 -b --pretty false",
+    "migrate:deploy": "pnpm run build && node dist/migrate-cli.js",
     "typecheck": "tsc6 -b --pretty false",
-    "test:repository": "vitest run src/in-memory-unit-of-work.test.ts src/lifecycle.property.test.ts src/migrations.test.ts",
+    "test:repository": "vitest run src/in-memory-unit-of-work.test.ts src/dsql-unit-of-work.test.ts src/dsql-disposable-schema.test.ts src/dsql-repository-contract.test.ts src/dsql-application-concurrency.test.ts src/dsql-import.integration.test.ts src/dsql-history-leaderboard.integration.test.ts src/import-dry-run.property.test.ts src/lifecycle.property.test.ts src/migrations.test.ts",
     "test:spike": "vitest run src/spike",
     "spike:local": "pnpm run build && node dist/spike/cli.js --mode=local --dry-run",
     "spike:live": "pnpm run build && node dist/spike/live-cli.js",

@@ -41,6 +41,26 @@ data "aws_iam_policy_document" "api_lambda_runtime" {
   }
 
   statement {
+    sid     = "ReadRuntimeContract"
+    effect  = "Allow"
+    actions = ["ssm:GetParameter"]
+    resources = concat(
+      [
+        module.dsql.endpoint_parameter_arn,
+        module.dsql.region_parameter_arn,
+      ],
+      values(module.application_runtime.ssm_parameter_arns),
+    )
+  }
+
+  statement {
+    sid       = "ConsumeSharedRateLimit"
+    effect    = "Allow"
+    actions   = ["dynamodb:TransactWriteItems"]
+    resources = [module.application_runtime.rate_limit_table_arn]
+  }
+
+  statement {
     sid    = "WriteFunctionLogs"
     effect = "Allow"
     actions = [

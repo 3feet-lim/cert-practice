@@ -1,0 +1,109 @@
+name: Infrastructure and security validation
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/infrastructure-security.yml"
+      - "infra/**"
+      - "scripts/validate-infrastructure.mjs"
+      - "scripts/deployed-infrastructure-smoke.mjs"
+      - "tests/architecture/task-21-*.test.mjs"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/infrastructure-security.yml"
+      - "infra/**"
+      - "scripts/validate-infrastructure.mjs"
+      - "scripts/deployed-infrastructure-smoke.mjs"
+      - "tests/architecture/task-21-*.test.mjs"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  workflow_dispatch:
+    inputs:
+      run_plan_and_package:
+        description: Run credentialed Terraform plans and Serverless package validation.
+        required: true
+        default: false
+        type: boolean
+      run_deployed_smoke:
+        description: Probe an already deployed API without mutating it.
+        required: true
+        default: false
+        type: boolean
+      api_origin:
+        description: HTTPS API origin for the deployed smoke check.
+        required: false
+        type: string
+      web_origin:
+        description: HTTPS SPA origin expected by API CORS for the deployed smoke check.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm infra:validate
+      - run: pnpm test:infrastructure
+
+  credentialed-template-validation:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_plan_and_package
+    needs: static-validation
+    runs-on: ubuntu-latest
+    environment: infrastructure-validation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.CERTQUIZ_INFRA_VALIDATION_ROLE_ARN }}
+          aws-region: ap-northeast-2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm infra:plan
+      - run: pnpm infra:package
+        env:
+          CERTQUIZ_LAMBDA_ROLE_ARN: ${{ secrets.CERTQUIZ_LAMBDA_ROLE_ARN }}
+          CERTQUIZ_DSQL_ENDPOINT: ${{ secrets.CERTQUIZ_DSQL_ENDPOINT }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+
+  deployed-smoke:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_deployed_smoke
+    needs: static-validation
+    runs-on: ubuntu-latest
+    environment: deployed-smoke
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+      - run: pnpm infra:smoke
+        env:
+          CERTQUIZ_DEPLOYED_API_ORIGIN: ${{ inputs.api_origin }}
+          CERTQUIZ_DEPLOYED_WEB_ORIGIN: ${{ inputs.web_origin }}

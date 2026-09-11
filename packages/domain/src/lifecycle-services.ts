@@ -1,4 +1,5 @@
 import type {
+  ActivePracticeSessionsDto,
   ExamActiveSessionDto,
   ExamResultDto,
   GetExamResponse,
@@ -14,6 +15,7 @@ import type {
   SubmitPracticeQuestionResponse,
 } from "@cert-quiz/contracts";
 import {
+  activePracticeSessionsDtoSchema,
   examActiveSessionDtoSchema,
   examResultDtoSchema,
   getExamResponseSchema,
@@ -104,6 +106,14 @@ export class LifecycleServices {
         stateVersion: version(session.version),
       });
     });
+  }
+
+  async listActivePracticeSessions(userId: string): Promise<ActivePracticeSessionsDto> {
+    return this.dependencies.unitOfWork.transaction(async (repos) =>
+      activePracticeSessionsDtoSchema.parse({
+        sessions: (await repos.practice.listActiveOwned(userId)).map(practiceSummary),
+      }),
+    );
   }
 
   async replacePractice(
@@ -338,18 +348,33 @@ export class LifecycleServices {
     userId: string,
     requestReceivedAt = this.dependencies.now(),
   ): Promise<void> {
-    return this.dependencies.unitOfWork.transaction(async (repos) => {
-      const expired = await repos.exams.listExpiredOwned(userId, requestReceivedAt);
-      for (const session of expired)
-        await finalize(
-          repos,
-          session,
-          userId,
-          "expired",
-          requestReceivedAt,
-          this.dependencies.createId(),
-        );
-    });
+    const expired = await this.dependencies.unitOfWork.transaction((repos) =>
+      repos.exams.listExpiredOwned(userId, requestReceivedAt),
+    );
+    for (const listed of expired) {
+      try {
+        await this.dependencies.unitOfWork.transaction(async (repos) => {
+          const session = await repos.exams.getOwned(userId, listed.id);
+          if (!session || session.status === "submitted") return;
+          await finalize(
+            repos,
+            session,
+            userId,
+            "expired",
+            requestReceivedAt,
+            this.dependencies.createId(),
+          );
+        });
+      } catch {
+        throw domainFailure("submission-failed", [
+          {
+            path: ["examSessionId"],
+            reason: "expired-finalization-failed",
+            identifier: listed.id,
+          },
+        ]);
+      }
+    }
   }
 
   async getAttempt(userId: string, attemptId: string): Promise<ExamResultDto> {
@@ -442,11 +467,14 @@ export class LifecycleServices {
           isCurrentUser: userId === currentUserId,
         }));
       const first = candidates[0] && content(candidates[0].attempt.items[0]!);
-      if (!first) throw domainFailure("not-found");
+      const catalog = first
+        ? null
+        : await repos.catalog.fullGenerationSource(certificationId);
+      if (!first && !catalog) throw domainFailure("not-found");
       return leaderboardDtoSchema.parse({
         certificationId,
-        certificationCode: first.certification.code,
-        certificationName: first.certification.name,
+        certificationCode: first?.certification.code ?? catalog!.certification.code,
+        certificationName: first?.certification.name ?? catalog!.certification.name,
         entries,
       });
     });
@@ -467,19 +495,22 @@ function version(value: bigint): number {
     throw domainFailure("dependency-unavailable");
   return result;
 }
-function resumeRequired(session: PracticeSession) {
+function practiceSummary(session: PracticeSession) {
   const first = content(session.questions[0]!);
   return {
+    practiceSessionId: session.id,
+    certificationId: first.certification.id,
+    certificationCode: first.certification.code,
+    currentQuestionNumber: session.currentIndex + 1,
+    totalQuestions: session.questions.length,
+    stateVersion: version(session.version),
+    updatedAt: session.createdAt.toISOString(),
+  };
+}
+function resumeRequired(session: PracticeSession) {
+  return {
     kind: "resume-or-replace-required" as const,
-    session: {
-      practiceSessionId: session.id,
-      certificationId: first.certification.id,
-      certificationCode: first.certification.code,
-      currentQuestionNumber: session.currentIndex + 1,
-      totalQuestions: session.questions.length,
-      stateVersion: version(session.version),
-      updatedAt: session.createdAt.toISOString(),
-    },
+    session: practiceSummary(session),
     allowedActions: ["resume", "replace"] as const,
   };
 }

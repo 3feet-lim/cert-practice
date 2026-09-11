@@ -12,13 +12,13 @@ describe("GET /v1/health", () => {
 
     const body: unknown = await response.json();
     expect(healthSuccessEnvelopeSchema.safeParse(body).success).toBe(true);
-    expect(body).toEqual({
+    expect(body).toMatchObject({
       data: {
         status: "ok",
         service: "cert-quiz-api",
         contractVersion: "v1",
       },
-      meta: { requestId: "api:health" },
+      meta: { requestId: response.headers.get("x-request-id") },
     });
   });
 });

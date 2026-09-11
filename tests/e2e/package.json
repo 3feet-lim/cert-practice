@@ -6,6 +6,7 @@
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
+    "test:real-api": "CERTQUIZ_REAL_E2E=1 playwright test --project=real-api",
     "typecheck": "tsc6 -b --pretty false"
   },
   "devDependencies": {

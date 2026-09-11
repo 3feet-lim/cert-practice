@@ -7,6 +7,20 @@ stages:
     params:
       dsqlDatabase: postgres
       dsqlUser: app
+      monthlyBudgetUsd: 100
+
+custom:
+  telemetryNamespace: CertQuiz/${sls:stage}
+  telemetryService: certquiz-api
+  runbookBaseUrl: ${env:CERTQUIZ_RUNBOOK_BASE_URL, 'https://github.com/certquiz/cert-practice/blob/main/infra/serverless/runbooks'}
+  runbooks:
+    api5xx: ${self:custom.runbookBaseUrl}/api-5xx.md
+    finalizeFailure: ${self:custom.runbookBaseUrl}/finalize-failure.md
+    cleanupFailure: ${self:custom.runbookBaseUrl}/cleanup-failure.md
+    importRollback: ${self:custom.runbookBaseUrl}/import-rollback.md
+    projectionLeak: ${self:custom.runbookBaseUrl}/projection-leak.md
+    dbLatency: ${self:custom.runbookBaseUrl}/db-latency.md
+    budget: ${self:custom.runbookBaseUrl}/budget.md
 
 provider:
   name: aws
@@ -19,13 +33,33 @@ provider:
   memorySize: 256
   logRetentionInDays: 30
   iam:
-    role: ${param:lambdaRoleArn}
+    # Terraform owns this least-privilege execution role and publishes it to SSM.
+    role: ${ssm:/certquiz/${sls:stage}/lambda-role-arn}
+  httpApi:
+    authorizers:
+      cognitoJwt:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: ${ssm:/certquiz/${sls:stage}/cognito-issuer}
+        audience:
+          - ${ssm:/certquiz/${sls:stage}/cognito-client-id}
   environment:
     STAGE: ${sls:stage}
     CERT_QUIZ_DATABASE_ADAPTER: ${file(../../artifacts/dsql-spike/database-adapter.json):adapter}
-    DSQL_ENDPOINT: ${param:databaseEndpoint}
+    DSQL_ENDPOINT: ${ssm:/certquiz/${sls:stage}/dsql-endpoint}
     DSQL_DATABASE: ${param:dsqlDatabase}
     DSQL_USER: ${param:dsqlUser}
+    COGNITO_ISSUER: ${ssm:/certquiz/${sls:stage}/cognito-issuer}
+    COGNITO_CLIENT_ID: ${ssm:/certquiz/${sls:stage}/cognito-client-id}
+    # Terraform publishes exact stage origins; Hono performs the final exact-origin check.
+    WEB_ORIGIN: ${ssm:/certquiz/${sls:stage}/web-origin}
+    MARKDOWN_IMAGE_ORIGINS: ${ssm:/certquiz/${sls:stage}/markdown-image-origins}
+    # DynamoDB supplies a shared durable limit across all Lambda instances.
+    RATE_LIMIT_TABLE: ${ssm:/certquiz/${sls:stage}/rate-limit-table-name}
+    RATE_LIMIT_POLICIES: ${ssm:/certquiz/${sls:stage}/rate-limit-policies}
+    # CloudWatch Embedded Metric Format is emitted through the existing Lambda log permission.
+    TELEMETRY_NAMESPACE: ${self:custom.telemetryNamespace}
+    TELEMETRY_SERVICE: ${self:custom.telemetryService}
     NODE_OPTIONS: --enable-source-maps
   stackTags:
     Service: certquiz
@@ -45,6 +79,185 @@ functions:
     description: CertQuiz Hono API
     handler: handler.handler
     events:
+      # Health and browser CORS preflight are intentionally public. Every other
+      # /v1 route gets the API Gateway JWT defense before Hono re-verifies it.
       - httpApi:
           path: /v1/health
           method: GET
+      - httpApi:
+          path: /v1/{proxy+}
+          method: OPTIONS
+      - httpApi:
+          path: /v1/{proxy+}
+          method: "*"
+          authorizer:
+            name: cognitoJwt
+  practiceRetention:
+    name: certquiz-${sls:stage}-practice-retention
+    description: Deletes expired completed practice results; it never finalizes exams.
+    handler: handler.practiceRetentionHandler
+    timeout: 29
+    events:
+      - eventBridge:
+          schedule: rate(1 hour)
+          enabled: true
+
+resources:
+  Resources:
+    OperationsDashboard:
+      Type: AWS::CloudWatch::Dashboard
+      Properties:
+        DashboardName: certquiz-${sls:stage}-operations
+        DashboardBody:
+          Fn::Sub: |
+            {"widgets":[
+              {"type":"metric","properties":{"title":"API health","region":"${AWS::Region}","view":"timeSeries","stat":"Sum","period":300,"metrics":[["${self:custom.telemetryNamespace}","ApiRequests","Service","${self:custom.telemetryService}","Stage","${sls:stage}"],[".","Api5xx",".",".",".","."]]}},
+              {"type":"metric","properties":{"title":"Finalize and cleanup","region":"${AWS::Region}","view":"timeSeries","stat":"Sum","period":300,"metrics":[["${self:custom.telemetryNamespace}","FinalizeFailures","Service","${self:custom.telemetryService}","Stage","${sls:stage}"],[".","CleanupFailures",".",".",".","."],[".","CleanupDeleted",".",".",".","."]]}},
+              {"type":"metric","properties":{"title":"Import and projection guards","region":"${AWS::Region}","view":"timeSeries","stat":"Sum","period":300,"metrics":[["${self:custom.telemetryNamespace}","ImportRollbacks","Service","${self:custom.telemetryService}","Stage","${sls:stage}"],[".","ProjectionSchemaFailures",".",".",".","."]]}},
+              {"type":"metric","properties":{"title":"Database latency","region":"${AWS::Region}","view":"timeSeries","stat":"p95","period":300,"metrics":[["${self:custom.telemetryNamespace}","DbConnectLatencyMs","Service","${self:custom.telemetryService}","Stage","${sls:stage}"],[".","DbTransactionLatencyMs",".",".",".","."]]}}
+            ]}
+    Api5xxAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Metadata:
+        RunbookUrl: ${self:custom.runbooks.api5xx}
+      Properties:
+        AlarmName: certquiz-${sls:stage}-api-5xx
+        AlarmDescription: '{"runbook":"${self:custom.runbooks.api5xx}","firstResponse":"Correlate request IDs and consider Lambda alias rollback."}'
+        Namespace: ${self:custom.telemetryNamespace}
+        MetricName: Api5xx
+        Dimensions:
+          - Name: Service
+            Value: ${self:custom.telemetryService}
+          - Name: Stage
+            Value: ${sls:stage}
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        DatapointsToAlarm: 1
+        Threshold: 3
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
+    FinalizeFailureAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Metadata:
+        RunbookUrl: ${self:custom.runbooks.finalizeFailure}
+      Properties:
+        AlarmName: certquiz-${sls:stage}-finalize-failure
+        AlarmDescription: '{"runbook":"${self:custom.runbooks.finalizeFailure}","firstResponse":"Verify Attempt cardinality and retryable session state."}'
+        Namespace: ${self:custom.telemetryNamespace}
+        MetricName: FinalizeFailures
+        Dimensions:
+          - Name: Service
+            Value: ${self:custom.telemetryService}
+          - Name: Stage
+            Value: ${sls:stage}
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        DatapointsToAlarm: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
+    CleanupFailureAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Metadata:
+        RunbookUrl: ${self:custom.runbooks.cleanupFailure}
+      Properties:
+        AlarmName: certquiz-${sls:stage}-cleanup-failure
+        AlarmDescription: '{"runbook":"${self:custom.runbooks.cleanupFailure}","firstResponse":"Check EventBridge, Lambda permissions, and rerun bounded cleanup."}'
+        Namespace: ${self:custom.telemetryNamespace}
+        MetricName: CleanupFailures
+        Dimensions:
+          - Name: Service
+            Value: ${self:custom.telemetryService}
+          - Name: Stage
+            Value: ${sls:stage}
+        Statistic: Sum
+        Period: 7200
+        EvaluationPeriods: 1
+        DatapointsToAlarm: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
+    ImportRollbackAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Metadata:
+        RunbookUrl: ${self:custom.runbooks.importRollback}
+      Properties:
+        AlarmName: certquiz-${sls:stage}-import-rollback
+        AlarmDescription: '{"runbook":"${self:custom.runbooks.importRollback}","firstResponse":"Confirm catalog head and validation-token state before retrying."}'
+        Namespace: ${self:custom.telemetryNamespace}
+        MetricName: ImportRollbacks
+        Dimensions:
+          - Name: Service
+            Value: ${self:custom.telemetryService}
+          - Name: Stage
+            Value: ${sls:stage}
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        DatapointsToAlarm: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
+    ProjectionLeakGuardAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Metadata:
+        RunbookUrl: ${self:custom.runbooks.projectionLeak}
+      Properties:
+        AlarmName: certquiz-${sls:stage}-projection-leak-guard
+        AlarmDescription: '{"runbook":"${self:custom.runbooks.projectionLeak}","firstResponse":"Stop deployment progression and roll back without collecting response payloads."}'
+        Namespace: ${self:custom.telemetryNamespace}
+        MetricName: ProjectionSchemaFailures
+        Dimensions:
+          - Name: Service
+            Value: ${self:custom.telemetryService}
+          - Name: Stage
+            Value: ${sls:stage}
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        DatapointsToAlarm: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        TreatMissingData: notBreaching
+    DbLatencyAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Metadata:
+        RunbookUrl: ${self:custom.runbooks.dbLatency}
+      Properties:
+        AlarmName: certquiz-${sls:stage}-db-latency
+        AlarmDescription: '{"runbook":"${self:custom.runbooks.dbLatency}","firstResponse":"Inspect connector pool and query-plan evidence against the 500 ms gate."}'
+        Namespace: ${self:custom.telemetryNamespace}
+        MetricName: DbConnectLatencyMs
+        Dimensions:
+          - Name: Service
+            Value: ${self:custom.telemetryService}
+          - Name: Stage
+            Value: ${sls:stage}
+        ExtendedStatistic: p95
+        Period: 300
+        EvaluationPeriods: 3
+        DatapointsToAlarm: 3
+        Threshold: 500
+        ComparisonOperator: GreaterThanThreshold
+        TreatMissingData: notBreaching
+    BudgetAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Metadata:
+        RunbookUrl: ${self:custom.runbooks.budget}
+      Properties:
+        AlarmName: certquiz-${sls:stage}-budget
+        AlarmDescription: '{"runbook":"${self:custom.runbooks.budget}","firstResponse":"Review traffic, log retention, and DSQL consumption."}'
+        Namespace: AWS/Billing
+        MetricName: EstimatedCharges
+        Dimensions:
+          - Name: Currency
+            Value: USD
+        Statistic: Maximum
+        Period: 21600
+        EvaluationPeriods: 1
+        DatapointsToAlarm: 1
+        Threshold: ${param:monthlyBudgetUsd}
+        ComparisonOperator: GreaterThanThreshold
+        TreatMissingData: notBreaching

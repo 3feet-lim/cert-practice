@@ -17,7 +17,7 @@ CREATE TABLE exam_sessions (
   UNIQUE (user_id, start_request_key)
 );
 CREATE TABLE exam_session_questions (
-  id uuid PRIMARY KEY,
+  id uuid NOT NULL,
   exam_session_id uuid NOT NULL REFERENCES exam_sessions(id),
   display_index integer NOT NULL CHECK (display_index >= 0),
   snapshot_content jsonb NOT NULL,
@@ -25,6 +25,7 @@ CREATE TABLE exam_session_questions (
   flagged boolean NOT NULL DEFAULT false,
   saved_at timestamptz NOT NULL,
   version bigint NOT NULL CHECK (version >= 0),
+  PRIMARY KEY (exam_session_id, id),
   UNIQUE (exam_session_id, display_index)
 );
 CREATE TABLE attempts (
@@ -48,13 +49,14 @@ CREATE TABLE attempts (
   submission_reason text NOT NULL CHECK (submission_reason IN ('manual', 'expired'))
 );
 CREATE TABLE attempt_items (
-  id uuid PRIMARY KEY,
+  id uuid NOT NULL,
   attempt_id uuid NOT NULL REFERENCES attempts(id),
   display_index integer NOT NULL CHECK (display_index >= 0),
   snapshot_content jsonb NOT NULL,
   selected_choice_ids jsonb NOT NULL,
   earned_numerator bigint NOT NULL CHECK (earned_numerator >= 0),
   earned_denominator bigint NOT NULL CHECK (earned_denominator > 0),
+  PRIMARY KEY (attempt_id, id),
   UNIQUE (attempt_id, display_index)
 );
 CREATE INDEX attempts_history_cursor ON attempts (user_id, submitted_at DESC, id ASC);

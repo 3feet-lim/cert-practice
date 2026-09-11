@@ -16,7 +16,7 @@ CREATE TABLE practice_sessions (
   UNIQUE (user_id, certification_key, active_slot)
 );
 CREATE TABLE practice_session_questions (
-  id uuid PRIMARY KEY,
+  id uuid NOT NULL,
   practice_session_id uuid NOT NULL REFERENCES practice_sessions(id),
   display_index integer NOT NULL CHECK (display_index >= 0),
   snapshot_content jsonb NOT NULL,
@@ -28,8 +28,8 @@ CREATE TABLE practice_session_questions (
   flagged boolean NOT NULL DEFAULT false,
   updated_at timestamptz NOT NULL,
   version bigint NOT NULL CHECK (version >= 0),
-  UNIQUE (practice_session_id, display_index),
-  UNIQUE (practice_session_id, id)
+  PRIMARY KEY (practice_session_id, id),
+  UNIQUE (practice_session_id, display_index)
 );
 CREATE TABLE completed_practice_results (
   id uuid PRIMARY KEY,
@@ -41,17 +41,19 @@ CREATE TABLE completed_practice_results (
   accuracy_numerator bigint NOT NULL CHECK (accuracy_numerator >= 0),
   accuracy_denominator bigint NOT NULL CHECK (accuracy_denominator > 0),
   domain_performance jsonb NOT NULL,
+  payload jsonb NOT NULL DEFAULT '{}'::jsonb,
   completed_at timestamptz NOT NULL,
   expires_at timestamptz NOT NULL CHECK (expires_at > completed_at)
 );
 CREATE TABLE completed_practice_items (
-  id uuid PRIMARY KEY,
+  id uuid NOT NULL,
   result_id uuid NOT NULL REFERENCES completed_practice_results(id),
   display_index integer NOT NULL CHECK (display_index >= 0),
   snapshot_content jsonb NOT NULL,
   selected_choice_ids jsonb NOT NULL,
   earned_numerator bigint NOT NULL CHECK (earned_numerator >= 0),
   earned_denominator bigint NOT NULL CHECK (earned_denominator > 0),
+  PRIMARY KEY (result_id, id),
   UNIQUE (result_id, display_index)
 );
 CREATE INDEX completed_practice_results_owner_expiry ON completed_practice_results (user_id, expires_at, id);

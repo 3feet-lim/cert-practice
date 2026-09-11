@@ -1,0 +1,142 @@
+name: PR and release-candidate gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_db_adapter:
+        description: Run the credentialed live DSQL repository, concurrency, API, and spike gate.
+        required: true
+        default: false
+        type: boolean
+      run_deployment_candidate:
+        description: Run all protected deployment-candidate checks against the disposable test environment.
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  pr-static:
+    name: PR · lint, types, tests, mock E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @cert-quiz/e2e exec playwright install --with-deps chromium
+      - run: pnpm ci:pr
+
+  dsql-adapter:
+    name: DB adapter · live DSQL contracts and spike
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' &&
+        (inputs.run_db_adapter || inputs.run_deployment_candidate))
+    needs: pr-static
+    runs-on: ubuntu-latest
+    environment: db-adapter-validation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.CERTQUIZ_DSQL_CI_ROLE_ARN }}
+          aws-region: ap-northeast-2
+      - run: pnpm install --frozen-lockfile
+      - id: started-at
+        run: echo "iso=$(node -p 'new Date().toISOString()')" >> "$GITHUB_OUTPUT"
+      - run: pnpm ci:db-adapter
+        env:
+          DSQL_ENDPOINT: ${{ secrets.CERTQUIZ_DSQL_ENDPOINT }}
+          DSQL_DATABASE: ${{ secrets.CERTQUIZ_DSQL_DATABASE }}
+          DSQL_USER: ${{ secrets.CERTQUIZ_DSQL_USER }}
+          PGSSLROOTCERT: /etc/ssl/certs/ca-certificates.crt
+          CERTQUIZ_DSQL_SPIKE_NOT_BEFORE: ${{ steps.started-at.outputs.iso }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dsql-adapter-evidence-${{ github.run_id }}
+          path: |
+            artifacts/dsql-spike/live-report.json
+            artifacts/dsql-spike/database-adapter.json
+            artifacts/dsql-spike/ADR-0001-database-adapter.md
+            artifacts/release-candidate/db-adapter-evidence.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  deployment-candidate:
+    name: Deployment candidate · credentialed release gate
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      inputs.run_deployment_candidate
+    needs: [pr-static, dsql-adapter]
+    runs-on: ubuntu-latest
+    environment: deployment-candidate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.CERTQUIZ_INFRA_VALIDATION_ROLE_ARN }}
+          aws-region: ap-northeast-2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm ci:cognito-integration
+        env:
+          LIVE_COGNITO_ID_TOKEN: ${{ secrets.CERTQUIZ_LIVE_COGNITO_ID_TOKEN }}
+          LIVE_COGNITO_ISSUER: ${{ secrets.CERTQUIZ_LIVE_COGNITO_ISSUER }}
+          LIVE_COGNITO_CLIENT_ID: ${{ secrets.CERTQUIZ_LIVE_COGNITO_CLIENT_ID }}
+          LIVE_COGNITO_GOOGLE_SUB: ${{ secrets.CERTQUIZ_LIVE_COGNITO_GOOGLE_SUB }}
+      - run: pnpm infra:plan
+      - run: pnpm infra:package
+        env:
+          CERTQUIZ_LAMBDA_ROLE_ARN: ${{ secrets.CERTQUIZ_LAMBDA_ROLE_ARN }}
+          CERTQUIZ_DSQL_ENDPOINT: ${{ secrets.CERTQUIZ_DSQL_ENDPOINT }}
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+      - run: pnpm --filter @cert-quiz/e2e exec playwright install --with-deps chromium
+      - run: pnpm ci:real-e2e
+        env:
+          CERTQUIZ_E2E_WEB_BASE_URL: ${{ secrets.CERTQUIZ_E2E_WEB_BASE_URL }}
+          CERTQUIZ_E2E_PENDING_TOKEN: ${{ secrets.CERTQUIZ_E2E_PENDING_TOKEN }}
+          CERTQUIZ_E2E_ADMIN_TOKEN: ${{ secrets.CERTQUIZ_E2E_ADMIN_TOKEN }}
+          CERTQUIZ_E2E_PENDING_DISPLAY_NAME: ${{ secrets.CERTQUIZ_E2E_PENDING_DISPLAY_NAME }}
+          CERTQUIZ_E2E_PRACTICE_RESULT_ID: ${{ secrets.CERTQUIZ_E2E_PRACTICE_RESULT_ID }}
+          CERTQUIZ_E2E_EMPTY_CATALOG_WEB_URL: ${{ secrets.CERTQUIZ_E2E_EMPTY_CATALOG_WEB_URL }}
+          CERTQUIZ_E2E_IMPORT_JSON_PATH: ${{ secrets.CERTQUIZ_E2E_IMPORT_JSON_PATH }}
+          CERTQUIZ_E2E_ALLOW_IMPORT_COMMIT: ${{ secrets.CERTQUIZ_E2E_ALLOW_IMPORT_COMMIT }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployment-candidate-reports-${{ github.run_id }}
+          path: |
+            tests/e2e/test-results
+            tests/e2e/playwright-report
+            artifacts/serverless-package
+          if-no-files-found: warn
+          retention-days: 30

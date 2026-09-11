@@ -54,7 +54,13 @@ pnpm --dir infra/serverless run deploy:dev \
   --param="databaseEndpoint=$CERT_QUIZ_DSQL_ENDPOINT"
 ```
 
-The current stack exposes only `GET /v1/health`, matching the implemented API. Cognito-protected routes and the EventBridge retention event must be added only when their handlers and Terraform-owned infrastructure exist.
+## Production composition and routes
+
+The stack composes the production Hono app at Lambda cold start, retaining its DSQL pool across warm invocations. It reads the Terraform-owned execution role, DSQL endpoint, Cognito issuer/client ID, and SPA origin from stage-scoped SSM paths; it does not duplicate those values in Serverless parameters. The API Gateway JWT authorizer protects `/v1/{proxy+}` while `GET /v1/health` and unauthenticated `OPTIONS` preflight remain public. Hono then verifies the Cognito ID token again and applies approval, role, ownership, security-header, and telemetry policies.
+
+`practiceRetention` is an EventBridge `rate(1 hour)` handler. It calls only `LifecycleServices.cleanupPracticeResults()` in bounded batches. It cannot finalize expired exams: exam Attempt creation stays exclusively in the authenticated owner-request lazy-finalization flow.
+
+`run-serverless.mjs` still requires the qualified DSQL live-spike report before packaging or deployment. This repository task does not run a cloud apply.
 
 Serverless Framework v4 builds TypeScript handlers with its built-in esbuild integration, so this service points at `handler.ts` and does not add a build plugin. See the [official function build documentation](https://www.serverless.com/framework/docs/providers/aws/guide/building).
 

@@ -1,0 +1,4 @@
+-- Task 12.4 compatibility marker.
+-- Aggregate-scoped item keys and completed-result payload are defined in the
+-- original CREATE TABLE statements because Aurora DSQL does not support
+-- ALTER TABLE DROP CONSTRAINT.

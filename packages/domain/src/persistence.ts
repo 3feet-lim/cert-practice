@@ -240,6 +240,8 @@ export interface PracticeRepository {
     userId: string,
     certificationKey: string,
   ): Promise<PracticeSession | null>;
+  /** Owner-scoped active sessions for the home-screen resume banner. */
+  listActiveOwned(userId: string): Promise<readonly PracticeSession[]>;
   getOwned(userId: string, sessionId: string): Promise<PracticeSession | null>;
   replaceAtomically(input: NewPracticeSession): Promise<PracticeSession>;
   /** Replaces a service-validated aggregate through one optimistic conditional write. */

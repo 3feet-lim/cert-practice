@@ -3030,6 +3030,436 @@
         "chatSessionId": "sess_544362e7-beea-4488-8356-c1a6fc7cdbe5",
         "timestamp": 1788645871418
       }
+    ],
+    "23.4 real API 기반 Playwright S1~S10 E2E를 구현한다": [
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789083396361
+      },
+      {
+        "executionId": "46fa32d2-d5c2-40b6-bea9-5357ac1fb561",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789099959623
+      },
+      {
+        "executionId": "46fa32d2-d5c2-40b6-bea9-5357ac1fb561",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789100232362
+      }
+    ],
+    "23.6 migration·Lambda alias·web·catalog release와 rollback automation을 구현한다": [
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789083397743
+      },
+      {
+        "executionId": "46fa32d2-d5c2-40b6-bea9-5357ac1fb561",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789100435090
+      },
+      {
+        "executionId": "46fa32d2-d5c2-40b6-bea9-5357ac1fb561",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789100849409
+      }
+    ],
+    "12.4 DSQL connector 기반 production `UnitOfWork`와 aggregate repository를 구현한다": [
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789083406344
+      },
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789084044521
+      }
+    ],
+    "13.1 실제 Cognito JWKS token verifier를 구현한다": [
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789083410543
+      },
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789084048462
+      }
+    ],
+    "15.6 Property 23 import dry-run 테스트를 설계 속성 전체로 확장한다": [
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789083414405
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087200597
+      }
+    ],
+    "18.10 Property 14 보관 경계·통계 격리 테스트를 완성한다": [
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789083419629
+      },
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789084052818
+      }
+    ],
+    "21.1 Terraform 기반 전체 인프라를 구현한다": [
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789083424508
+      },
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789084056635
+      }
+    ],
+    "18. Practice session, result와 retention 수직 기능 완성": [
+      {
+        "executionId": "60360e0b-6273-44b9-a5bb-5bffcd085795",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789084052955
+      }
+    ],
+    "12.5 공통 repository contract suite를 production DSQL adapter에도 실행한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087209890
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087652626
+      }
+    ],
+    "15.4 production DSQL에서 revision insert·head switch·token consume을 원자적으로 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087214039
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087656898
+      }
+    ],
+    "16.5 Property 5 largest-remainder 테스트를 일반 domain 목록으로 확장한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087218210
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087661103
+      }
+    ],
+    "20.4 Property 21 Attempt 불변성·이력 테스트를 확장한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087223288
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087665147
+      }
+    ],
+    "21.2 Serverless production composition과 route/schedule을 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087227323
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087669539
+      }
+    ],
+    "12.6 production table 대상 concurrency·fault suite를 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087680719
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090160935
+      }
+    ],
+    "13.8 Cognito와 production repository 인증 integration test를 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087685832
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090164046
+      }
+    ],
+    "15.7 Property 24 validation binding·atomic switch 테스트를 확장한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087689900
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090167539
+      }
+    ],
+    "20.5 Property 22 leaderboard 테스트를 일반 profile/Attempt 집합으로 확장한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087694005
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090170435
+      }
+    ],
+    "21.3 durable rate limit와 배포 보안 설정을 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789087698323
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090173544
+      }
+    ],
+    "12. Production DSQL migration과 repository adapter 완성": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090161170
+      }
+    ],
+    "13. Cognito 인증, 승인, 관리자와 소유권 경계 완성": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090164210
+      }
+    ],
+    "15.8 production DSQL import integration suite를 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090184450
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090623487
+      }
+    ],
+    "16.7 Property 7 all-or-nothing·snapshot 불변성 테스트를 확장한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090187543
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090628505
+      }
+    ],
+    "19.3 production Lambda의 모든 인증 요청에 `OwnedExpiredExamFinalizer`를 배선한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090190793
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090633483
+      }
+    ],
+    "20.6 production DSQL history·leaderboard integration test를 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090193906
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090637202
+      }
+    ],
+    "21.4 CloudWatch telemetry, alarms와 runbook automation을 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090196852
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090650413
+      }
+    ],
+    "15. JSON import dry-run과 atomic revision commit 완성": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090624895
+      }
+    ],
+    "16. Domain allocation, sampling과 immutable snapshot 검증 완성": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090629849
+      }
+    ],
+    "20. Immutable result, history와 leaderboard 검증 완성": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090637367
+      }
+    ],
+    "19.10 all-route lazy expiration production integration suite를 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090667176
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789091964738
+      }
+    ],
+    "21.5 인프라·보안 validation suite를 완성한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090670968
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789091968398
+      }
+    ],
+    "22.1 production composition integration harness를 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789090674519
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789091972030
+      }
+    ],
+    "19. Exam timer, lazy expiration과 idempotent finalize 수직 기능 완성": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789091964926
+      }
+    ],
+    "21. IaC, observability와 운영 보안 완성": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789091968580
+      }
+    ],
+    "22. 실제 API·DB 통합 harness와 결정적 backend fixture 완성": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789091972171
+      }
+    ],
+    "23.1 frontend real HTTP adapter를 전체 `CertQuizApi`로 확장한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789091984007
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789092244428
+      }
+    ],
+    "23.2 frontend consumer/backend provider compatibility gate를 전체 endpoint로 확장한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789092255408
+      },
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789092528743
+      }
+    ],
+    "23.3 API·DSQL acceptance integration suite를 구현한다": [
+      {
+        "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789092540076
+      }
+    ],
+    "23.5 PR·DB adapter·배포 후보 CI gate를 완성한다": [
+      {
+        "executionId": "46fa32d2-d5c2-40b6-bea9-5357ac1fb561",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789100243377
+      },
+      {
+        "executionId": "46fa32d2-d5c2-40b6-bea9-5357ac1fb561",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789100423793
+      }
+    ],
+    "23. Mock를 실제 API로 교체하고 통합·E2E·release gate 완성": [
+      {
+        "executionId": "46fa32d2-d5c2-40b6-bea9-5357ac1fb561",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789100849577
+      }
+    ],
+    "17. Backend domain/repository checkpoint": [
+      {
+        "executionId": "46fa32d2-d5c2-40b6-bea9-5357ac1fb561",
+        "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",
+        "timestamp": 1789100862434
+      }
     ]
   }
 }

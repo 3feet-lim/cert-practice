@@ -6,7 +6,10 @@ export function createRequestId(): RequestId {
 }
 
 export const requestContext: MiddlewareHandler = async (context, next) => {
-  const requestId = createRequestId();
+  const supplied = context.req.header("x-request-id");
+  const requestId = requestIdSchema.safeParse(supplied).success
+    ? requestIdSchema.parse(supplied)
+    : createRequestId();
   context.header("x-request-id", requestId);
   await next();
 };

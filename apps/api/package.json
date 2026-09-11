@@ -20,9 +20,11 @@
     "build": "tsc6 -b --pretty false",
     "test": "vitest run src",
     "test:integration": "vitest run src --passWithNoTests",
+    "test:cognito-live": "RUN_LIVE_COGNITO_AUTH_INTEGRATION=true vitest run src/cognito-production.integration.test.ts",
     "typecheck": "tsc6 -b --pretty false"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.1127.0",
     "@cert-quiz/contracts": "workspace:*",
     "@cert-quiz/db": "workspace:*",
     "@cert-quiz/domain": "workspace:*",

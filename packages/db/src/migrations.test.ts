@@ -5,6 +5,7 @@ import {
   loadApplicationMigrations,
   schemaVersionRange,
 } from "./migrations.js";
+import { normalizeDsqlMigrationStatement } from "./migrate.js";
 
 describe("production migration manifest", () => {
   it("is deterministic, versioned, and separate from the disposable spike", async () => {
@@ -15,9 +16,24 @@ describe("production migration manifest", () => {
       "0001_identity_catalog_import.sql",
       "0002_practice.sql",
       "0003_exams.sql",
+      "0004_snapshot_scope_and_result_payload.sql",
     ]);
     expect(first.every((migration) => !migration.path.includes("/spike/"))).toBe(true);
-    expect(schemaVersionRange(first)).toEqual({ minimum: 1, maximum: 3 });
+    expect(schemaVersionRange(first)).toEqual({ minimum: 1, maximum: 4 });
+  });
+
+  it("translates synchronous index DDL and removes unsupported DSQL key ordering", () => {
+    expect(normalizeDsqlMigrationStatement("CREATE INDEX example ON records (id)")).toBe(
+      "CREATE INDEX ASYNC example ON records (id)",
+    );
+    expect(
+      normalizeDsqlMigrationStatement(
+        "CREATE UNIQUE INDEX ASYNC ready ON records (user_id, submitted_at DESC, id ASC)",
+      ),
+    ).toBe("CREATE UNIQUE INDEX ASYNC ready ON records (user_id, submitted_at, id)");
+    expect(normalizeDsqlMigrationStatement("CREATE TABLE records (id uuid PRIMARY KEY)")).toBe(
+      "CREATE TABLE records (id uuid PRIMARY KEY)",
+    );
   });
 
   it("fails closed for missing, altered, and unknown database migration state", async () => {
@@ -30,7 +46,7 @@ describe("production migration manifest", () => {
         },
         manifest,
       ),
-    ).resolves.toEqual({ minimum: 1, maximum: 3 });
+    ).resolves.toEqual({ minimum: 1, maximum: 4 });
     await expect(
       assertApplicationSchema({ listAppliedMigrations: async () => [] }, manifest),
     ).rejects.toThrow("missing migration");

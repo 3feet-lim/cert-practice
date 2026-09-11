@@ -20,6 +20,7 @@ import {
   examStateResponseSchema,
   practiceStateResponseSchema,
   examResultDtoSchema,
+  activePracticeSessionsDtoSchema,
   approvalStatusDtoSchema,
   approveUserResponseSchema,
   commitImportRequestSchema,
@@ -56,24 +57,50 @@ import {
   type CognitoTokenVerifier,
 } from "./authentication.js";
 import { mapError } from "./error-mapper.js";
+import {
+  enforceRateLimit,
+  type RateLimitPort,
+  type RateLimitScope,
+} from "./rate-limit.js";
 import { requestContext, requestIdFromContextHeader } from "./request-context.js";
-
-const healthResponse = healthSuccessEnvelopeSchema.parse({
-  data: {
-    status: "ok",
-    service: "cert-quiz-api",
-    contractVersion: "v1",
-  },
-  meta: { requestId: "api:health" },
-});
+import {
+  healthOnlySecurityConfiguration,
+  securityBoundary,
+  type ApiSecurityConfiguration,
+} from "./security.js";
+import { emitTelemetry, type TelemetryPort } from "./telemetry.js";
 
 export type CreateAppDependencies = AuthenticationDependencies & {
   /** Optional while composition roots migrate; import routes fail closed without it. */
   importService?: ImportService;
   /** Offline-safe lifecycle composition; absent production adapters fail closed. */
   lifecycle?: LifecycleServices;
+  /** Durable shared limiter supplied by the production composition root. */
+  rateLimit?: RateLimitPort;
+  /** Trusted client address resolver supplied by the API Gateway/Lambda adapter. */
+  clientIp?: (context: Context<ApiEnvironment>) => string | undefined;
+  /** Injected structured telemetry sink; this module never configures a log transport. */
+  telemetry?: TelemetryPort;
 };
 export type { CognitoTokenVerifier };
+
+/**
+ * Every path that accepts an authenticated actor. Keep this manifest as the
+ * single source of truth so authentication and lazy expired-exam finalization
+ * cannot drift apart as route families are added.
+ */
+export const authenticatedRouteManifest = [
+  "/v1/me/*",
+  "/v1/catalog",
+  "/v1/admin/*",
+  "/v1/certifications/*",
+  "/v1/practice/*",
+  "/v1/practice-results/*",
+  "/v1/exams/*",
+  "/v1/attempts/*",
+  "/v1/history/*",
+  "/v1/leaderboards/*",
+] as const;
 
 function toStateVersion(version: bigint): number {
   const value = Number(version);
@@ -121,13 +148,31 @@ async function runTransaction<T>(
   dependencies: CreateAppDependencies,
   work: (repositories: TransactionRepositories) => Promise<T>,
 ): Promise<T> {
+  const startedAt = performance.now();
   try {
     const unitOfWork = dependencies.unitOfWork;
-    return await unitOfWork.transaction(work);
+    const result = await unitOfWork.transaction(work);
+    emitTelemetry(dependencies.telemetry, {
+      event: "db.transaction",
+      outcome: "completed",
+      durationMs: performance.now() - startedAt,
+    });
+    return result;
   } catch (error) {
+    emitTelemetry(dependencies.telemetry, {
+      event: "db.transaction",
+      outcome: isDomainFailure(error) ? "rejected" : "failed",
+      errorCode: isDomainFailure(error) ? undefined : "transaction-failed",
+      durationMs: performance.now() - startedAt,
+    });
     if (isDomainFailure(error)) throw error;
     throw domainFailure("dependency-unavailable");
   }
+}
+
+/** Request parsers consume validation errors; an uncaught Zod failure is a strict response guard. */
+function isProjectionSchemaFailure(error: unknown): boolean {
+  return error instanceof Error && error.name === "ZodError";
 }
 
 /**
@@ -135,30 +180,74 @@ async function runTransaction<T>(
  * probes only; protected routes are installed only when their fail-closed auth
  * boundary and UnitOfWork have been explicitly supplied.
  */
-export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnvironment> {
+export function createApp(
+  dependencies?: CreateAppDependencies,
+  security: ApiSecurityConfiguration = healthOnlySecurityConfiguration,
+): Hono<ApiEnvironment> {
   const created = new Hono<ApiEnvironment>();
   created.use("/v1/*", requestContext);
+  created.use("/v1/*", securityBoundary(security));
+  created.use("/v1/*", async (context, next) => {
+    const startedAt = performance.now();
+    try {
+      await next();
+    } finally {
+      emitTelemetry(dependencies?.telemetry, {
+        event: "api.request",
+        requestId: requestIdFromContextHeader(context),
+        method: context.req.method,
+        path: context.req.path,
+        status: context.res.status,
+        durationMs: performance.now() - startedAt,
+        outcome: context.res.status < 400 ? "completed" : "rejected",
+      });
+    }
+  });
   created.onError((error, context) => {
-    const mapped = mapError(error, requestIdFromContextHeader(context));
+    const requestId = requestIdFromContextHeader(context);
+    if (isProjectionSchemaFailure(error))
+      emitTelemetry(dependencies?.telemetry, {
+        event: "api.projection-schema-failure",
+        requestId,
+        path: context.req.path,
+        outcome: "failed",
+        errorCode: "strict-schema-failure",
+      });
+    if (context.req.path.startsWith("/v1/admin/imports/"))
+      emitTelemetry(dependencies?.telemetry, {
+        event: "api.import",
+        requestId,
+        path: context.req.path,
+        outcome: "failed",
+        errorCode: "import-operation-failed",
+      });
+    const mapped = mapError(error, requestId);
     for (const [name, value] of Object.entries(mapped.headers ?? {}))
       context.header(name, value);
     return context.json(mapped.body, mapped.status);
   });
   created.get("/v1/health", (context) =>
-    context.json(healthSuccessEnvelopeSchema.parse(healthResponse)),
+    context.json(
+      healthSuccessEnvelopeSchema.parse({
+        data: {
+          status: "ok",
+          service: "cert-quiz-api",
+          contractVersion: "v1",
+        },
+        meta: responseMeta(context),
+      }),
+    ),
   );
 
   if (!dependencies) return created;
 
   const authenticate = authenticationPolicy(dependencies);
+  const limit = (context: Context<ApiEnvironment>, scope: RateLimitScope) =>
+    enforceRateLimit(context, dependencies.rateLimit, scope, dependencies.clientIp);
   const inTransaction = <T>(
     work: (repositories: TransactionRepositories) => Promise<T>,
   ) => runTransaction(dependencies, work);
-  created.use("/v1/me", authenticate);
-  created.use("/v1/me/*", authenticate);
-  created.use("/v1/catalog", authenticate);
-  created.use("/v1/admin", authenticate);
-  created.use("/v1/admin/*", authenticate);
+  for (const path of authenticatedRouteManifest) created.use(path, authenticate);
 
   const requireLifecycle = (): LifecycleServices => {
     if (!dependencies.lifecycle) throw domainFailure("dependency-unavailable");
@@ -168,25 +257,33 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
     context,
     next,
   ) => {
-    if (dependencies.lifecycle)
-      await dependencies.lifecycle.finalizeExpiredOwned(
-        context.get("actor").userId,
-        dependencies.now(),
-      );
+    if (dependencies.lifecycle) {
+      try {
+        await dependencies.lifecycle.finalizeExpiredOwned(
+          context.get("actor").userId,
+          dependencies.now(),
+        );
+        emitTelemetry(dependencies.telemetry, {
+          event: "api.finalize-expired",
+          requestId: requestIdFromContextHeader(context),
+          path: context.req.path,
+          outcome: "completed",
+        });
+      } catch (error) {
+        emitTelemetry(dependencies.telemetry, {
+          event: "api.finalize-expired",
+          requestId: requestIdFromContextHeader(context),
+          path: context.req.path,
+          outcome: "failed",
+          errorCode: "expired-finalize-failed",
+        });
+        throw error;
+      }
+    }
     await next();
   };
-  created.use("/v1/me", finalizeExpiredExams);
-  created.use("/v1/me/*", finalizeExpiredExams);
-  created.use("/v1/catalog", finalizeExpiredExams);
-  created.use("/v1/admin/*", finalizeExpiredExams);
-  created.use("/v1/certifications/*", authenticate, finalizeExpiredExams);
-  created.use("/v1/practice/*", authenticate, finalizeExpiredExams);
-  created.use("/v1/practice-results/*", authenticate, finalizeExpiredExams);
-  created.use("/v1/exams/*", authenticate, finalizeExpiredExams);
-  created.use("/v1/attempts/*", authenticate, finalizeExpiredExams);
-  created.use("/v1/history", authenticate, finalizeExpiredExams);
-  created.use("/v1/history/*", authenticate, finalizeExpiredExams);
-  created.use("/v1/leaderboards/*", authenticate, finalizeExpiredExams);
+  for (const path of authenticatedRouteManifest)
+    created.use(path, finalizeExpiredExams);
 
   created.get("/v1/me/approval", (context) => {
     const body = successEnvelopeSchema(approvalStatusDtoSchema).parse({
@@ -221,6 +318,18 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
     );
   });
 
+  created.get("/v1/practice/active", approvalPolicy, async (context) => {
+    const data = await requireLifecycle().listActivePracticeSessions(
+      context.get("actor").userId,
+    );
+    return context.json(
+      successEnvelopeSchema(activePracticeSessionsDtoSchema).parse({
+        data,
+        meta: responseMeta(context),
+      }),
+    );
+  });
+
   created.patch("/v1/me/score-visibility", approvalPolicy, async (context) => {
     const request = await parseVisibilityRequest(context);
     const profile = await inTransaction((repositories) =>
@@ -243,10 +352,17 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
   });
 
   created.post("/v1/admin/imports/dry-run", adminPolicy, async (context) => {
+    await limit(context, "admin-import");
     const request = await parseImportRequest(context, dryRunImportRequestSchema);
     const service = dependencies.importService;
     if (!service) throw domainFailure("dependency-unavailable");
     const result = await service.dryRun(request.content, context.get("actor").userId);
+    emitTelemetry(dependencies.telemetry, {
+      event: "api.import",
+      requestId: requestIdFromContextHeader(context),
+      path: context.req.path,
+      outcome: result.response.valid ? "accepted" : "rejected",
+    });
     if (result.materialization?.validation) {
       await inTransaction((repositories) =>
         repositories.catalog.saveValidation(result.materialization!.validation!),
@@ -261,6 +377,7 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
   });
 
   created.post("/v1/admin/imports/commit", adminPolicy, async (context) => {
+    await limit(context, "admin-import");
     const request = await parseImportRequest(context, commitImportRequestSchema);
     const service = dependencies.importService;
     if (!service) throw domainFailure("dependency-unavailable");
@@ -286,6 +403,12 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
     );
     const certificationId = materialized.materialization.source.certifications[0]?.id;
     if (!certificationId) throw domainFailure("dependency-unavailable");
+    emitTelemetry(dependencies.telemetry, {
+      event: "api.import",
+      requestId: requestIdFromContextHeader(context),
+      path: context.req.path,
+      outcome: "completed",
+    });
     return context.json(
       successEnvelopeSchema(commitImportResponseSchema).parse({
         data: {
@@ -384,6 +507,7 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
     "/v1/certifications/:id/practice/start",
     approvalPolicy,
     async (context) => {
+      await limit(context, "practice-start");
       const id = uuidSchema.safeParse(context.req.param("id"));
       if (!id.success) throw domainFailure("validation-failed");
       const request = await parseImportRequest(context, startPracticeRequestSchema);
@@ -454,6 +578,7 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
     "/v1/practice/:id/questions/:questionId/submit",
     approvalPolicy,
     async (context) => {
+      await limit(context, "practice-submit");
       const id = uuidSchema.safeParse(context.req.param("id"));
       const questionId = uuidSchema.safeParse(context.req.param("questionId"));
       if (!id.success || !questionId.success) throw domainFailure("validation-failed");
@@ -492,6 +617,7 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
   });
 
   created.post("/v1/certifications/:id/exams", approvalPolicy, async (context) => {
+    await limit(context, "exam-start");
     const id = uuidSchema.safeParse(context.req.param("id"));
     if (!id.success) throw domainFailure("validation-failed");
     const request = await parseImportRequest(context, startExamRequestSchema);
@@ -549,6 +675,7 @@ export function createApp(dependencies?: CreateAppDependencies): Hono<ApiEnviron
     );
   });
   created.post("/v1/exams/:id/submit", approvalPolicy, async (context) => {
+    await limit(context, "exam-submit");
     const id = uuidSchema.safeParse(context.req.param("id"));
     if (!id.success) throw domainFailure("validation-failed");
     await parseImportRequest(context, submitExamRequestSchema);
