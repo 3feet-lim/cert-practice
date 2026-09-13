@@ -171,7 +171,9 @@ export async function createProductionComposition(
     cleanupExpiredPracticeResults: async (batchSize = DEFAULT_CLEANUP_BATCH_SIZE) => {
       const startedAt = performance.now();
       try {
-        const deleted = await lifecycle.cleanupPracticeResults(validateBatchSize(batchSize));
+        const deleted = await lifecycle.cleanupPracticeResults(
+          validateBatchSize(batchSize),
+        );
         emitTelemetry(telemetry, {
           event: "api.cleanup",
           outcome: "completed",

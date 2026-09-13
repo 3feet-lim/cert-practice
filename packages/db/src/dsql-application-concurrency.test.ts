@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 
-import { Fraction, type ImportCommitCommand, type PersistedQuestionSnapshot } from "@cert-quiz/domain";
+import {
+  Fraction,
+  type ImportCommitCommand,
+  type PersistedQuestionSnapshot,
+} from "@cert-quiz/domain";
 import type { QueryResultRow } from "pg";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
@@ -49,20 +53,28 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
     );
 
     expect(new Set(results.map((profile) => profile.id))).toHaveLength(1);
-    expect(await count(harness, "user_profiles", "google_sub = $1", [googleSub])).toBe(1);
+    expect(await count(harness, "user_profiles", "google_sub = $1", [googleSub])).toBe(
+      1,
+    );
     expect(barrier.arrivals).toBe(2);
   }, 60_000);
 
   it("keeps one active practice slot when replacement writers collide at the application table", async () => {
     const user = await createUser(harness);
-    const certification = await seedActiveCertification(harness, user.id, "practice-live");
+    const certification = await seedActiveCertification(
+      harness,
+      user.id,
+      "practice-live",
+    );
     const first = newPractice(user.id, certification.key);
     const second = newPractice(user.id, certification.key);
     const barrier = harness.hooks.barrierBefore("INSERT INTO practice_sessions", 2);
 
     const results = await Promise.all(
       [first, second].map((input) =>
-        harness.unitOfWork.transaction((repos) => repos.practice.replaceAtomically(input)),
+        harness.unitOfWork.transaction((repos) =>
+          repos.practice.replaceAtomically(input),
+        ),
       ),
     );
 
@@ -88,9 +100,15 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
 
   it("locks one first submission and creates one completed result under a barrier race", async () => {
     const user = await createUser(harness);
-    const certification = await seedActiveCertification(harness, user.id, "submit-live");
+    const certification = await seedActiveCertification(
+      harness,
+      user.id,
+      "submit-live",
+    );
     const practice = newPractice(user.id, certification.key);
-    await harness.unitOfWork.transaction((repos) => repos.practice.replaceAtomically(practice));
+    await harness.unitOfWork.transaction((repos) =>
+      repos.practice.replaceAtomically(practice),
+    );
     const barrier = harness.hooks.barrierBefore(
       "UPDATE practice_sessions SET version = version + 1",
       2,
@@ -122,7 +140,9 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
         [practice.id],
       ),
     ).toBe(1);
-    const locked = await harness.database.query<{ final_choice_ids: string[] | string | null }>(
+    const locked = await harness.database.query<{
+      final_choice_ids: string[] | string | null;
+    }>(
       "SELECT final_choice_ids FROM practice_session_questions WHERE practice_session_id = $1",
       [practice.id],
     );
@@ -131,9 +151,15 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
 
   it("returns one immutable Attempt to manual and expiry finalizers released at a barrier", async () => {
     const user = await createUser(harness);
-    const certification = await seedActiveCertification(harness, user.id, "finalize-live");
+    const certification = await seedActiveCertification(
+      harness,
+      user.id,
+      "finalize-live",
+    );
     const exam = newExam(user.id, certification.key);
-    await harness.unitOfWork.transaction((repos) => repos.exams.createWithSnapshots(exam));
+    await harness.unitOfWork.transaction((repos) =>
+      repos.exams.createWithSnapshots(exam),
+    );
     const barrier = harness.hooks.barrierBefore(
       "UPDATE exam_sessions SET status = 'submitted'",
       2,
@@ -143,7 +169,11 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
       ["manual", "expired"].map((submissionReason, index) =>
         harness.unitOfWork.transaction((repos) =>
           repos.exams.finalizeOnce({
-            ...finalizeCommand(user.id, exam.id, submissionReason as "manual" | "expired"),
+            ...finalizeCommand(
+              user.id,
+              exam.id,
+              submissionReason as "manual" | "expired",
+            ),
             id: randomUUID(),
             submittedAt: later(index + 1),
           }),
@@ -155,16 +185,23 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
     expect(attempts.every((attempt) => attempt !== null)).toBe(true);
     expect(new Set(attempts.map((attempt) => attempt?.id))).toHaveLength(1);
     expect(await count(harness, "attempts", "exam_session_id = $1", [exam.id])).toBe(1);
-    const session = await harness.database.query<{ status: string; attempt_id: string | null }>(
-      "SELECT status, attempt_id FROM exam_sessions WHERE id = $1",
-      [exam.id],
-    );
-    expect(session.rows[0]).toMatchObject({ status: "submitted", attempt_id: attempts[0]?.id });
+    const session = await harness.database.query<{
+      status: string;
+      attempt_id: string | null;
+    }>("SELECT status, attempt_id FROM exam_sessions WHERE id = $1", [exam.id]);
+    expect(session.rows[0]).toMatchObject({
+      status: "submitted",
+      attempt_id: attempts[0]?.id,
+    });
   }, 60_000);
 
   it("switches an application catalog head only to a complete committed revision under a barrier race", async () => {
     const user = await createUser(harness);
-    const certification = await seedActiveCertification(harness, user.id, "import-live");
+    const certification = await seedActiveCertification(
+      harness,
+      user.id,
+      "import-live",
+    );
     const commands = [
       await validatedImport(harness, user.id, certification.key, "first"),
       await validatedImport(harness, user.id, certification.key, "second"),
@@ -176,7 +213,9 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
 
     await Promise.all(
       commands.map((command) =>
-        harness.unitOfWork.transaction((repos) => repos.catalog.commitValidatedImport(command)),
+        harness.unitOfWork.transaction((repos) =>
+          repos.catalog.commitValidatedImport(command),
+        ),
       ),
     );
 
@@ -191,15 +230,21 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
       activeRevisionId,
     );
     expect(
-      await count(harness, "catalog_revisions", "certification_key = $1 AND status = 'active'", [
-        certification.key,
-      ]),
+      await count(
+        harness,
+        "catalog_revisions",
+        "certification_key = $1 AND status = 'active'",
+        [certification.key],
+      ),
     ).toBe(1);
     await expectCompleteRevision(harness, activeRevisionId!);
     expect(
-      await count(harness, "import_validations", "status = 'consumed' AND id = ANY($1::uuid[])", [
-        commands.map((command) => command.validationId),
-      ]),
+      await count(
+        harness,
+        "import_validations",
+        "status = 'consumed' AND id = ANY($1::uuid[])",
+        [commands.map((command) => command.validationId)],
+      ),
     ).toBe(2);
   }, 60_000);
 
@@ -220,7 +265,9 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
         ),
       ).rejects.toThrow("Injected post-write fault");
 
-      expect(await count(harness, "user_profiles", "google_sub = $1", [googleSub])).toBe(0);
+      expect(
+        await count(harness, "user_profiles", "google_sub = $1", [googleSub]),
+      ).toBe(0);
     }, 60_000);
   }
 
@@ -232,7 +279,11 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
   ]) {
     it(`rolls back an active-practice replacement after ${stage}`, async () => {
       const user = await createUser(harness);
-      const certification = await seedActiveCertification(harness, user.id, `replace-${randomUUID()}`);
+      const certification = await seedActiveCertification(
+        harness,
+        user.id,
+        `replace-${randomUUID()}`,
+      );
       const oldPractice = newPractice(user.id, certification.key);
       await harness.unitOfWork.transaction((repos) =>
         repos.practice.replaceAtomically(oldPractice),
@@ -247,17 +298,18 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
       ).rejects.toThrow("Injected post-write fault");
 
       expect(
-        await count(harness, "practice_sessions", "id = $1 AND status = 'active'", [oldPractice.id]),
+        await count(harness, "practice_sessions", "id = $1 AND status = 'active'", [
+          oldPractice.id,
+        ]),
       ).toBe(1);
       expect(
-        await count(
-          harness,
-          "practice_session_questions",
-          "practice_session_id = $1",
-          [oldPractice.id],
-        ),
+        await count(harness, "practice_session_questions", "practice_session_id = $1", [
+          oldPractice.id,
+        ]),
       ).toBe(1);
-      expect(await count(harness, "practice_sessions", "id = $1", [replacement.id])).toBe(0);
+      expect(
+        await count(harness, "practice_sessions", "id = $1", [replacement.id]),
+      ).toBe(0);
     }, 60_000);
   }
 
@@ -270,9 +322,15 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
   ]) {
     it(`rolls back first submit and completion after ${stage}`, async () => {
       const user = await createUser(harness);
-      const certification = await seedActiveCertification(harness, user.id, `submit-fault-${randomUUID()}`);
+      const certification = await seedActiveCertification(
+        harness,
+        user.id,
+        `submit-fault-${randomUUID()}`,
+      );
       const practice = newPractice(user.id, certification.key);
-      await harness.unitOfWork.transaction((repos) => repos.practice.replaceAtomically(practice));
+      await harness.unitOfWork.transaction((repos) =>
+        repos.practice.replaceAtomically(practice),
+      );
       harness.hooks.failAfter(stage);
 
       await expect(
@@ -300,7 +358,11 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
          WHERE session.id = $1`,
         [practice.id],
       );
-      expect(state.rows[0]).toMatchObject({ status: "active", version: "0", final_choice_ids: null });
+      expect(state.rows[0]).toMatchObject({
+        status: "active",
+        version: "0",
+        final_choice_ids: null,
+      });
       expect(
         await count(
           harness,
@@ -320,9 +382,15 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
   ]) {
     it(`rolls back finalize after ${stage}`, async () => {
       const user = await createUser(harness);
-      const certification = await seedActiveCertification(harness, user.id, `finalize-fault-${randomUUID()}`);
+      const certification = await seedActiveCertification(
+        harness,
+        user.id,
+        `finalize-fault-${randomUUID()}`,
+      );
       const exam = newExam(user.id, certification.key);
-      await harness.unitOfWork.transaction((repos) => repos.exams.createWithSnapshots(exam));
+      await harness.unitOfWork.transaction((repos) =>
+        repos.exams.createWithSnapshots(exam),
+      );
       harness.hooks.failAfter(stage);
 
       await expect(
@@ -331,12 +399,14 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
         ),
       ).rejects.toThrow("Injected post-write fault");
 
-      const state = await harness.database.query<{ status: string; attempt_id: string | null }>(
-        "SELECT status, attempt_id FROM exam_sessions WHERE id = $1",
-        [exam.id],
-      );
+      const state = await harness.database.query<{
+        status: string;
+        attempt_id: string | null;
+      }>("SELECT status, attempt_id FROM exam_sessions WHERE id = $1", [exam.id]);
       expect(state.rows[0]).toEqual({ status: "active", attempt_id: null });
-      expect(await count(harness, "attempts", "exam_session_id = $1", [exam.id])).toBe(0);
+      expect(await count(harness, "attempts", "exam_session_id = $1", [exam.id])).toBe(
+        0,
+      );
       expect(await count(harness, "attempt_items", "1 = 1")).toBe(0);
     }, 60_000);
   }
@@ -354,13 +424,24 @@ describeLive("production DSQL application-table concurrency and fault suite", ()
   ]) {
     it(`rolls back the import revision and token state after ${stage}`, async () => {
       const user = await createUser(harness);
-      const certification = await seedActiveCertification(harness, user.id, `import-fault-${randomUUID()}`);
+      const certification = await seedActiveCertification(
+        harness,
+        user.id,
+        `import-fault-${randomUUID()}`,
+      );
       const baselineHead = await activeHead(harness, certification.key);
-      const command = await validatedImport(harness, user.id, certification.key, "fault");
+      const command = await validatedImport(
+        harness,
+        user.id,
+        certification.key,
+        "fault",
+      );
       harness.hooks.failAfter(stage);
 
       await expect(
-        harness.unitOfWork.transaction((repos) => repos.catalog.commitValidatedImport(command)),
+        harness.unitOfWork.transaction((repos) =>
+          repos.catalog.commitValidatedImport(command),
+        ),
       ).rejects.toThrow("Injected post-write fault");
 
       expect(await activeHead(harness, certification.key)).toBe(baselineHead);
@@ -454,7 +535,8 @@ async function createLiveHarness(): Promise<LiveHarness> {
     caPath: process.env.PGSSLROOTCERT,
   });
   const pool = await lifecycle.pool();
-  let disposableSchema: Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
+  let disposableSchema:
+    Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
   try {
     disposableSchema = await createDisposableDsqlSchema(pool, schema);
     const hooks = new TestQueryHooks();
@@ -680,7 +762,9 @@ async function validatedImport(
       source: {
         revisionId,
         certificationKey,
-        providers: [{ id: providerId, revisionId, name: `Provider ${label}`, logoUrl: null }],
+        providers: [
+          { id: providerId, revisionId, name: `Provider ${label}`, logoUrl: null },
+        ],
         certifications: [
           {
             id: certificationId,
@@ -709,7 +793,12 @@ async function validatedImport(
       },
       generation: {
         revisionId,
-        provider: { id: providerId, revisionId, name: `Provider ${label}`, logoUrl: null },
+        provider: {
+          id: providerId,
+          revisionId,
+          name: `Provider ${label}`,
+          logoUrl: null,
+        },
         certification: {
           id: certificationId,
           revisionId,
@@ -781,7 +870,10 @@ async function count(
   return Number(result.rows[0]?.count ?? 0);
 }
 
-async function activeHead(harness: LiveHarness, certificationKey: string): Promise<string> {
+async function activeHead(
+  harness: LiveHarness,
+  certificationKey: string,
+): Promise<string> {
   const result = await harness.database.query<{ active_revision_id: string }>(
     "SELECT active_revision_id FROM catalog_heads WHERE certification_key = $1",
     [certificationKey],
@@ -791,7 +883,10 @@ async function activeHead(harness: LiveHarness, certificationKey: string): Promi
   return id;
 }
 
-async function expectCompleteRevision(harness: LiveHarness, revisionId: string): Promise<void> {
+async function expectCompleteRevision(
+  harness: LiveHarness,
+  revisionId: string,
+): Promise<void> {
   await expect(
     Promise.all([
       count(harness, "providers", "revision_id = $1", [revisionId]),
@@ -803,7 +898,10 @@ async function expectCompleteRevision(harness: LiveHarness, revisionId: string):
   ).resolves.toEqual([1, 1, 1, 1, 2]);
 }
 
-async function expectRevisionAbsent(harness: LiveHarness, revisionId: string): Promise<void> {
+async function expectRevisionAbsent(
+  harness: LiveHarness,
+  revisionId: string,
+): Promise<void> {
   await expect(
     Promise.all([
       count(harness, "catalog_revisions", "id = $1", [revisionId]),
@@ -829,7 +927,7 @@ function hash(value: string): string {
 function quoteIdentifier(identifier: string): string {
   if (!/^[a-z_][a-z0-9_]*$/u.test(identifier))
     throw new Error("Invalid disposable DSQL schema identifier.");
-  return `\"${identifier}\"`;
+  return `"${identifier}"`;
 }
 
 function requiredEnvironment(key: string): string {

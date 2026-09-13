@@ -1,12 +1,9 @@
 import { handle } from "hono/aws-lambda";
 
-import { app as healthOnlyApp } from "./app.js";
 import { productionComposition } from "./production.js";
 
-const healthOnlyHandler = handle(healthOnlyApp);
-
 /** Lazily composes the production graph once and reuses it for Lambda warm starts. */
-export async function handler(...args: Parameters<typeof healthOnlyHandler>) {
+export async function handler(...args: Parameters<ReturnType<typeof handle>>) {
   const { app } = await productionComposition();
   return handle(app)(...args);
 }

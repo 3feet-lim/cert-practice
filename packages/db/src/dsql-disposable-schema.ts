@@ -45,6 +45,7 @@ export async function createDisposableDsqlSchema(
       throw new AggregateError(
         [createError, cleanupError],
         `Failed to create and clean up disposable DSQL schema ${name}.`,
+        { cause: cleanupError },
       );
     }
     throw createError;
@@ -64,5 +65,5 @@ export async function createDisposableDsqlSchema(
 function quoteIdentifier(identifier: string): string {
   if (!/^[a-z_][a-z0-9_]*$/u.test(identifier))
     throw new Error("Invalid disposable DSQL schema identifier.");
-  return `\"${identifier}\"`;
+  return `"${identifier}"`;
 }

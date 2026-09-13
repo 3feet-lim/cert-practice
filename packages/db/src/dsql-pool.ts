@@ -25,8 +25,9 @@ export class DsqlPoolLifecycle {
 
   constructor(
     private readonly config: DsqlPoolConfig,
-    private readonly createPool: (options: ConstructorParameters<typeof AuroraDSQLPool>[0]) => AuroraDSQLPool =
-      (options) => new AuroraDSQLPool(options),
+    private readonly createPool: (
+      options: ConstructorParameters<typeof AuroraDSQLPool>[0],
+    ) => AuroraDSQLPool = (options) => new AuroraDSQLPool(options),
   ) {}
 
   async pool(): Promise<AuroraDSQLPool> {

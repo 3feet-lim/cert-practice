@@ -18,7 +18,10 @@ function fixture(options: FixtureOptions = {}) {
       calls.push({ text, values });
       if (options.failWhen?.(text)) throw new Error("write failed");
       if (text.includes("SELECT active_revision_id, version FROM catalog_heads"))
-        return { rows: options.head ? [options.head] : [], rowCount: options.head ? 1 : 0 };
+        return {
+          rows: options.head ? [options.head] : [],
+          rowCount: options.head ? 1 : 0,
+        };
       if (text.includes("AS orphan_choices"))
         return {
           rows: [
@@ -105,9 +108,7 @@ function commitCommand(): ImportCommitCommand {
             orderIndex: 0,
           },
         ],
-        questions: [
-          { id: questionId, revisionId, certificationId, domainId },
-        ],
+        questions: [{ id: questionId, revisionId, certificationId, domainId }],
       },
       generation: {
         revisionId,
@@ -208,7 +209,9 @@ describe("DSQL UnitOfWork transaction boundary", () => {
             query: async (text: string) => {
               calls.push(`${connection}:${text}`);
               if (connection === 0 && text === "COMMIT")
-                throw Object.assign(new Error("transaction aborted"), { code: "OC000" });
+                throw Object.assign(new Error("transaction aborted"), {
+                  code: "OC000",
+                });
               return { rows: [], rowCount: 0 };
             },
             release: () => {
@@ -228,13 +231,7 @@ describe("DSQL UnitOfWork transaction boundary", () => {
 
     await expect(unitOfWork.transaction(async () => ++workRuns)).resolves.toBe(2);
 
-    expect(calls).toEqual([
-      "0:BEGIN",
-      "0:COMMIT",
-      "0:ROLLBACK",
-      "1:BEGIN",
-      "1:COMMIT",
-    ]);
+    expect(calls).toEqual(["0:BEGIN", "0:COMMIT", "0:ROLLBACK", "1:BEGIN", "1:COMMIT"]);
     expect(delays).toEqual([0]);
     expect(released).toBe(2);
   });
@@ -263,7 +260,9 @@ describe("DSQL validated import commit", () => {
     const { calls, unitOfWork } = fixture();
 
     await expect(
-      unitOfWork.transaction((repos) => repos.catalog.commitValidatedImport(commitCommand())),
+      unitOfWork.transaction((repos) =>
+        repos.catalog.commitValidatedImport(commitCommand()),
+      ),
     ).resolves.toBeUndefined();
 
     const revisionInsert = calls.find((call) =>
@@ -286,7 +285,9 @@ describe("DSQL validated import commit", () => {
     });
 
     await expect(
-      unitOfWork.transaction((repos) => repos.catalog.commitValidatedImport(commitCommand())),
+      unitOfWork.transaction((repos) =>
+        repos.catalog.commitValidatedImport(commitCommand()),
+      ),
     ).rejects.toThrow("write failed");
 
     expect(
@@ -304,12 +305,17 @@ describe("DSQL validated import commit", () => {
 
   it("rolls back rather than overwriting a concurrently changed catalog head", async () => {
     const { calls, unitOfWork } = fixture({
-      head: { active_revision_id: "00000000-0000-4000-8000-000000000010", version: "4" },
+      head: {
+        active_revision_id: "00000000-0000-4000-8000-000000000010",
+        version: "4",
+      },
       rejectHeadSwitch: true,
     });
 
     await expect(
-      unitOfWork.transaction((repos) => repos.catalog.commitValidatedImport(commitCommand())),
+      unitOfWork.transaction((repos) =>
+        repos.catalog.commitValidatedImport(commitCommand()),
+      ),
     ).rejects.toThrow("Catalog head changed during import");
 
     expect(calls.some((call) => call.text.includes("UPDATE import_validations"))).toBe(

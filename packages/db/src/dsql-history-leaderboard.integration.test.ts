@@ -53,7 +53,9 @@ describeLive("production DSQL history and leaderboard integration", () => {
     const learnerExactHigher = Fraction.of(333_334n, 10_000n);
     const competitorAccuracy = Fraction.of(333_333n, 10_000n);
 
-    expect(learnerExactLower.displayDecimal()).toBe(learnerExactHigher.displayDecimal());
+    expect(learnerExactLower.displayDecimal()).toBe(
+      learnerExactHigher.displayDecimal(),
+    );
     expect(learnerExactLower.compare(learnerExactHigher)).toBe(-1);
 
     const learnerAtSameTime = await createAttempt(harness, {
@@ -94,12 +96,15 @@ describeLive("production DSQL history and leaderboard integration", () => {
           left.id.localeCompare(right.id),
       )
       .map((attempt) => attempt.id);
-    const expectedRepresentativeId = [learnerBest, learnerBestAtSameTime]
-      .sort((left, right) => left.id.localeCompare(right.id))[0]!.id;
+    const expectedRepresentativeId = [learnerBest, learnerBestAtSameTime].sort(
+      (left, right) => left.id.localeCompare(right.id),
+    )[0]!.id;
 
     const lifecycle = lifecycleService(harness.unitOfWork);
     const history = await lifecycle.history(learner.id);
-    expect(history.attempts.map((attempt) => attempt.attemptId)).toEqual(expectedHistoryIds);
+    expect(history.attempts.map((attempt) => attempt.attemptId)).toEqual(
+      expectedHistoryIds,
+    );
 
     const firstPage = await historyPage(harness, learner.id, 2);
     const cursor = firstPage.at(-1);
@@ -115,18 +120,29 @@ describeLive("production DSQL history and leaderboard integration", () => {
       competitorAttempt.id,
     ]);
     expect(leaderboard.entries.map((entry) => entry.rank)).toEqual([1, 2]);
-    expect(leaderboard.entries.map((entry) => entry.isCurrentUser)).toEqual([true, false]);
-    expect(leaderboard.entries.some((entry) => entry.userId === privateLearner.id)).toBe(false);
+    expect(leaderboard.entries.map((entry) => entry.isCurrentUser)).toEqual([
+      true,
+      false,
+    ]);
+    expect(
+      leaderboard.entries.some((entry) => entry.userId === privateLearner.id),
+    ).toBe(false);
 
     await setVisibility(harness, competitor.id, false);
-    const afterVisibilityChange = await lifecycle.leaderboard(certification.id, learner.id);
+    const afterVisibilityChange = await lifecycle.leaderboard(
+      certification.id,
+      learner.id,
+    );
     expect(afterVisibilityChange.entries.map((entry) => entry.attemptId)).toEqual([
       expectedRepresentativeId,
     ]);
 
     await createCompletedPracticeResult(harness, learner.id, certification.key);
     const historyAfterPractice = await lifecycle.history(learner.id);
-    const leaderboardAfterPractice = await lifecycle.leaderboard(certification.id, learner.id);
+    const leaderboardAfterPractice = await lifecycle.leaderboard(
+      certification.id,
+      learner.id,
+    );
     expect(historyAfterPractice.attempts.map((attempt) => attempt.attemptId)).toEqual(
       history.attempts.map((attempt) => attempt.attemptId),
     );
@@ -198,7 +214,8 @@ async function createLiveHarness(): Promise<LiveHarness> {
     caPath: process.env.PGSSLROOTCERT,
   });
   const pool = await lifecycle.pool();
-  let disposableSchema: Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
+  let disposableSchema:
+    Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
   try {
     disposableSchema = await createDisposableDsqlSchema(pool, schema);
     const scopedPool = new SchemaScopedPool(pool, disposableSchema.name);
@@ -240,7 +257,11 @@ async function createApprovedUser(harness: LiveHarness, displayName: string) {
   return { id };
 }
 
-async function setVisibility(harness: LiveHarness, userId: string, scorePublic: boolean): Promise<void> {
+async function setVisibility(
+  harness: LiveHarness,
+  userId: string,
+  scorePublic: boolean,
+): Promise<void> {
   await harness.unitOfWork.transaction(async (repos) => {
     const profile = await repos.users.findById(userId);
     if (!profile) throw new Error("Expected approved profile.");
@@ -396,7 +417,10 @@ async function historyPage(
   limit: number,
   cursor?: HistoryCursor,
 ): Promise<HistoryCursor[]> {
-  const result = await harness.database.query<{ id: string; submitted_at: Date | string }>(
+  const result = await harness.database.query<{
+    id: string;
+    submitted_at: Date | string;
+  }>(
     `SELECT id, submitted_at
      FROM attempts
      WHERE user_id = $1
@@ -406,7 +430,10 @@ async function historyPage(
      LIMIT $4`,
     [userId, cursor?.submittedAt ?? null, cursor?.id ?? null, limit],
   );
-  return result.rows.map((row) => ({ id: row.id, submittedAt: new Date(row.submitted_at) }));
+  return result.rows.map((row) => ({
+    id: row.id,
+    submittedAt: new Date(row.submitted_at),
+  }));
 }
 
 async function seedHistoryPlanWorkload(
@@ -417,7 +444,9 @@ async function seedHistoryPlanWorkload(
   const count = 300;
   const sessionIds = Array.from({ length: count }, randomUUID);
   const attemptIds = Array.from({ length: count }, randomUUID);
-  const timestamps = sessionIds.map((_, index) => new Date(now.getTime() - index * 1_000));
+  const timestamps = sessionIds.map(
+    (_, index) => new Date(now.getTime() - index * 1_000),
+  );
   await harness.database.query(
     `INSERT INTO exam_sessions
        (id, user_id, certification_id_at_start, certification_key, certification_snapshot,
@@ -496,7 +525,7 @@ function hash(value: string): string {
 function quoteIdentifier(identifier: string): string {
   if (!/^[a-z_][a-z0-9_]*$/u.test(identifier))
     throw new Error("Invalid disposable DSQL schema identifier.");
-  return `\"${identifier}\"`;
+  return `"${identifier}"`;
 }
 
 function requiredEnvironment(key: string): string {

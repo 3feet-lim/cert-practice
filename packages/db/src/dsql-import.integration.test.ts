@@ -59,11 +59,16 @@ describeLive("production DSQL import integration suite", () => {
 
   it("rejects an otherwise valid document whose Domain array order changed after validation", async () => {
     const prepared = await prepare(document(), ADMIN_A);
-    const reordered = await service.materializeCommit(document({ reverseDomains: true }), ADMIN_A);
+    const reordered = await service.materializeCommit(
+      document({ reverseDomains: true }),
+      ADMIN_A,
+    );
     const command = { ...prepared.command, ...reordered };
 
     expect(reordered.contentHash).not.toBe(prepared.command.contentHash);
-    await expect(commit(command)).rejects.toThrow("Import validation is not consumable");
+    await expect(commit(command)).rejects.toThrow(
+      "Import validation is not consumable",
+    );
 
     expect(await validationStatus(prepared.command.validationId)).toBe("validated");
     await expectRevisionAbsent(reordered.materialization.revision.id);
@@ -75,7 +80,9 @@ describeLive("production DSQL import integration suite", () => {
     const expired = await service.materializeCommit(document(), ADMIN_A);
     const command = { ...prepared.command, ...expired, now: new Date(clock.now) };
 
-    await expect(commit(command)).rejects.toThrow("Import validation is not consumable");
+    await expect(commit(command)).rejects.toThrow(
+      "Import validation is not consumable",
+    );
 
     expect(await validationStatus(prepared.command.validationId)).toBe("validated");
     await expectRevisionAbsent(expired.materialization.revision.id);
@@ -90,7 +97,9 @@ describeLive("production DSQL import integration suite", () => {
       actorUserId: ADMIN_B,
     };
 
-    await expect(commit(command)).rejects.toThrow("Import validation is not consumable");
+    await expect(commit(command)).rejects.toThrow(
+      "Import validation is not consumable",
+    );
 
     expect(await validationStatus(prepared.command.validationId)).toBe("validated");
     await expectRevisionAbsent(otherActor.materialization.revision.id);
@@ -100,11 +109,15 @@ describeLive("production DSQL import integration suite", () => {
     const prepared = await prepare(document(), ADMIN_A);
 
     await expect(commit(prepared.command)).resolves.toBeUndefined();
-    await expect(commit(prepared.command)).rejects.toThrow("Import validation is not consumable");
+    await expect(commit(prepared.command)).rejects.toThrow(
+      "Import validation is not consumable",
+    );
 
     expect(await validationStatus(prepared.command.validationId)).toBe("consumed");
     expect(
-      await count("catalog_revisions", "id = $1", [prepared.command.materialization.revision.id]),
+      await count("catalog_revisions", "id = $1", [
+        prepared.command.materialization.revision.id,
+      ]),
     ).toBe(1);
     expect(await activeHead()).toBe(prepared.command.materialization.revision.id);
   }, 60_000);
@@ -113,20 +126,32 @@ describeLive("production DSQL import integration suite", () => {
     "INSERT INTO catalog_revisions",
     "UPDATE catalog_heads SET active_revision_id",
     "UPDATE import_validations SET status = 'consumed'",
-  ])("rolls back the revision, head, and validation when %s fails", async (stage) => {
-    await commit((await prepare(document({ name: "Baseline" }), ADMIN_A)).command);
-    const baselineHead = await activeHead();
-    const prepared = await prepare(document({ name: `Fault after ${stage}` }), ADMIN_A);
-    harness.hooks.failAfter(stage);
+  ])(
+    "rolls back the revision, head, and validation when %s fails",
+    async (stage) => {
+      await commit((await prepare(document({ name: "Baseline" }), ADMIN_A)).command);
+      const baselineHead = await activeHead();
+      const prepared = await prepare(
+        document({ name: `Fault after ${stage}` }),
+        ADMIN_A,
+      );
+      harness.hooks.failAfter(stage);
 
-    await expect(commit(prepared.command)).rejects.toThrow("Injected post-write fault");
+      await expect(commit(prepared.command)).rejects.toThrow(
+        "Injected post-write fault",
+      );
 
-    expect(await activeHead()).toBe(baselineHead);
-    expect(await validationStatus(prepared.command.validationId)).toBe("validated");
-    await expectRevisionAbsent(prepared.command.materialization.revision.id);
-  }, 60_000);
+      expect(await activeHead()).toBe(baselineHead);
+      expect(await validationStatus(prepared.command.validationId)).toBe("validated");
+      await expectRevisionAbsent(prepared.command.materialization.revision.id);
+    },
+    60_000,
+  );
 
-  async function prepare(content: string, actorUserId: string): Promise<PreparedImport> {
+  async function prepare(
+    content: string,
+    actorUserId: string,
+  ): Promise<PreparedImport> {
     const dryRun = await service.dryRun(content, actorUserId);
     if (!dryRun.materialization?.validation || !dryRun.response.commitToken)
       throw new Error("Live import fixture must pass dry-run validation.");
@@ -148,7 +173,9 @@ describeLive("production DSQL import integration suite", () => {
   }
 
   async function commit(command: ImportCommitCommand): Promise<void> {
-    await harness.unitOfWork.transaction((repos) => repos.catalog.commitValidatedImport(command));
+    await harness.unitOfWork.transaction((repos) =>
+      repos.catalog.commitValidatedImport(command),
+    );
   }
 
   async function activeHead(): Promise<string | null> {
@@ -259,7 +286,8 @@ async function createLiveHarness(): Promise<LiveHarness> {
     caPath: process.env.PGSSLROOTCERT,
   });
   const pool = await lifecycle.pool();
-  let disposableSchema: Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
+  let disposableSchema:
+    Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
   try {
     disposableSchema = await createDisposableDsqlSchema(pool, schema);
     const hooks = new TestQueryHooks();
@@ -267,7 +295,10 @@ async function createLiveHarness(): Promise<LiveHarness> {
     const database = new SchemaScopedDatabase(scopedPool);
     await new DsqlMigrationRunner(database).migrate(await loadApplicationMigrations());
     return {
-      unitOfWork: new DsqlUnitOfWork(scopedPool, { maxOccRetries: 2, retryDelayMs: 10 }),
+      unitOfWork: new DsqlUnitOfWork(scopedPool, {
+        maxOccRetries: 2,
+        retryDelayMs: 10,
+      }),
       database,
       hooks,
       cleanup: async () => {
@@ -335,7 +366,7 @@ const randomUuidFactory: UuidFactory = { next: () => randomUUID() };
 function quoteIdentifier(identifier: string): string {
   if (!/^[a-z_][a-z0-9_]*$/u.test(identifier))
     throw new Error("Invalid disposable DSQL schema identifier.");
-  return `\"${identifier}\"`;
+  return `"${identifier}"`;
 }
 
 function requiredEnvironment(key: string): string {

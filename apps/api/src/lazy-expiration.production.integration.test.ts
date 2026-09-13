@@ -83,7 +83,12 @@ describeLive("production DSQL all-route lazy expiration integration", () => {
     const app = productionApp(harness.unitOfWork, actor.googleSub, clock);
     const first = await createExpiredExam(harness, actor.id, certification.key, 3);
     const failed = await createExpiredExam(harness, actor.id, certification.key, 2);
-    const unprocessed = await createExpiredExam(harness, actor.id, certification.key, 1);
+    const unprocessed = await createExpiredExam(
+      harness,
+      actor.id,
+      certification.key,
+      1,
+    );
     harness.hooks.failOnAttemptInsert(2);
 
     const response = await authorizedRequest(app, "/v1/me");
@@ -148,11 +153,7 @@ class FixtureVerifier implements CognitoTokenVerifier {
   }
 }
 
-function productionApp(
-  unitOfWork: DsqlUnitOfWork,
-  googleSub: string,
-  clock: Clock,
-) {
+function productionApp(unitOfWork: DsqlUnitOfWork, googleSub: string, clock: Clock) {
   const dependencies: CreateAppDependencies = {
     tokenVerifier: new FixtureVerifier(googleSub),
     unitOfWork,
@@ -163,7 +164,10 @@ function productionApp(
   return createApp(dependencies);
 }
 
-function productionLifecycle(unitOfWork: DsqlUnitOfWork, clock: Clock): LifecycleServices {
+function productionLifecycle(
+  unitOfWork: DsqlUnitOfWork,
+  clock: Clock,
+): LifecycleServices {
   return new LifecycleServices({
     unitOfWork,
     now: () => new Date(clock.now),
@@ -208,7 +212,8 @@ async function createLiveHarness(): Promise<LiveHarness> {
     caPath: process.env.PGSSLROOTCERT,
   });
   const pool = await lifecycle.pool();
-  let disposableSchema: Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
+  let disposableSchema:
+    Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
   try {
     disposableSchema = await createDisposableDsqlSchema(pool, schema);
     const hooks = new TestQueryHooks();
@@ -216,7 +221,10 @@ async function createLiveHarness(): Promise<LiveHarness> {
     const database = new SchemaScopedDatabase(scopedPool);
     await new DsqlMigrationRunner(database).migrate(await loadApplicationMigrations());
     return {
-      unitOfWork: new DsqlUnitOfWork(scopedPool, { maxOccRetries: 8, retryDelayMs: 10 }),
+      unitOfWork: new DsqlUnitOfWork(scopedPool, {
+        maxOccRetries: 8,
+        retryDelayMs: 10,
+      }),
       database,
       hooks,
       cleanup: async () => {
@@ -250,7 +258,10 @@ async function createApprovedAdmin(harness: LiveHarness): Promise<Actor> {
     });
     await repos.users.approvePending(id, NOW);
   });
-  await harness.database.query("UPDATE user_profiles SET role = 'admin' WHERE id = $1", [id]);
+  await harness.database.query(
+    "UPDATE user_profiles SET role = 'admin' WHERE id = $1",
+    [id],
+  );
   return { id, googleSub };
 }
 
@@ -364,7 +375,10 @@ function question(id: string): PersistedQuestionSnapshot {
   };
 }
 
-async function expectExpiredAttempt(harness: LiveHarness, sessionId: string): Promise<void> {
+async function expectExpiredAttempt(
+  harness: LiveHarness,
+  sessionId: string,
+): Promise<void> {
   const result = await harness.database.query<{ submission_reason: string }>(
     "SELECT submission_reason FROM attempts WHERE exam_session_id = $1",
     [sessionId],
@@ -384,7 +398,10 @@ async function attemptCount(harness: LiveHarness, sessionId: string): Promise<nu
   return Number(result.rows[0]?.count ?? 0);
 }
 
-async function examStatus(harness: LiveHarness, sessionId: string): Promise<string | undefined> {
+async function examStatus(
+  harness: LiveHarness,
+  sessionId: string,
+): Promise<string | undefined> {
   const result = await harness.database.query<{ status: string }>(
     "SELECT status FROM exam_sessions WHERE id = $1",
     [sessionId],
@@ -499,7 +516,7 @@ function hash(value: string): string {
 function quoteIdentifier(identifier: string): string {
   if (!/^[a-z_][a-z0-9_]*$/u.test(identifier))
     throw new Error("Invalid disposable DSQL schema identifier.");
-  return `\"${identifier}\"`;
+  return `"${identifier}"`;
 }
 
 function requiredEnvironment(key: string): string {

@@ -128,10 +128,10 @@ function createService(ids = DRY_RUN_IDS) {
 function semanticDocument(input: SemanticImportCase): ImportDocument {
   const document = validImportDocument();
   const [firstQuestion, secondQuestion] = document.certification.questions;
-  if (!firstQuestion || !secondQuestion) throw new Error("Fixture must have two questions.");
+  if (!firstQuestion || !secondQuestion)
+    throw new Error("Fixture must have two questions.");
 
-  if (input.invalidWeights)
-    document.certification.domains[1]!.weightPercent = "40";
+  if (input.invalidWeights) document.certification.domains[1]!.weightPercent = "40";
   if (input.duplicateQuestion) secondQuestion.id = firstQuestion.id;
   if (input.unknownDomain) secondQuestion.domainId = "missing-domain";
   if (input.duplicateChoice)
@@ -144,8 +144,7 @@ function semanticDocument(input: SemanticImportCase): ImportDocument {
     for (const question of document.certification.questions) {
       question.stemKo = `${question.stemEn} 한국어`;
       question.explanationKo = `${question.explanationEn} 한국어`;
-      for (const choice of question.choices)
-        choice.textKo = `${choice.textEn} 한국어`;
+      for (const choice of question.choices) choice.textKo = `${choice.textEn} 한국어`;
     }
   }
   if (input.translation === "incomplete") firstQuestion.stemKo = "일부 한국어";
@@ -231,7 +230,8 @@ async function activeCatalogSnapshot(database: InMemoryUnitOfWork) {
     if (!revision || !certificationId)
       throw new Error("Committed baseline catalog must be active and readable.");
     const generation = await repos.catalog.fullGenerationSource(certificationId);
-    if (!generation) throw new Error("Committed baseline catalog must generate sessions.");
+    if (!generation)
+      throw new Error("Committed baseline catalog must generate sessions.");
     return { revision, sources, generation };
   });
 }

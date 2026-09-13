@@ -23,11 +23,15 @@ const describeLive = enabled ? describe : describe.skip;
  */
 const DSQL_CONTRACT_TIMEOUT_MS = 120_000;
 
-describeLive("production DSQL repository contracts", { timeout: DSQL_CONTRACT_TIMEOUT_MS }, () => {
-  describeRepositoryContractSuite("production DSQL", createDsqlHarness, {
-    timeout: DSQL_CONTRACT_TIMEOUT_MS,
-  });
-});
+describeLive(
+  "production DSQL repository contracts",
+  { timeout: DSQL_CONTRACT_TIMEOUT_MS },
+  () => {
+    describeRepositoryContractSuite("production DSQL", createDsqlHarness, {
+      timeout: DSQL_CONTRACT_TIMEOUT_MS,
+    });
+  },
+);
 
 async function createDsqlHarness(): Promise<RepositoryContractHarness> {
   const endpoint = required("DSQL_ENDPOINT");
@@ -46,7 +50,8 @@ async function createDsqlHarness(): Promise<RepositoryContractHarness> {
     caPath: process.env.PGSSLROOTCERT,
   });
   const pool = await lifecycle.pool();
-  let disposableSchema: Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
+  let disposableSchema:
+    Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
   try {
     disposableSchema = await createDisposableDsqlSchema(pool, schema);
     const scopedPool = new SchemaScopedPool(pool, disposableSchema.name);

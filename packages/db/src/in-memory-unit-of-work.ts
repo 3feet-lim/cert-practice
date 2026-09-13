@@ -382,10 +382,13 @@ class InMemoryRepositories implements TransactionRepositories {
       },
       listActiveOwned: async (userId) =>
         [...this.state.practices.values()]
-          .filter((candidate) => candidate.userId === userId && candidate.status === "active")
-          .sort((left, right) =>
-            left.createdAt.getTime() - right.createdAt.getTime() ||
-            left.id.localeCompare(right.id),
+          .filter(
+            (candidate) => candidate.userId === userId && candidate.status === "active",
+          )
+          .sort(
+            (left, right) =>
+              left.createdAt.getTime() - right.createdAt.getTime() ||
+              left.id.localeCompare(right.id),
           )
           .map(copyPractice),
       getOwned: async (userId, sessionId) => {

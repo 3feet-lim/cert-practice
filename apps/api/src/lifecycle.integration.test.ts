@@ -252,7 +252,6 @@ describe("offline lifecycle Hono integration", () => {
   });
 });
 
-
 describe("authenticated route lazy-finalization manifest", () => {
   it("runs lazy finalization on every protected route before approval or role policies", async () => {
     const { app, lifecycle } = fixture();
@@ -264,10 +263,13 @@ describe("authenticated route lazy-finalization manifest", () => {
       ["/v1/catalog"],
       ["/v1/admin"],
       ["/v1/admin/pending-users"],
-      [`/v1/certifications/${CERTIFICATION_ID}/practice/start`, {
-        method: "POST",
-        body: "{}",
-      }],
+      [
+        `/v1/certifications/${CERTIFICATION_ID}/practice/start`,
+        {
+          method: "POST",
+          body: "{}",
+        },
+      ],
       [`/v1/practice/${unknownSessionId}/resume`, { method: "POST" }],
       [`/v1/practice-results/${unknownSessionId}`],
       [`/v1/exams/${unknownSessionId}`],

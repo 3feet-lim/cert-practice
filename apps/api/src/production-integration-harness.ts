@@ -105,7 +105,9 @@ export class DeterministicClock {
 
   advance(milliseconds: number): void {
     if (!Number.isSafeInteger(milliseconds))
-      throw new RangeError("Clock advance must be a safe integer number of milliseconds.");
+      throw new RangeError(
+        "Clock advance must be a safe integer number of milliseconds.",
+      );
     this.#now = new Date(this.#now.getTime() + milliseconds);
   }
 }
@@ -145,7 +147,9 @@ export class DeterministicRandomSource implements RandomSource {
       throw new RangeError("maxExclusive must be a positive safe integer.");
     const next = this.#values.shift() ?? 0;
     if (!Number.isSafeInteger(next) || next < 0 || next >= maxExclusive)
-      throw new RangeError(`Deterministic random value ${next} is outside [0, ${maxExclusive}).`);
+      throw new RangeError(
+        `Deterministic random value ${next} is outside [0, ${maxExclusive}).`,
+      );
     return next;
   }
 }
@@ -301,19 +305,23 @@ export async function createProductionIntegrationHarness(
     caPath: environment.PGSSLROOTCERT,
   });
   const pool = await lifecycle.pool();
-  let disposableSchema: Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
+  let disposableSchema:
+    Awaited<ReturnType<typeof createDisposableDsqlSchema>> | undefined;
 
   try {
     disposableSchema = await createDisposableDsqlSchema(pool, schema);
     const scopedPool = new SchemaScopedPool(pool, disposableSchema.name, queries);
     const database = new DisposableSchemaDatabase(scopedPool);
     const migrations = await loadApplicationMigrations();
-    await new DsqlMigrationRunner(database, { now: () => clock.now() }).migrate(migrations);
+    await new DsqlMigrationRunner(database, { now: () => clock.now() }).migrate(
+      migrations,
+    );
     const unitOfWork = new DsqlUnitOfWork(
       scopedPool as unknown as ConstructorParameters<typeof DsqlUnitOfWork>[0],
       {
-      retryDelayMs: 10,
-    });
+        retryDelayMs: 10,
+      },
+    );
     const sessionFactory = new SessionFactory({ ids, random, now: () => clock.now() });
     const services = new LifecycleServices({
       unitOfWork,
@@ -440,7 +448,9 @@ async function seedUser(
 ): Promise<UserProfile> {
   const id = input.id ?? ids.next();
   const requiresApproval =
-    input.approvalStatus === "approved" || input.scorePublic === true || input.role === "admin";
+    input.approvalStatus === "approved" ||
+    input.scorePublic === true ||
+    input.role === "admin";
   const profile = await unitOfWork.transaction(async (repositories) => {
     const created = await repositories.users.getOrCreatePendingByGoogleSub({
       id,
@@ -656,7 +666,7 @@ function encodeBytes(bytes: Uint8Array): string {
 function quoteIdentifier(identifier: string): string {
   if (!/^[a-z_][a-z0-9_]*$/u.test(identifier))
     throw new Error("Invalid disposable DSQL schema identifier.");
-  return `\"${identifier}\"`;
+  return `"${identifier}"`;
 }
 
 function requiredEnvironment(

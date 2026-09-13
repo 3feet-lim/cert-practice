@@ -79,7 +79,8 @@ export function normalizeDsqlMigrationStatement(statement: string): string {
     /^CREATE\s+(UNIQUE\s+)?INDEX\s+(?!ASYNC\b)/iu,
     (_match, unique: string | undefined) => `CREATE ${unique ?? ""}INDEX ASYNC `,
   );
-  if (!/^CREATE\s+(UNIQUE\s+)?INDEX\s+ASYNC\b/iu.test(asynchronous)) return asynchronous;
+  if (!/^CREATE\s+(UNIQUE\s+)?INDEX\s+ASYNC\b/iu.test(asynchronous))
+    return asynchronous;
 
   // Aurora DSQL rejects ASC/DESC index-key modifiers. The source migrations retain
   // their PostgreSQL form; DSQL scans the compatible default-order index as needed.
@@ -101,7 +102,8 @@ export class DsqlMigrationRunner implements MigrationStateReader {
       query: <Row extends QueryResultRow = QueryResultRow>(
         text: string,
         values?: readonly unknown[],
-      ) => retryDsqlOcc(() => query<Row>(normalizeDsqlMigrationStatement(text), values)),
+      ) =>
+        retryDsqlOcc(() => query<Row>(normalizeDsqlMigrationStatement(text), values)),
     };
     this.options = options;
   }
@@ -127,21 +129,27 @@ export class DsqlMigrationRunner implements MigrationStateReader {
     const result = await this.database.query<{ version: number; sha256: string }>(
       "SELECT version, sha256 FROM application_schema_migrations ORDER BY version ASC",
     );
-    return result.rows.map((row) => ({ version: Number(row.version), sha256: row.sha256 }));
+    return result.rows.map((row) => ({
+      version: Number(row.version),
+      sha256: row.sha256,
+    }));
   }
 
   private async ensureLedger(): Promise<void> {
-    await this.database.query(`CREATE TABLE IF NOT EXISTS application_schema_migrations (
+    await this.database
+      .query(`CREATE TABLE IF NOT EXISTS application_schema_migrations (
       version integer PRIMARY KEY,
       sha256 char(64) NOT NULL,
       applied_at timestamptz NOT NULL
     )`);
-    await this.database.query(`CREATE TABLE IF NOT EXISTS application_schema_migration_lease (
+    await this.database
+      .query(`CREATE TABLE IF NOT EXISTS application_schema_migration_lease (
       lease_key text PRIMARY KEY,
       owner_id uuid NOT NULL,
       expires_at timestamptz NOT NULL
     )`);
-    await this.database.query(`CREATE TABLE IF NOT EXISTS application_schema_migration_steps (
+    await this.database
+      .query(`CREATE TABLE IF NOT EXISTS application_schema_migration_steps (
       version integer NOT NULL,
       sha256 char(64) NOT NULL,
       statement_index integer NOT NULL,

@@ -67,11 +67,16 @@ describeLive("API · DSQL acceptance integration", () => {
     });
     expect(approve.status).toBe(200);
 
-    const certificationId = await activateCertification(adminToken, "Question version one");
+    const certificationId = await activateCertification(
+      adminToken,
+      "Question version one",
+    );
     const learnerToken = await tokenFor(pending.googleSub);
     const catalog = await request("/v1/catalog", learnerToken);
     expect(catalog.status).toBe(200);
-    expect(certificationId).toBe(catalogCertificationId(await json<Envelope<Catalog>>(catalog)));
+    expect(certificationId).toBe(
+      catalogCertificationId(await json<Envelope<Catalog>>(catalog)),
+    );
 
     harness.queries.failAfter("INSERT INTO practice_session_questions");
     const failedStart = await request(
@@ -89,30 +94,41 @@ describeLive("API · DSQL acceptance integration", () => {
       jsonRequest({}),
     );
     expect(started.status).toBe(200);
-    const practiceSessionId = (
-      await json<Envelope<StartedSession>>(started)
-    ).data.practiceSessionId;
+    const practiceSessionId = (await json<Envelope<StartedSession>>(started)).data
+      .practiceSessionId;
     expect(practiceSessionId).toBeTruthy();
 
-    const resumed = await request(`/v1/practice/${practiceSessionId}/resume`, learnerToken, {
-      method: "POST",
-    });
+    const resumed = await request(
+      `/v1/practice/${practiceSessionId}/resume`,
+      learnerToken,
+      {
+        method: "POST",
+      },
+    );
     const question = (await json<Envelope<PracticeResume>>(resumed)).data.questions[0]!;
     expect(question).not.toHaveProperty("correctChoiceIds");
 
     const submitted = await request(
       `/v1/practice/${practiceSessionId}/questions/${question.id}/submit`,
       learnerToken,
-      jsonRequest({ expectedVersion: 0, selectedChoiceIds: [question.choices[0]!.id, question.choices[1]!.id] }),
+      jsonRequest({
+        expectedVersion: 0,
+        selectedChoiceIds: [question.choices[0]!.id, question.choices[1]!.id],
+      }),
     );
     expect(submitted.status).toBe(200);
     const resultId = (await json<Envelope<Submission>>(submitted)).data
       .completedPracticeResultId;
     expect(resultId).toBeTruthy();
 
-    expect((await request(`/v1/practice-results/${resultId}`, learnerToken)).status).toBe(200);
+    expect(
+      (await request(`/v1/practice-results/${resultId}`, learnerToken)).status,
+    ).toBe(200);
     harness.clock.advance(ONE_HUNDRED_SIXTY_EIGHT_HOURS);
-    const expired = await request(`/v1/practice-results/${resultId}`, await tokenFor(pending.googleSub));
+    const expired = await request(
+      `/v1/practice-results/${resultId}`,
+      await tokenFor(pending.googleSub),
+    );
     expect(expired.status).toBe(410);
     expect((await json<{ error: { code: string } }>(expired)).error.code).toBe(
       "practice-result-expired",
@@ -136,15 +152,24 @@ describeLive("API · DSQL acceptance integration", () => {
       scorePublic: false,
     });
     const adminToken = await tokenFor(admin.googleSub);
-    const certificationId = await activateCertification(adminToken, "Question version one");
+    const certificationId = await activateCertification(
+      adminToken,
+      "Question version one",
+    );
 
-    const publicAttempt = await completePartialExam(await tokenFor(publicUser.googleSub), certificationId);
+    const publicAttempt = await completePartialExam(
+      await tokenFor(publicUser.googleSub),
+      certificationId,
+    );
     expect(publicAttempt).toMatchObject({
       rawScore: "0.5",
       accuracyRate: "50",
       reference1000Score: 500,
     });
-    const privateAttempt = await completePartialExam(await tokenFor(privateUser.googleSub), certificationId);
+    const privateAttempt = await completePartialExam(
+      await tokenFor(privateUser.googleSub),
+      certificationId,
+    );
     expect(privateAttempt.attemptId).toBeTruthy();
 
     const originalReview = await request(
@@ -170,7 +195,9 @@ describeLive("API · DSQL acceptance integration", () => {
       await tokenFor(privateUser.googleSub),
     );
     expect(foreignReview.status).toBe(404);
-    expect(JSON.stringify(await foreignReview.json())).not.toContain(publicAttempt.attemptId!);
+    expect(JSON.stringify(await foreignReview.json())).not.toContain(
+      publicAttempt.attemptId!,
+    );
 
     const history = await request("/v1/history", await tokenFor(publicUser.googleSub));
     expect(history.status).toBe(200);
@@ -181,7 +208,8 @@ describeLive("API · DSQL acceptance integration", () => {
       await tokenFor(publicUser.googleSub),
     );
     expect(leaderboard.status).toBe(200);
-    const leaderboardPayload = await json<Envelope<{ entries: unknown[] }>>(leaderboard);
+    const leaderboardPayload =
+      await json<Envelope<{ entries: unknown[] }>>(leaderboard);
     expect(leaderboardPayload.data.entries).toHaveLength(1);
   }, 90_000);
 
@@ -192,7 +220,10 @@ describeLive("API · DSQL acceptance integration", () => {
       approvalStatus: "approved",
     });
     const adminToken = await tokenFor(admin.googleSub);
-    const certificationId = await activateCertification(adminToken, "Question for lazy finalization");
+    const certificationId = await activateCertification(
+      adminToken,
+      "Question for lazy finalization",
+    );
     const unknownId = "00000000-0000-4000-8000-000000099999";
     const routes: ReadonlyArray<readonly [string, RequestInit?]> = [
       ["/v1/me/approval"],
@@ -210,30 +241,48 @@ describeLive("API · DSQL acceptance integration", () => {
     ];
 
     for (const [path, init] of routes) {
-      const expiredSessionId = await startExam(await tokenFor(admin.googleSub), certificationId);
+      const expiredSessionId = await startExam(
+        await tokenFor(admin.googleSub),
+        certificationId,
+      );
       harness.clock.advance(TEN_MINUTES);
       const response = await request(path, await tokenFor(admin.googleSub), init);
       expect(response.status, path).toBeLessThan(500);
-      expect(await count("attempts", "exam_session_id = $1", [expiredSessionId])).toBe(1);
+      expect(await count("attempts", "exam_session_id = $1", [expiredSessionId])).toBe(
+        1,
+      );
     }
 
-    const concurrentSessionId = await startExam(await tokenFor(admin.googleSub), certificationId);
+    const concurrentSessionId = await startExam(
+      await tokenFor(admin.googleSub),
+      certificationId,
+    );
     const barrier = harness.queries.barrierBefore(
       "UPDATE exam_sessions SET status = 'submitted'",
       2,
     );
     const [first, second] = await Promise.all([
-      request(`/v1/exams/${concurrentSessionId}/submit`, await tokenFor(admin.googleSub), {
-        method: "POST",
-      }),
-      request(`/v1/exams/${concurrentSessionId}/submit`, await tokenFor(admin.googleSub), {
-        method: "POST",
-      }),
+      request(
+        `/v1/exams/${concurrentSessionId}/submit`,
+        await tokenFor(admin.googleSub),
+        {
+          method: "POST",
+        },
+      ),
+      request(
+        `/v1/exams/${concurrentSessionId}/submit`,
+        await tokenFor(admin.googleSub),
+        {
+          method: "POST",
+        },
+      ),
     ]);
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
     expect(barrier.arrivals).toBe(2);
-    expect(await count("attempts", "exam_session_id = $1", [concurrentSessionId])).toBe(1);
+    expect(await count("attempts", "exam_session_id = $1", [concurrentSessionId])).toBe(
+      1,
+    );
   }, 90_000);
 
   async function tokenFor(googleSub: string): Promise<string> {
@@ -242,14 +291,21 @@ describeLive("API · DSQL acceptance integration", () => {
     });
   }
 
-  async function request(path: string, token: string, init: RequestInit = {}): Promise<Response> {
+  async function request(
+    path: string,
+    token: string,
+    init: RequestInit = {},
+  ): Promise<Response> {
     return harness.app.request(
       `http://localhost${path}`,
       harness.authorization(token, init),
     );
   }
 
-  async function activateCertification(adminToken: string, stem: string): Promise<string> {
+  async function activateCertification(
+    adminToken: string,
+    stem: string,
+  ): Promise<string> {
     const content = importContent(stem);
     const dryRun = await request(
       "/v1/admin/imports/dry-run",
@@ -283,12 +339,16 @@ describeLive("API · DSQL acceptance integration", () => {
       jsonRequest({ idempotencyKey: `acceptance-${harness.ids.next()}` }),
     );
     expect(response.status).toBe(200);
-    const sessionId = (await json<Envelope<StartedSession>>(response)).data.examSessionId;
+    const sessionId = (await json<Envelope<StartedSession>>(response)).data
+      .examSessionId;
     expect(sessionId).toBeTruthy();
     return sessionId!;
   }
 
-  async function completePartialExam(token: string, certificationId: string): Promise<Submission> {
+  async function completePartialExam(
+    token: string,
+    certificationId: string,
+  ): Promise<Submission> {
     const sessionId = await startExam(token, certificationId);
     const active = await request(`/v1/exams/${sessionId}`, token);
     expect(active.status).toBe(200);
@@ -333,7 +393,8 @@ function catalogCertificationId(catalog: Envelope<Catalog>): string {
   const certification = catalog.data.providers[0]?.certifications.find(
     (item) => item.code === "ACCEPTANCE-CERT",
   );
-  if (!certification) throw new Error("Acceptance certification was not returned by the catalog.");
+  if (!certification)
+    throw new Error("Acceptance certification was not returned by the catalog.");
   return certification.id;
 }
 
@@ -348,7 +409,9 @@ function importContent(stem: string): string {
       timeLimitMinutes: 10,
       passThreshold: "75",
       scoringMode: "partial",
-      domains: [{ id: "acceptance-domain", name: "Acceptance Domain", weightPercent: "100" }],
+      domains: [
+        { id: "acceptance-domain", name: "Acceptance Domain", weightPercent: "100" },
+      ],
       questions: [
         {
           id: "acceptance-question",

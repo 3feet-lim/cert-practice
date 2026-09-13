@@ -52,7 +52,12 @@ describe("CloudWatch Embedded Metric telemetry", () => {
     );
 
     telemetry.emit({ event: "api.finalize-expired", outcome: "failed" });
-    telemetry.emit({ event: "api.cleanup", outcome: "completed", count: 3, durationMs: 8 });
+    telemetry.emit({
+      event: "api.cleanup",
+      outcome: "completed",
+      count: 3,
+      durationMs: 8,
+    });
     telemetry.emit({ event: "api.import", outcome: "failed" });
     telemetry.emit({ event: "api.projection-schema-failure", outcome: "failed" });
     telemetry.emit({ event: "db.runtime", outcome: "completed", durationMs: 21 });
@@ -63,7 +68,10 @@ describe("CloudWatch Embedded Metric telemetry", () => {
     expect(payloads[1]).toMatchObject({ CleanupCompleted: 1, CleanupDeleted: 3 });
     expect(payloads[2]).toMatchObject({ ImportRollbacks: 1 });
     expect(payloads[3]).toMatchObject({ ProjectionSchemaFailures: 1 });
-    expect(payloads[4]).toMatchObject({ DbRuntimeCompleted: 1, DbConnectLatencyMs: 21 });
+    expect(payloads[4]).toMatchObject({
+      DbRuntimeCompleted: 1,
+      DbConnectLatencyMs: 21,
+    });
     expect(payloads[5]).toMatchObject({
       DbTransactionFailures: 1,
       DbTransactionLatencyMs: 34,
@@ -77,6 +85,9 @@ describe("CloudWatch Embedded Metric telemetry", () => {
       requestId: "api:telemetry-test",
       outcome: "completed",
     });
-    expect(JSON.parse(lines[0]!)).toMatchObject({ event: "api.import", outcome: "completed" });
+    expect(JSON.parse(lines[0]!)).toMatchObject({
+      event: "api.import",
+      outcome: "completed",
+    });
   });
 });

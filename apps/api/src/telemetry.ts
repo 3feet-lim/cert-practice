@@ -29,7 +29,11 @@ export type CloudWatchEmbeddedMetricsConfiguration = Readonly<{
   stage: string;
 }>;
 
-type MetricValue = Readonly<{ name: string; unit: "Count" | "Milliseconds"; value: number }>;
+type MetricValue = Readonly<{
+  name: string;
+  unit: "Count" | "Milliseconds";
+  value: number;
+}>;
 
 const sensitiveKey =
   /(?:authorization|token|email|google(?:_|-)?sub|answer|selected.*choice|explanation|content|payload|sql|bind|password|secret)/i;
@@ -122,15 +126,22 @@ function metricsFor(event: ApiTelemetryEvent): MetricValue[] {
         value: 1,
       });
       if (event.count !== undefined)
-        metrics.push({ name: "CleanupDeleted", unit: "Count", value: finiteCount(event.count) });
+        metrics.push({
+          name: "CleanupDeleted",
+          unit: "Count",
+          value: finiteCount(event.count),
+        });
       if (duration !== undefined)
-        metrics.push({ name: "CleanupDurationMs", unit: "Milliseconds", value: duration });
+        metrics.push({
+          name: "CleanupDurationMs",
+          unit: "Milliseconds",
+          value: duration,
+        });
       break;
     case "api.import":
       if (event.outcome === "failed")
         metrics.push({ name: "ImportRollbacks", unit: "Count", value: 1 });
-      else
-        metrics.push({ name: "ImportProcessed", unit: "Count", value: 1 });
+      else metrics.push({ name: "ImportProcessed", unit: "Count", value: 1 });
       break;
     case "api.projection-schema-failure":
       metrics.push({ name: "ProjectionSchemaFailures", unit: "Count", value: 1 });
@@ -142,16 +153,27 @@ function metricsFor(event: ApiTelemetryEvent): MetricValue[] {
         value: 1,
       });
       if (duration !== undefined)
-        metrics.push({ name: "DbConnectLatencyMs", unit: "Milliseconds", value: duration });
+        metrics.push({
+          name: "DbConnectLatencyMs",
+          unit: "Milliseconds",
+          value: duration,
+        });
       break;
     case "db.transaction":
       metrics.push({
-        name: event.outcome === "failed" ? "DbTransactionFailures" : "DbTransactionCompleted",
+        name:
+          event.outcome === "failed"
+            ? "DbTransactionFailures"
+            : "DbTransactionCompleted",
         unit: "Count",
         value: 1,
       });
       if (duration !== undefined)
-        metrics.push({ name: "DbTransactionLatencyMs", unit: "Milliseconds", value: duration });
+        metrics.push({
+          name: "DbTransactionLatencyMs",
+          unit: "Milliseconds",
+          value: duration,
+        });
       break;
   }
 

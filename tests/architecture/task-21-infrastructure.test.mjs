@@ -113,7 +113,7 @@ test("Task 21 EventBridge cleanup architecture cannot create an exam Attempt", a
   assert.doesNotMatch(cleanupHandler, /finalize|submitExam|Attempt/i);
 
   const cleanupComposition = production.match(
-    /cleanupExpiredPracticeResults:[\s\S]*?lifecycle\.cleanupPracticeResults\(validateBatchSize\(batchSize\)\)/,
+    /cleanupExpiredPracticeResults:[\s\S]*?lifecycle\.cleanupPracticeResults\(\s*validateBatchSize\(batchSize\)\s*,?\s*\)/,
   )?.[0];
   assert.ok(cleanupComposition, "cleanup composition must only call lifecycle cleanup");
   assert.doesNotMatch(cleanupComposition, /finalize|submitExam|Attempt/i);
@@ -147,7 +147,6 @@ test("Task 21 production root requires remote state and preserves recovery prote
   }
 });
 
-
 test("Task 21 provisions CloudWatch telemetry, actionable alarms, and machine-readable runbooks", async () => {
   const [serverless, runbooks, telemetry, production] = await Promise.all([
     source("infra/serverless/serverless.yml"),
@@ -156,7 +155,10 @@ test("Task 21 provisions CloudWatch telemetry, actionable alarms, and machine-re
     source("apps/api/src/production.ts"),
   ]);
 
-  assert.match(serverless, /TELEMETRY_NAMESPACE: \$\{self:custom\.telemetryNamespace\}/);
+  assert.match(
+    serverless,
+    /TELEMETRY_NAMESPACE: \$\{self:custom\.telemetryNamespace\}/,
+  );
   assert.match(serverless, /TELEMETRY_SERVICE: \$\{self:custom\.telemetryService\}/);
   assert.match(serverless, /Type: AWS::CloudWatch::Dashboard/);
   for (const alarm of [

@@ -127,10 +127,10 @@ function service() {
 function semanticDocument(input: SemanticImportCase): ImportDocument {
   const document = validImportDocument();
   const [firstQuestion, secondQuestion] = document.certification.questions;
-  if (!firstQuestion || !secondQuestion) throw new Error("Fixture must have two questions.");
+  if (!firstQuestion || !secondQuestion)
+    throw new Error("Fixture must have two questions.");
 
-  if (input.invalidWeights)
-    document.certification.domains[1]!.weightPercent = "40";
+  if (input.invalidWeights) document.certification.domains[1]!.weightPercent = "40";
   if (input.duplicateQuestion) secondQuestion.id = firstQuestion.id;
   if (input.unknownDomain) secondQuestion.domainId = "missing-domain";
   if (input.duplicateChoice)
@@ -143,8 +143,7 @@ function semanticDocument(input: SemanticImportCase): ImportDocument {
     for (const question of document.certification.questions) {
       question.stemKo = `${question.stemEn} 한국어`;
       question.explanationKo = `${question.explanationEn} 한국어`;
-      for (const choice of question.choices)
-        choice.textKo = `${choice.textEn} 한국어`;
+      for (const choice of question.choices) choice.textKo = `${choice.textEn} 한국어`;
     }
   }
   if (input.translation === "incomplete") firstQuestion.stemKo = "일부 한국어";
@@ -158,8 +157,7 @@ function semanticOracle(input: SemanticImportCase) {
   if (input.unknownDomain) errors.add("unknown-domain");
   if (input.duplicateChoice) errors.add("duplicate-choice-id");
   if (input.invalidCorrectChoices) errors.add("invalid-correct-choices");
-  if (input.invalidRequiredChoiceCount)
-    errors.add("invalid-required-choice-count");
+  if (input.invalidRequiredChoiceCount) errors.add("invalid-required-choice-count");
   if (input.blankEnglishStem) errors.add("missing-english-content");
   if (!input.invalidWeights && input.unknownDomain)
     errors.add("insufficient-domain-pool");
@@ -223,7 +221,9 @@ function contentFor(input: GeneratedDryRunCase): string {
   }
 }
 
-function expectUnavailableSummary(result: Awaited<ReturnType<ImportService["dryRun"]>>) {
+function expectUnavailableSummary(
+  result: Awaited<ReturnType<ImportService["dryRun"]>>,
+) {
   expect(result.response.summary.totalQuestions.status).toBe("unavailable");
   expect(result.response.summary.translationStatusCounts.translated.status).toBe(
     "unavailable",
@@ -346,8 +346,9 @@ type LargestRemainderCase = {
 };
 
 /** Generates positive integer partitions of 10,000 basis points in non-import order. */
-const largestRemainderCaseArbitrary = fc.integer({ min: 1, max: 20 }).chain(
-  (domainCount) =>
+const largestRemainderCaseArbitrary = fc
+  .integer({ min: 1, max: 20 })
+  .chain((domainCount) =>
     fc
       .tuple(
         fc.integer({ min: 1, max: 200 }),
@@ -358,7 +359,9 @@ const largestRemainderCaseArbitrary = fc.integer({ min: 1, max: 20 }).chain(
         fc.integer({ min: 0, max: domainCount - 1 }),
       )
       .map(([totalQuestions, cutPoints, rotation]): LargestRemainderCase => {
-        const boundaries = [0, ...cutPoints, 10_000].sort((left, right) => left - right);
+        const boundaries = [0, ...cutPoints, 10_000].sort(
+          (left, right) => left - right,
+        );
         const orderedDomains = boundaries.slice(1).map((boundary, orderIndex) => ({
           id: `domain-${orderIndex}`,
           weightBasisPoints: boundary - boundaries[orderIndex]!,
@@ -372,7 +375,7 @@ const largestRemainderCaseArbitrary = fc.integer({ min: 1, max: 20 }).chain(
           ],
         };
       }),
-);
+  );
 
 function generationSourceForAllocation(
   input: LargestRemainderCase,
@@ -382,7 +385,12 @@ function generationSourceForAllocation(
   const certificationId = "allocation-certification";
   return {
     revisionId,
-    provider: { id: "allocation-provider", revisionId, name: "Provider", logoUrl: null },
+    provider: {
+      id: "allocation-provider",
+      revisionId,
+      name: "Provider",
+      logoUrl: null,
+    },
     certification: {
       id: certificationId,
       revisionId,
@@ -457,9 +465,7 @@ describe("Property 5: largest-remainder allocation", () => {
           .map((domain) => domain.id)
           .toSorted();
         const actualRecipients = exactAllocations
-          .filter(
-            (domain) => allocation.get(domain.id) === domain.floor + 1,
-          )
+          .filter((domain) => allocation.get(domain.id) === domain.floor + 1)
           .map((domain) => domain.id)
           .toSorted();
 

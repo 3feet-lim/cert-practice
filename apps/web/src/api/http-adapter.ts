@@ -36,7 +36,8 @@ import type {
 } from "./port";
 
 export type HttpFetch = (input: string, init?: RequestInit) => Promise<Response>;
-export type BearerTokenProvider = () => string | undefined | Promise<string | undefined>;
+export type BearerTokenProvider = () =>
+  string | undefined | Promise<string | undefined>;
 
 export interface HttpCertQuizApiOptions {
   /** Origin or base path of the Hono API, such as https://api.example.test. */
@@ -185,7 +186,10 @@ export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuiz
     const body: unknown = await response.json().catch(() => undefined);
     if (!response.ok) {
       const parsedError = errorEnvelopeSchema.safeParse(body);
-      if (parsedError.success && apiErrorCodes.has(parsedError.data.error.code as never)) {
+      if (
+        parsedError.success &&
+        apiErrorCodes.has(parsedError.data.error.code as never)
+      ) {
         return { ok: false, error: parsedError.data.error as CertQuizApiError };
       }
       return unavailableFailure(request.operation, response);
@@ -203,11 +207,23 @@ export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuiz
   ) => request({ operation, path, method: "POST", body: {} }, schema);
 
   return {
-    getHealth: () => request({ operation: "health", path: "/v1/health" }, healthSuccessEnvelopeSchema),
+    getHealth: () =>
+      request({ operation: "health", path: "/v1/health" }, healthSuccessEnvelopeSchema),
     getApprovalStatus: () =>
-      request({ operation: "approval", path: "/v1/me/approval" }, successEnvelopeSchema(approvalStatusDtoSchema)),
-    getCurrentUser: () => request({ operation: "current-user", path: "/v1/me" }, successEnvelopeSchema(currentUserDtoSchema)),
-    getCatalog: () => request({ operation: "catalog", path: "/v1/catalog" }, successEnvelopeSchema(catalogDtoSchema)),
+      request(
+        { operation: "approval", path: "/v1/me/approval" },
+        successEnvelopeSchema(approvalStatusDtoSchema),
+      ),
+    getCurrentUser: () =>
+      request(
+        { operation: "current-user", path: "/v1/me" },
+        successEnvelopeSchema(currentUserDtoSchema),
+      ),
+    getCatalog: () =>
+      request(
+        { operation: "catalog", path: "/v1/catalog" },
+        successEnvelopeSchema(catalogDtoSchema),
+      ),
     listActivePracticeSessions: () =>
       request(
         { operation: "active-practice", path: "/v1/practice/active" },
@@ -313,7 +329,10 @@ export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuiz
       ),
     getPracticeResult: ({ resultId }) =>
       request(
-        { operation: "practice-result", path: `/v1/practice-results/${routeId(resultId)}` },
+        {
+          operation: "practice-result",
+          path: `/v1/practice-results/${routeId(resultId)}`,
+        },
         successEnvelopeSchema(practiceResultDtoSchema),
       ),
     getAttempt: ({ attemptId }) =>
@@ -335,12 +354,20 @@ export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuiz
       ),
     updateScoreVisibility: (body) =>
       request(
-        { operation: "score-visibility", path: "/v1/me/score-visibility", method: "PATCH", body },
+        {
+          operation: "score-visibility",
+          path: "/v1/me/score-visibility",
+          method: "PATCH",
+          body,
+        },
         successEnvelopeSchema(updateScoreVisibilityResponseSchema),
       ),
     getLeaderboard: ({ certificationId }) =>
       request(
-        { operation: "leaderboard", path: `/v1/leaderboards/${routeId(certificationId)}` },
+        {
+          operation: "leaderboard",
+          path: `/v1/leaderboards/${routeId(certificationId)}`,
+        },
         successEnvelopeSchema(leaderboardDtoSchema),
       ),
     getPendingUsers: () =>
@@ -360,12 +387,22 @@ export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuiz
       ),
     dryRunImport: (body) =>
       request(
-        { operation: "dry-run-import", path: "/v1/admin/imports/dry-run", method: "POST", body },
+        {
+          operation: "dry-run-import",
+          path: "/v1/admin/imports/dry-run",
+          method: "POST",
+          body,
+        },
         successEnvelopeSchema(dryRunImportResponseSchema),
       ),
     commitImport: (body) =>
       request(
-        { operation: "commit-import", path: "/v1/admin/imports/commit", method: "POST", body },
+        {
+          operation: "commit-import",
+          path: "/v1/admin/imports/commit",
+          method: "POST",
+          body,
+        },
         successEnvelopeSchema(commitImportResponseSchema),
       ),
   };

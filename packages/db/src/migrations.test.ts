@@ -23,17 +23,17 @@ describe("production migration manifest", () => {
   });
 
   it("translates synchronous index DDL and removes unsupported DSQL key ordering", () => {
-    expect(normalizeDsqlMigrationStatement("CREATE INDEX example ON records (id)")).toBe(
-      "CREATE INDEX ASYNC example ON records (id)",
-    );
+    expect(
+      normalizeDsqlMigrationStatement("CREATE INDEX example ON records (id)"),
+    ).toBe("CREATE INDEX ASYNC example ON records (id)");
     expect(
       normalizeDsqlMigrationStatement(
         "CREATE UNIQUE INDEX ASYNC ready ON records (user_id, submitted_at DESC, id ASC)",
       ),
     ).toBe("CREATE UNIQUE INDEX ASYNC ready ON records (user_id, submitted_at, id)");
-    expect(normalizeDsqlMigrationStatement("CREATE TABLE records (id uuid PRIMARY KEY)")).toBe(
-      "CREATE TABLE records (id uuid PRIMARY KEY)",
-    );
+    expect(
+      normalizeDsqlMigrationStatement("CREATE TABLE records (id uuid PRIMARY KEY)"),
+    ).toBe("CREATE TABLE records (id uuid PRIMARY KEY)");
   });
 
   it("fails closed for missing, altered, and unknown database migration state", async () => {

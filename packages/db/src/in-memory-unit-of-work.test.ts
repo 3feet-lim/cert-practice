@@ -70,10 +70,14 @@ describe("in-memory fault-injection repository behavior", () => {
     );
     await identity(db);
 
-    await db.transaction((repos) => repos.practice.replaceAtomically(practice("practice-old")));
+    await db.transaction((repos) =>
+      repos.practice.replaceAtomically(practice("practice-old")),
+    );
     db.failNext("practice-replace");
     await expect(
-      db.transaction((repos) => repos.practice.replaceAtomically(practice("practice-new"))),
+      db.transaction((repos) =>
+        repos.practice.replaceAtomically(practice("practice-new")),
+      ),
     ).rejects.toThrow("practice-replace");
     await db.transaction(async (repos) =>
       expect((await repos.practice.findActiveOwned("user-a", "cert-a"))?.id).toBe(
@@ -142,16 +146,18 @@ describe("in-memory fault-injection repository behavior", () => {
       submissionReason: "manual" as const,
     };
     db.failNext("exam-finalize");
-    await expect(db.transaction((repos) => repos.exams.finalizeOnce(command))).rejects.toThrow(
-      "exam-finalize",
-    );
+    await expect(
+      db.transaction((repos) => repos.exams.finalizeOnce(command)),
+    ).rejects.toThrow("exam-finalize");
     await db.transaction(async (repos) =>
       expect(await repos.exams.getOwned("user-a", "exam-fault")).toMatchObject({
         status: "active",
         attemptId: null,
       }),
     );
-    await expect(db.transaction((repos) => repos.exams.finalizeOnce(command))).resolves.toMatchObject({
+    await expect(
+      db.transaction((repos) => repos.exams.finalizeOnce(command)),
+    ).resolves.toMatchObject({
       id: "attempt-fault",
     });
   });
@@ -217,7 +223,8 @@ describe("revisioned catalog repository reads", () => {
     ]);
     expect(
       source.domains.map(
-        (domain) => source.questions.filter((item) => item.domainId === domain.id).length,
+        (domain) =>
+          source.questions.filter((item) => item.domainId === domain.id).length,
       ),
     ).toEqual([17, 13, 13, 11, 11, 10]);
   });
@@ -313,10 +320,14 @@ describe("atomic imported catalog activation", () => {
       random: new SequenceRandomSource([0]),
       now: () => now,
     });
-    await database.transaction((repos) => sessions.createPractice(repos, "user-a", generation));
+    await database.transaction((repos) =>
+      sessions.createPractice(repos, "user-a", generation),
+    );
     database.failNext("practice-replace");
     await expect(
-      database.transaction((repos) => sessions.createPractice(repos, "user-a", generation)),
+      database.transaction((repos) =>
+        sessions.createPractice(repos, "user-a", generation),
+      ),
     ).rejects.toThrow("practice-replace");
     await database.transaction(async (repos) =>
       expect((await repos.practice.findActiveOwned("user-a", "CERT-IMPORT"))?.id).toBe(
@@ -334,7 +345,6 @@ describe("atomic imported catalog activation", () => {
   });
 });
 
-
 type ImportCommitCase = {
   actorMatches: boolean;
   tokenMatches: boolean;
@@ -349,11 +359,9 @@ const PROPERTY_24_SEED = 20_260_319;
 const importCommitCaseArbitrary = (await import("fast-check")).default.record({
   actorMatches: (await import("fast-check")).default.boolean(),
   tokenMatches: (await import("fast-check")).default.boolean(),
-  content: (await import("fast-check")).default.constantFrom<ImportCommitCase["content"]>(
-    "same",
-    "canonical-equivalent",
-    "changed",
-  ),
+  content: (await import("fast-check")).default.constantFrom<
+    ImportCommitCase["content"]
+  >("same", "canonical-equivalent", "changed"),
   expires: (await import("fast-check")).default.boolean(),
   alreadyConsumed: (await import("fast-check")).default.boolean(),
   fault: (await import("fast-check")).default.boolean(),
@@ -458,7 +466,9 @@ describe("Property 24: validation binding and atomic catalog switch", () => {
         };
 
         const initial = await prepare(initialContent);
-        await database.transaction((repos) => repos.catalog.commitValidatedImport(initial.command));
+        await database.transaction((repos) =>
+          repos.catalog.commitValidatedImport(initial.command),
+        );
         await database.transaction((repos) =>
           repos.exams.createWithSnapshots({
             id: "property-24-exam",
@@ -488,7 +498,8 @@ describe("Property 24: validation binding and atomic catalog switch", () => {
         const attemptBefore = await database.transaction((repos) =>
           repos.history.getAttemptOwned("learner", "property-24-attempt"),
         );
-        if (!attemptBefore) throw new Error("Attempt fixture must persist its snapshot.");
+        if (!attemptBefore)
+          throw new Error("Attempt fixture must persist its snapshot.");
 
         const target = await prepare(targetContent);
         if (input.alreadyConsumed)
@@ -527,8 +538,7 @@ describe("Property 24: validation binding and atomic catalog switch", () => {
           !input.expires &&
           !input.alreadyConsumed;
         const expectedSuccess = reachesCatalogSwitch && !input.fault;
-        if (input.fault && reachesCatalogSwitch)
-          database.failNext("catalog-switch");
+        if (input.fault && reachesCatalogSwitch) database.failNext("catalog-switch");
 
         const commit = database.transaction((repos) =>
           repos.catalog.commitValidatedImport(command),
@@ -552,7 +562,9 @@ describe("Property 24: validation binding and atomic catalog switch", () => {
         if (expectedSuccess) {
           expect(headAfter?.id).toBe(command.materialization.revision.id);
           await expect(
-            database.transaction((repos) => repos.catalog.commitValidatedImport(command)),
+            database.transaction((repos) =>
+              repos.catalog.commitValidatedImport(command),
+            ),
           ).rejects.toThrow("not consumable");
           return;
         }
@@ -560,14 +572,18 @@ describe("Property 24: validation binding and atomic catalog switch", () => {
         expect(headAfter).toEqual(headBefore);
         if (input.expires || input.alreadyConsumed) {
           await expect(
-            database.transaction((repos) => repos.catalog.commitValidatedImport(command)),
+            database.transaction((repos) =>
+              repos.catalog.commitValidatedImport(command),
+            ),
           ).rejects.toThrow("not consumable");
           return;
         }
 
         // Rejected binding and injected-fault paths retain the unused validation for one valid retry.
         await expect(
-          database.transaction((repos) => repos.catalog.commitValidatedImport(target.command)),
+          database.transaction((repos) =>
+            repos.catalog.commitValidatedImport(target.command),
+          ),
         ).resolves.toBeUndefined();
       }),
       { numRuns: PROPERTY_24_RUNS, seed: PROPERTY_24_SEED },

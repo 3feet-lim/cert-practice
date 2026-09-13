@@ -33,9 +33,11 @@ describe("production composition integration harness primitives", () => {
     expect(cognito.requests).toEqual([cognito.jwksUrl]);
 
     clock.advance(60_000);
-    await expect(verifier.verify(await cognito.sign({ exp: 0 }))).rejects.toMatchObject({
-      error: { code: "unauthenticated" },
-    });
+    await expect(verifier.verify(await cognito.sign({ exp: 0 }))).rejects.toMatchObject(
+      {
+        error: { code: "unauthenticated" },
+      },
+    );
   });
 
   it("provides resettable query barriers/faults and deterministic ID/RNG controls", async () => {

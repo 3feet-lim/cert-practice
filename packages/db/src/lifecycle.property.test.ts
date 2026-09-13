@@ -340,7 +340,10 @@ async function generatedSession(
   );
 }
 
-function mutateSourceRevision(source: FullCatalogGenerationSource, marker: string): void {
+function mutateSourceRevision(
+  source: FullCatalogGenerationSource,
+  marker: string,
+): void {
   source.certification.name = `Replaced certification ${marker}`;
   source.domains[0]!.name = `Replaced domain ${marker}`;
   source.questions[0]!.stem.en = `Replaced question ${marker}`;
@@ -399,7 +402,9 @@ describe("offline lifecycle properties", () => {
             random: new SequenceRandomSource([0]),
             now: () => new Date(base),
           });
-          faultDatabase.failNext(mode === "practice" ? "practice-replace" : "exam-create");
+          faultDatabase.failNext(
+            mode === "practice" ? "practice-replace" : "exam-create",
+          );
           await expect(
             faultDatabase.transaction((repositories) =>
               createGeneratedSession(
@@ -410,7 +415,9 @@ describe("offline lifecycle properties", () => {
               ),
             ),
           ).rejects.toThrow("Injected persistence fault");
-          expect(await generatedSession(faultDatabase, mode, faultSessionId)).toBeNull();
+          expect(
+            await generatedSession(faultDatabase, mode, faultSessionId),
+          ).toBeNull();
 
           const successDatabase = new InMemoryUnitOfWork();
           const successSessionId = id(mode === "practice" ? 705 : 706);
@@ -426,7 +433,8 @@ describe("offline lifecycle properties", () => {
           const snapshotsBeforeRevisionMutation = structuredClone(created.questions);
           mutateSourceRevision(generation, revisionMarker);
           expect(
-            (await generatedSession(successDatabase, mode, successSessionId))?.questions,
+            (await generatedSession(successDatabase, mode, successSessionId))
+              ?.questions,
           ).toEqual(snapshotsBeforeRevisionMutation);
         }
       }),
@@ -570,7 +578,9 @@ describe("offline lifecycle properties", () => {
 
           clock.advance(168 * 60 * 60 * 1000 - 1);
           for (const resultId of resultIds)
-            await expect(service.getPracticeResult(USER_A, resultId)).resolves.toMatchObject({
+            await expect(
+              service.getPracticeResult(USER_A, resultId),
+            ).resolves.toMatchObject({
               resultId,
             });
 
@@ -578,7 +588,9 @@ describe("offline lifecycle properties", () => {
           // Physical cleanup is deliberately delayed: logical expiry must already exclude
           // every completed practice result without changing Attempt-only analytics.
           expect(await analyticsSnapshot(service)).toEqual(attemptAnalytics);
-          expect(await service.cleanupPracticeResults(resultIds.length)).toBe(resultIds.length);
+          expect(await service.cleanupPracticeResults(resultIds.length)).toBe(
+            resultIds.length,
+          );
           for (const resultId of resultIds)
             await expect(
               service.getPracticeResult(USER_A, resultId),
@@ -717,7 +729,9 @@ describe("offline lifecycle properties", () => {
                       answer: {
                         questionId: question.id,
                         selectedChoiceIds: [
-                          input.correct ? question.choices[0]!.id : question.choices[1]!.id,
+                          input.correct
+                            ? question.choices[0]!.id
+                            : question.choices[1]!.id,
                         ],
                       },
                     }
@@ -754,10 +768,13 @@ describe("offline lifecycle properties", () => {
 
           const beforeReplacement = new Map(
             await Promise.all(
-              ownerAttempts.map(async ({ result }) => [
-                result.attemptId,
-                await service.getAttempt(USER_A, result.attemptId),
-              ] as const),
+              ownerAttempts.map(
+                async ({ result }) =>
+                  [
+                    result.attemptId,
+                    await service.getAttempt(USER_A, result.attemptId),
+                  ] as const,
+              ),
             ),
           );
           const replacement = source({
@@ -777,7 +794,8 @@ describe("offline lifecycle properties", () => {
           seedCatalog(database, replacement);
           await database.transaction(async (repos) => {
             expect(
-              (await repos.catalog.fullGenerationSource(CERTIFICATION_ID))?.certification,
+              (await repos.catalog.fullGenerationSource(CERTIFICATION_ID))
+                ?.certification,
             ).toMatchObject({
               code: replacement.certification.code,
               name: replacement.certification.name,
@@ -906,7 +924,6 @@ describe("offline lifecycle properties", () => {
     );
   });
 });
-
 
 type LeaderboardFraction = {
   numerator: number;
@@ -1061,7 +1078,10 @@ async function seedLeaderboardAttempt(
       id: input.attemptId,
       userId: input.userId,
       sessionId: input.sessionId,
-      rawScore: Fraction.of(BigInt(input.rawScore.numerator), BigInt(input.rawScore.denominator)),
+      rawScore: Fraction.of(
+        BigInt(input.rawScore.numerator),
+        BigInt(input.rawScore.denominator),
+      ),
       accuracyRate: Fraction.of(
         BigInt(input.accuracy.numerator),
         BigInt(input.accuracy.denominator),
@@ -1090,7 +1110,10 @@ function leaderboardOracle(
   });
   const ordered = representatives.sort(
     (left, right) =>
-      compareOracleAccuracy(right.representative.accuracy, left.representative.accuracy) ||
+      compareOracleAccuracy(
+        right.representative.accuracy,
+        left.representative.accuracy,
+      ) ||
       left.representative.submittedAt.getTime() -
         right.representative.submittedAt.getTime() ||
       left.userId.localeCompare(right.userId),
@@ -1104,8 +1127,10 @@ function leaderboardOracle(
         1 +
         ordered.filter(
           (other) =>
-            compareOracleAccuracy(other.representative.accuracy, representative.accuracy) >
-            0,
+            compareOracleAccuracy(
+              other.representative.accuracy,
+              representative.accuracy,
+            ) > 0,
         ).length,
       userId,
       displayName: `Leaderboard user ${userId.slice(-4)}`,
@@ -1118,7 +1143,10 @@ function leaderboardOracle(
   };
 }
 
-function compareOracleRepresentative(left: OracleAttempt, right: OracleAttempt): number {
+function compareOracleRepresentative(
+  left: OracleAttempt,
+  right: OracleAttempt,
+): number {
   return (
     compareOracleAccuracy(right.accuracy, left.accuracy) ||
     left.submittedAt.getTime() - right.submittedAt.getTime() ||

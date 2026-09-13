@@ -53,9 +53,11 @@ describe("production runtime configuration", () => {
     expect(() => productionConfigurationFromEnvironment(missingIssuer)).toThrow(
       "Missing required COGNITO_ISSUER.",
     );
-    expect(() => productionConfigurationFromEnvironment({
-      ...environment,
-      WEB_ORIGIN: "http://quiz.example.test",
-    })).toThrow("allowedOrigins may use HTTP only for localhost.");
+    expect(() =>
+      productionConfigurationFromEnvironment({
+        ...environment,
+        WEB_ORIGIN: "http://quiz.example.test",
+      }),
+    ).toThrow("allowedOrigins may use HTTP only for localhost.");
   });
 });

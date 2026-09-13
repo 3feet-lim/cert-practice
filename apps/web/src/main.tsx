@@ -3,10 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import { CertQuizCompositionRoot } from "./app/CertQuizCompositionRoot";
-import {
-  createHttpCertQuizApi,
-  type BearerTokenProvider,
-} from "./api/http-adapter";
+import { createHttpCertQuizApi, type BearerTokenProvider } from "./api/http-adapter";
 import { createMockAuthController, createMockCertQuizApi } from "./api/mock-adapter";
 import { App } from "./App";
 import "./styles.css";

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { CognitoJwksTokenVerifier } from "./cognito-jwks-verifier.js";
 
-const ISSUER = "https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_example";
+const ISSUER =
+  "https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_example";
 const CLIENT_ID = "cert-quiz-client";
 const NOW_MS = Date.parse("2026-01-01T12:00:00.000Z");
 
@@ -108,7 +109,9 @@ describe("CognitoJwksTokenVerifier", () => {
     const fixture = verifier([[material.jwk]]);
 
     await expect(fixture.verifier.verify(valid)).resolves.toEqual({
-      identities: JSON.stringify([{ providerName: "Google", userId: "google-subject" }]),
+      identities: JSON.stringify([
+        { providerName: "Google", userId: "google-subject" },
+      ]),
       email: "learner@example.test",
       name: "Learner",
     });
@@ -181,7 +184,10 @@ describe("CognitoJwksTokenVerifier", () => {
     expect(fixture.requests).toHaveLength(3);
 
     const coldFixture = verifier([[first.jwk]]);
-    await expectUnauthenticated(coldFixture.verifier.verify(unknownToken), unknownToken);
+    await expectUnauthenticated(
+      coldFixture.verifier.verify(unknownToken),
+      unknownToken,
+    );
     expect(coldFixture.requests).toHaveLength(1);
   });
 });

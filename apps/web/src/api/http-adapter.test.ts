@@ -78,7 +78,6 @@ describe("createHttpCertQuizApi", () => {
   });
 });
 
-
 function success(data: unknown, requestId = "api:request"): Response {
   return new Response(JSON.stringify({ data, meta: { requestId } }), {
     status: 200,
@@ -140,7 +139,10 @@ describe("complete CertQuizApi HTTP surface", () => {
       { scorePublic: false, stateVersion: 4 },
       fixtures.leaderboard.tied,
       fixtures.admin.pendingUsers,
-      { userId: fixtures.admin.pendingUsers.users[0]!.id, approvalStatus: "approved" as const },
+      {
+        userId: fixtures.admin.pendingUsers.users[0]!.id,
+        approvalStatus: "approved" as const,
+      },
       fixtures.import.dryRunValid,
       fixtures.import.commitResponse,
     ];
@@ -211,7 +213,9 @@ describe("complete CertQuizApi HTTP surface", () => {
     await expect(
       api.getPracticeResult({ resultId: fixtures.ids.practiceResultId }),
     ).resolves.toMatchObject({ ok: true });
-    await expect(api.getAttempt({ attemptId: fixtures.ids.attemptId })).resolves.toMatchObject({
+    await expect(
+      api.getAttempt({ attemptId: fixtures.ids.attemptId }),
+    ).resolves.toMatchObject({
       ok: true,
     });
     await expect(api.getHistory({ cursor: "next cursor" })).resolves.toMatchObject({
@@ -228,10 +232,14 @@ describe("complete CertQuizApi HTTP surface", () => {
     await expect(
       api.approveUser({ userId: fixtures.admin.pendingUsers.users[0]!.id }),
     ).resolves.toMatchObject({ ok: true });
-    await expect(api.dryRunImport(fixtures.import.dryRunRequest)).resolves.toMatchObject({
+    await expect(
+      api.dryRunImport(fixtures.import.dryRunRequest),
+    ).resolves.toMatchObject({
       ok: true,
     });
-    await expect(api.commitImport(fixtures.import.commitRequest)).resolves.toMatchObject({
+    await expect(
+      api.commitImport(fixtures.import.commitRequest),
+    ).resolves.toMatchObject({
       ok: true,
     });
 
@@ -310,9 +318,7 @@ describe("complete CertQuizApi HTTP surface", () => {
         requestId: "api:practice:stale",
         retryable: false,
         nextAction: "Refresh the practice session.",
-        details: [
-          { path: ["expectedVersion"], reason: "A newer state is available." },
-        ],
+        details: [{ path: ["expectedVersion"], reason: "A newer state is available." }],
       },
     });
   });
