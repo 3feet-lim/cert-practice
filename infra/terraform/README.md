@@ -4,8 +4,8 @@ Terraform owns CertQuiz's persistent infrastructure: Aurora DSQL, Cognito, the o
 
 ## Roots and state
 
-- `environments/dev` is an isolated development root. It can use its existing local state for the current spike environment.
-- `environments/prod` is a separate production root with an S3 backend configuration. Its state bucket is deliberately provided through `-backend-config=backend.hcl` or equivalent protected CI configuration, never committed as an account-specific value. The remote bucket must be versioned, encrypted, and restricted to Terraform operators. S3 native locking (`use_lockfile = true`) is enabled.
+- `environments/dev` and `environments/prod` use the `smlim-tf-state-bucket` S3 backend in `ap-northeast-2` with backend encryption and S3 native locking (`use_lockfile = true`).
+- Development state is stored at `cert-quiz/dev/terraform.tfstate`; production state is isolated at `cert-quiz/prod/terraform.tfstate`. Initialize production without `-migrate-state` until a separately approved production migration is performed.
 
 Initialize and validate without applying cloud changes:
 
@@ -13,12 +13,11 @@ Initialize and validate without applying cloud changes:
 terraform -chdir=infra/terraform/environments/dev init
 terraform -chdir=infra/terraform/environments/dev validate
 
-terraform -chdir=infra/terraform/environments/prod init \
-  -backend-config=backend.hcl
+terraform -chdir=infra/terraform/environments/prod init -reconfigure
 terraform -chdir=infra/terraform/environments/prod validate
 ```
 
-`backend.hcl.example` documents the sole non-secret backend input. Copy it outside the repository or generate it in CI.
+The backend bucket and keys are committed in each environment root. Do not override them with alternate backend configuration.
 
 ## Stage deployment contract
 

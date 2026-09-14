@@ -1,4 +1,2 @@
-# Copy outside the repository or pass equivalent -backend-config values from CI.
-# The bucket must already exist, have versioning enabled, and be restricted to Terraform operators.
-bucket = "replace-with-organization-terraform-state-bucket"
+# Backend values are committed in backend.tf. Do not pass an alternate key or bucket.
 # Optional: profile = "production-deployer"
