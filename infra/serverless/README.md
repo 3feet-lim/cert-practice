@@ -65,3 +65,26 @@ The stack composes the production Hono app at Lambda cold start, retaining its D
 Serverless Framework v4 builds TypeScript handlers with its built-in esbuild integration, so this service points at `handler.ts` and does not add a build plugin. See the [official function build documentation](https://www.serverless.com/framework/docs/providers/aws/guide/building).
 
 Content was rephrased for compliance with licensing restrictions.
+
+## Local validation
+
+Run the Serverless HTTP emulator in one terminal, then probe its public health endpoint from another:
+
+```bash
+pnpm api:local
+pnpm api:local:health
+# Equivalent manual probe:
+curl --fail-with-body http://127.0.0.1:3000/v1/health
+```
+
+`api:local` injects only harmless local stand-ins for Terraform/SSM values and sets `CERTQUIZ_LOCAL_EMULATION=true`. It exercises the Serverless/API Gateway adapter and the public health route without AWS calls or resource changes. Protected routes intentionally remain outside this local mode because their production composition needs real authentication and persistence dependencies. Override the probe target with `CERTQUIZ_LOCAL_API_ORIGIN` when required.
+
+## Deployed health smoke
+
+After a stack is already deployed, run:
+
+```bash
+pnpm infra:smoke
+```
+
+The command reads `HttpApiUrl` from CloudFormation stack `certquiz-api-<stage>` and probes `/v1/health`; the defaults are stage `dev` and region `ap-northeast-2`. It does not require manually copying an API Gateway URL. `CERTQUIZ_DEPLOYED_API_ORIGIN` remains an explicit URL override. Set `CERTQUIZ_STAGE` and `CERTQUIZ_REGION` (or `AWS_REGION`) to select another stack, and set `CERTQUIZ_DEPLOYED_WEB_ORIGIN` to additionally validate trusted and rejected CORS preflight behavior.

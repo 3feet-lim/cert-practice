@@ -1,11 +1,16 @@
 import { handle } from "hono/aws-lambda";
 
+import { app } from "./app.js";
 import { productionComposition } from "./production.js";
 
 /** Lazily composes the production graph once and reuses it for Lambda warm starts. */
 export async function handler(...args: Parameters<ReturnType<typeof handle>>) {
-  const { app } = await productionComposition();
-  return handle(app)(...args);
+  if (process.env.CERTQUIZ_LOCAL_EMULATION === "true") {
+    return handle(app)(...args);
+  }
+
+  const { app: productionApp } = await productionComposition();
+  return handle(productionApp)(...args);
 }
 
 /**

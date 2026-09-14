@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "package:dev": "node ./run-serverless.mjs package --stage dev --region ap-northeast-2",
+    "offline:dev": "node ./run-local-serverless.mjs",
     "deploy:dev": "node ./run-serverless.mjs deploy --stage dev --region ap-northeast-2",
     "remove:dev": "serverless remove --stage dev --region ap-northeast-2"
   },
@@ -12,6 +13,7 @@
     "@cert-quiz/api": "workspace:*"
   },
   "devDependencies": {
-    "serverless": "4.41.1"
+    "serverless": "4.41.1",
+    "serverless-offline": "14.8.2"
   }
 }

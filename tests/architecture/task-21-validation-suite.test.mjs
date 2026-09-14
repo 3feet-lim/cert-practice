@@ -57,11 +57,42 @@ test("Task 21 package validation is report-gated and uses only explicitly suppli
   assert.match(command, /`--param=databaseEndpoint=\$\{databaseEndpoint\}`/);
 });
 
-test("Task 21 deployed smoke is explicitly parameterized and verifies public health plus exact-origin CORS", async () => {
-  const [packageJson, smoke, workflow] = await Promise.all([
+test("Task 21 local validation uses Serverless Offline without workflow automation", async () => {
+  const [packageJson, serverlessPackage, serverlessConfig, runner, localHealth] =
+    await Promise.all([
+      source("package.json"),
+      source("infra/serverless/package.json"),
+      source("infra/serverless/serverless.yml"),
+      source("infra/serverless/run-local-serverless.mjs"),
+      source("scripts/local-api-health.mjs"),
+    ]);
+
+  assert.match(
+    packageJson,
+    /"api:local": "pnpm --dir infra\/serverless run offline:dev"/,
+  );
+  assert.match(
+    packageJson,
+    /"api:local:health": "node scripts\/local-api-health\.mjs"/,
+  );
+  assert.match(serverlessPackage, /"serverless-offline": "14\.8\.2"/);
+  assert.match(
+    serverlessPackage,
+    /"offline:dev": "node \.\/run-local-serverless\.mjs"/,
+  );
+  assert.match(serverlessConfig, /plugins:\s*\n\s*- serverless-offline/);
+  assert.match(serverlessConfig, /noPrependStageInUrl: true/);
+  assert.match(serverlessConfig, /ignoreJWTSignature: true/);
+  assert.match(serverlessConfig, /CERTQUIZ_LOCAL_EMULATION/);
+  assert.match(runner, /CERTQUIZ_LOCAL_EMULATION: "true"/);
+  assert.match(runner, /"offline", "start"/);
+  assert.match(localHealth, /\/v1\/health/);
+});
+
+test("Task 21 deployed smoke resolves a stack HttpApiUrl by default and keeps overrides optional", async () => {
+  const [packageJson, smoke] = await Promise.all([
     source("package.json"),
     source("scripts/deployed-infrastructure-smoke.mjs"),
-    source(".github/workflows/infrastructure-security.yml"),
   ]);
 
   assert.match(
@@ -70,11 +101,15 @@ test("Task 21 deployed smoke is explicitly parameterized and verifies public hea
   );
   assert.match(smoke, /CERTQUIZ_DEPLOYED_API_ORIGIN/);
   assert.match(smoke, /CERTQUIZ_DEPLOYED_WEB_ORIGIN/);
+  assert.match(smoke, /CERTQUIZ_STAGE \?\? "dev"/);
+  assert.match(
+    smoke,
+    /CERTQUIZ_REGION \?\? process\.env\.AWS_REGION \?\? "ap-northeast-2"/,
+  );
+  assert.match(smoke, /certquiz-api-\$\{stage\}/);
+  assert.match(smoke, /"cloudformation",\s*\n\s*"describe-stacks"/);
+  assert.match(smoke, /OutputKey === "HttpApiUrl"/);
   assert.match(smoke, /Health endpoint returned/);
-  assert.match(smoke, /access-control-allow-origin/);
-  assert.match(smoke, /untrusted\.invalid/);
   assert.match(smoke, /strict-transport-security/);
-  assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /run_deployed_smoke/);
-  assert.match(workflow, /pnpm infra:smoke/);
+  assert.match(smoke, /if \(!webOrigin\) return/);
 });

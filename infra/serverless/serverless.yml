@@ -9,9 +9,17 @@ stages:
       dsqlUser: app
       monthlyBudgetUsd: 100
 
+plugins:
+  - serverless-offline
+
 custom:
-  telemetryNamespace: CertQuiz/${sls:stage}
-  telemetryService: certquiz-api
+  telemetryNamespace: ${env:CERTQUIZ_TELEMETRY_NAMESPACE, 'CertQuiz/${sls:stage}'}
+  telemetryService: ${env:CERTQUIZ_TELEMETRY_SERVICE, 'certquiz-api'}
+  serverless-offline:
+    host: 127.0.0.1
+    httpPort: 3000
+    noPrependStageInUrl: true
+    ignoreJWTSignature: true
   runbookBaseUrl: ${env:CERTQUIZ_RUNBOOK_BASE_URL, 'https://github.com/certquiz/cert-practice/blob/main/infra/serverless/runbooks'}
   runbooks:
     api5xx: ${self:custom.runbookBaseUrl}/api-5xx.md
@@ -33,30 +41,32 @@ provider:
   memorySize: 256
   logRetentionInDays: 30
   iam:
-    # Terraform owns this least-privilege execution role and publishes it to SSM.
-    role: ${ssm:/certquiz/${sls:stage}/lambda-role-arn}
+    # Production reads Terraform-owned values from SSM; the local runner injects harmless stand-ins.
+    role: ${env:CERTQUIZ_LAMBDA_ROLE_ARN, ssm:/certquiz/${sls:stage}/lambda-role-arn}
   httpApi:
     authorizers:
       cognitoJwt:
         type: jwt
-        identitySource: $request.header.Authorization
-        issuerUrl: ${ssm:/certquiz/${sls:stage}/cognito-issuer}
+        identitySource: $request.header.authorization
+        issuerUrl: ${env:CERTQUIZ_COGNITO_ISSUER, ssm:/certquiz/${sls:stage}/cognito-issuer}
         audience:
-          - ${ssm:/certquiz/${sls:stage}/cognito-client-id}
+          - ${env:CERTQUIZ_COGNITO_CLIENT_ID, ssm:/certquiz/${sls:stage}/cognito-client-id}
   environment:
     STAGE: ${sls:stage}
-    CERT_QUIZ_DATABASE_ADAPTER: ${file(../../artifacts/dsql-spike/database-adapter.json):adapter}
-    DSQL_ENDPOINT: ${ssm:/certquiz/${sls:stage}/dsql-endpoint}
+    CERTQUIZ_LOCAL_EMULATION: ${env:CERTQUIZ_LOCAL_EMULATION, 'false'}
+    # Dev infrastructure is the Terraform-owned Aurora DSQL target; deployment does not depend on a historical report artifact.
+    CERT_QUIZ_DATABASE_ADAPTER: dsql
+    DSQL_ENDPOINT: ${env:CERTQUIZ_DSQL_ENDPOINT, ssm:/certquiz/${sls:stage}/dsql-endpoint}
     DSQL_DATABASE: ${param:dsqlDatabase}
     DSQL_USER: ${param:dsqlUser}
-    COGNITO_ISSUER: ${ssm:/certquiz/${sls:stage}/cognito-issuer}
-    COGNITO_CLIENT_ID: ${ssm:/certquiz/${sls:stage}/cognito-client-id}
+    COGNITO_ISSUER: ${env:CERTQUIZ_COGNITO_ISSUER, ssm:/certquiz/${sls:stage}/cognito-issuer}
+    COGNITO_CLIENT_ID: ${env:CERTQUIZ_COGNITO_CLIENT_ID, ssm:/certquiz/${sls:stage}/cognito-client-id}
     # Terraform publishes exact stage origins; Hono performs the final exact-origin check.
-    WEB_ORIGIN: ${ssm:/certquiz/${sls:stage}/web-origin}
-    MARKDOWN_IMAGE_ORIGINS: ${ssm:/certquiz/${sls:stage}/markdown-image-origins}
+    WEB_ORIGIN: ${env:CERTQUIZ_WEB_ORIGIN, ssm:/certquiz/${sls:stage}/web-origin}
+    MARKDOWN_IMAGE_ORIGINS: ${env:CERTQUIZ_MARKDOWN_IMAGE_ORIGINS, ssm:/certquiz/${sls:stage}/markdown-image-origins}
     # DynamoDB supplies a shared durable limit across all Lambda instances.
-    RATE_LIMIT_TABLE: ${ssm:/certquiz/${sls:stage}/rate-limit-table-name}
-    RATE_LIMIT_POLICIES: ${ssm:/certquiz/${sls:stage}/rate-limit-policies}
+    RATE_LIMIT_TABLE: ${env:CERTQUIZ_RATE_LIMIT_TABLE, ssm:/certquiz/${sls:stage}/rate-limit-table-name}
+    RATE_LIMIT_POLICIES: ${env:CERTQUIZ_RATE_LIMIT_POLICIES, ssm:/certquiz/${sls:stage}/rate-limit-policies}
     # CloudWatch Embedded Metric Format is emitted through the existing Lambda log permission.
     TELEMETRY_NAMESPACE: ${self:custom.telemetryNamespace}
     TELEMETRY_SERVICE: ${self:custom.telemetryService}

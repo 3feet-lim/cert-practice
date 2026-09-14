@@ -40,6 +40,8 @@
     "infra:validate": "node scripts/validate-infrastructure.mjs",
     "infra:plan": "node scripts/validate-infrastructure.mjs --plan",
     "infra:package": "node scripts/validate-infrastructure.mjs --package",
+    "api:local": "pnpm --dir infra/serverless run offline:dev",
+    "api:local:health": "node scripts/local-api-health.mjs",
     "infra:smoke": "node scripts/deployed-infrastructure-smoke.mjs",
     "release:apply": "node scripts/release-automation.mjs release",
     "release:rollback": "node scripts/release-automation.mjs rollback",
