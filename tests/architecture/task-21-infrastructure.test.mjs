@@ -1,51 +1,142 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
 const source = async (relativePath) => readFile(`${root}/${relativePath}`, "utf8");
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const runtimeResourceAddresses = [
+  "aws_dynamodb_table.rate_limit",
+  "aws_cognito_user_pool.this",
+  "aws_cognito_user_pool_domain.hosted_ui",
+  "aws_cognito_identity_provider.google[0]",
+  "aws_cognito_user_pool_client.web",
+  "aws_s3_bucket.web",
+  "aws_s3_bucket_public_access_block.web",
+  "aws_s3_bucket_ownership_controls.web",
+  "aws_s3_bucket_server_side_encryption_configuration.web",
+  "aws_s3_bucket_versioning.web",
+  "aws_s3_bucket_lifecycle_configuration.web",
+  "aws_cloudfront_origin_access_control.web",
+  "aws_cloudfront_response_headers_policy.web_security",
+  "aws_cloudfront_distribution.web",
+  "aws_s3_bucket_policy.web",
+  "aws_route53_record.web[0]",
+  ...[
+    "cognito-user-pool-id",
+    "cognito-client-id",
+    "cognito-issuer",
+    "cognito-hosted-ui-base-url",
+    "lambda-role-arn",
+    "web-bucket-name",
+    "cloudfront-distribution-id",
+    "cloudfront-domain-name",
+    "web-origin",
+    "markdown-image-origins",
+    "rate-limit-table-name",
+    "rate-limit-policies",
+    "api-origin",
+    "backup-recovery-policy",
+  ].map((name) => `aws_ssm_parameter.contract[\"${name}\"]`),
+];
 
 test("Task 21 keeps Terraform stateful resources separate from Serverless routes and jobs", async () => {
-  const [serverless, devRoot, prodRoot, dsqlModule, runtimeModule] = await Promise.all([
+  const [
+    serverless,
+    devRoot,
+    prodRoot,
+    dsqlModule,
+    devCognito,
+    devWebDelivery,
+    devRateLimit,
+    devSsm,
+    devMoved,
+    prodCognito,
+    prodWebDelivery,
+    prodRateLimit,
+    prodSsm,
+    prodMoved,
+  ] = await Promise.all([
     source("infra/serverless/serverless.yml"),
     source("infra/terraform/environments/dev/main.tf"),
     source("infra/terraform/environments/prod/main.tf"),
     source("infra/terraform/modules/dsql/main.tf"),
-    source("infra/terraform/modules/application-runtime/main.tf"),
+    source("infra/terraform/environments/dev/cognito.tf"),
+    source("infra/terraform/environments/dev/web_delivery.tf"),
+    source("infra/terraform/environments/dev/rate_limit.tf"),
+    source("infra/terraform/environments/dev/ssm.tf"),
+    source("infra/terraform/environments/dev/moved.tf"),
+    source("infra/terraform/environments/prod/cognito.tf"),
+    source("infra/terraform/environments/prod/web_delivery.tf"),
+    source("infra/terraform/environments/prod/rate_limit.tf"),
+    source("infra/terraform/environments/prod/ssm.tf"),
+    source("infra/terraform/environments/prod/moved.tf"),
   ]);
 
   for (const terraformRoot of [devRoot, prodRoot]) {
     assert.match(terraformRoot, /module "dsql"/);
-    assert.match(terraformRoot, /module "application_runtime"/);
+    assert.doesNotMatch(terraformRoot, /module "application_runtime"/);
     assert.doesNotMatch(terraformRoot, /aws_lambda_function|aws_cloudwatch_log_group/);
   }
   assert.match(dsqlModule, /resource "aws_dsql_cluster"/);
   assert.match(dsqlModule, /resource "aws_ssm_parameter" "dsql_endpoint"/);
 
+  for (const [runtime, moved] of [
+    [[devCognito, devWebDelivery, devRateLimit, devSsm].join("\n"), devMoved],
+    [[prodCognito, prodWebDelivery, prodRateLimit, prodSsm].join("\n"), prodMoved],
+  ]) {
+    for (const resource of [
+      "aws_cognito_user_pool",
+      "aws_cognito_identity_provider",
+      "aws_cognito_user_pool_client",
+      "aws_s3_bucket",
+      "aws_s3_bucket_versioning",
+      "aws_s3_bucket_public_access_block",
+      "aws_cloudfront_origin_access_control",
+      "aws_cloudfront_distribution",
+      "aws_dynamodb_table",
+      "aws_route53_record",
+      "aws_ssm_parameter",
+    ]) {
+      assert.match(runtime, new RegExp(`resource "${resource}"`));
+    }
+    for (const address of runtimeResourceAddresses) {
+      assert.match(moved, new RegExp(`from\\s*=\\s*module\\.application_runtime\\.${escapeRegExp(address)}[\\s\\S]*?to\\s*=\\s*${escapeRegExp(address)}`));
+    }
+    assert.match(runtime, /enable_google_identity_provider/);
+    assert.match(runtime, /google_oauth_client_secret/);
+    assert.match(runtime, /sse_algorithm = "AES256"/);
+    assert.match(runtime, /status = "Enabled"/);
+    assert.match(runtime, /backup-recovery-policy/);
+    assert.match(runtime, /dsql-provider-managed-pitr/);
+  }
+  await assert.rejects(access(`${root}/infra/terraform/modules/application-runtime`));
+
   assert.match(
     serverless,
-    /iam:\s+# Terraform owns[\s\S]*role: \$\{ssm:\/certquiz\/\$\{sls:stage\}\/lambda-role-arn\}/,
+    /iam:\s+# Terraform owns[\s\S]*role: \$\{env:CERTQUIZ_LAMBDA_ROLE_ARN, ssm:\/certquiz\/\$\{sls:stage\}\/lambda-role-arn\}/,
   );
   assert.match(
     serverless,
-    /COGNITO_ISSUER: \$\{ssm:\/certquiz\/\$\{sls:stage\}\/cognito-issuer\}/,
+    /COGNITO_ISSUER: \$\{env:CERTQUIZ_COGNITO_ISSUER, ssm:\/certquiz\/\$\{sls:stage\}\/cognito-issuer\}/,
   );
   assert.match(
     serverless,
-    /WEB_ORIGIN: \$\{ssm:\/certquiz\/\$\{sls:stage\}\/web-origin\}/,
+    /WEB_ORIGIN: \$\{env:CERTQUIZ_WEB_ORIGIN, ssm:\/certquiz\/\$\{sls:stage\}\/web-origin\}/,
   );
   assert.match(
     serverless,
-    /MARKDOWN_IMAGE_ORIGINS: \$\{ssm:\/certquiz\/\$\{sls:stage\}\/markdown-image-origins\}/,
+    /MARKDOWN_IMAGE_ORIGINS: \$\{env:CERTQUIZ_MARKDOWN_IMAGE_ORIGINS, ssm:\/certquiz\/\$\{sls:stage\}\/markdown-image-origins\}/,
   );
   assert.match(
     serverless,
-    /RATE_LIMIT_TABLE: \$\{ssm:\/certquiz\/\$\{sls:stage\}\/rate-limit-table-name\}/,
+    /RATE_LIMIT_TABLE: \$\{env:CERTQUIZ_RATE_LIMIT_TABLE, ssm:\/certquiz\/\$\{sls:stage\}\/rate-limit-table-name\}/,
   );
   assert.match(
     serverless,
-    /RATE_LIMIT_POLICIES: \$\{ssm:\/certquiz\/\$\{sls:stage\}\/rate-limit-policies\}/,
+    /RATE_LIMIT_POLICIES: \$\{env:CERTQUIZ_RATE_LIMIT_POLICIES, ssm:\/certquiz\/\$\{sls:stage\}\/rate-limit-policies\}/,
   );
   assert.match(serverless, /type: jwt/);
   assert.match(serverless, /path: \/v1\/\{proxy\+\}/);
@@ -53,50 +144,7 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
   assert.match(serverless, /method: OPTIONS/);
   assert.match(serverless, /eventBridge:[\s\S]*schedule: rate\(1 hour\)/);
   assert.match(serverless, /handler: handler\.practiceRetentionHandler/);
-  assert.doesNotMatch(
-    serverless,
-    /aws_cognito_user_pool|aws_dsql_cluster|aws_s3_bucket/,
-  );
-
-  for (const resource of [
-    "aws_cognito_user_pool",
-    "aws_cognito_identity_provider",
-    "aws_cognito_user_pool_client",
-    "aws_s3_bucket",
-    "aws_s3_bucket_versioning",
-    "aws_s3_bucket_public_access_block",
-    "aws_cloudfront_origin_access_control",
-    "aws_cloudfront_distribution",
-    "aws_dynamodb_table",
-    "aws_route53_record",
-    "aws_ssm_parameter",
-  ]) {
-    assert.match(
-      runtimeModule,
-      new RegExp(`resource "${resource.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}`),
-    );
-  }
-  assert.match(runtimeModule, /enable_google_identity_provider/);
-  assert.match(runtimeModule, /google_oauth_client_secret/);
-  assert.match(runtimeModule, /sse_algorithm = "AES256"/);
-  assert.match(runtimeModule, /status = "Enabled"/);
-  assert.match(runtimeModule, /backup-recovery-policy/);
-  assert.match(runtimeModule, /dsql-provider-managed-pitr/);
-
-  for (const name of [
-    "cognito-user-pool-id",
-    "cognito-client-id",
-    "cognito-issuer",
-    "lambda-role-arn",
-    "web-bucket-name",
-    "cloudfront-distribution-id",
-    "web-origin",
-    "markdown-image-origins",
-    "rate-limit-table-name",
-    "rate-limit-policies",
-  ]) {
-    assert.match(runtimeModule, new RegExp(`"${name}"`));
-  }
+  assert.doesNotMatch(serverless, /aws_cognito_user_pool|aws_dsql_cluster|aws_s3_bucket/);
 });
 
 test("Task 21 EventBridge cleanup architecture cannot create an exam Attempt", async () => {
@@ -138,7 +186,7 @@ test("Task 21 production root requires remote state and preserves recovery prote
   for (const role of [devRole, prodRole]) {
     assert.match(role, /dsql:DbConnect/);
     assert.match(role, /dynamodb:TransactWriteItems/);
-    assert.match(role, /rate_limit_table_arn/);
+    assert.match(role, /rate_limit_table_arn|aws_dynamodb_table\.rate_limit\.arn/);
     assert.match(role, /ReadRuntimeContract/);
     assert.match(role, /ssm:GetParameter/);
     assert.match(role, /logs:CreateLogStream/);
@@ -155,21 +203,10 @@ test("Task 21 provisions CloudWatch telemetry, actionable alarms, and machine-re
     source("apps/api/src/production.ts"),
   ]);
 
-  assert.match(
-    serverless,
-    /TELEMETRY_NAMESPACE: \$\{self:custom\.telemetryNamespace\}/,
-  );
+  assert.match(serverless, /TELEMETRY_NAMESPACE: \$\{self:custom\.telemetryNamespace\}/);
   assert.match(serverless, /TELEMETRY_SERVICE: \$\{self:custom\.telemetryService\}/);
   assert.match(serverless, /Type: AWS::CloudWatch::Dashboard/);
-  for (const alarm of [
-    "Api5xxAlarm",
-    "FinalizeFailureAlarm",
-    "CleanupFailureAlarm",
-    "ImportRollbackAlarm",
-    "ProjectionLeakGuardAlarm",
-    "DbLatencyAlarm",
-    "BudgetAlarm",
-  ]) {
+  for (const alarm of ["Api5xxAlarm", "FinalizeFailureAlarm", "CleanupFailureAlarm", "ImportRollbackAlarm", "ProjectionLeakGuardAlarm", "DbLatencyAlarm", "BudgetAlarm"]) {
     assert.match(serverless, new RegExp(`^    ${alarm}:`, "m"));
   }
   assert.match(serverless, /MetricName: Api5xx/);
@@ -184,14 +221,43 @@ test("Task 21 provisions CloudWatch telemetry, actionable alarms, and machine-re
   assert.match(runbooks, /"projection-leak"/);
 
   assert.match(telemetry, /createCloudWatchEmbeddedMetricsTelemetry/);
-  for (const metric of [
-    "FinalizeFailures",
-    "CleanupFailures",
-    "ImportRollbacks",
-    "ProjectionSchemaFailures",
-    "DbConnectLatencyMs",
-  ])
-    assert.match(telemetry, new RegExp(metric));
+  for (const metric of ["FinalizeFailures", "CleanupFailures", "ImportRollbacks", "ProjectionSchemaFailures", "DbConnectLatencyMs"]) assert.match(telemetry, new RegExp(metric));
   assert.match(production, /event: "db\.runtime"/);
   assert.match(production, /event: "api\.cleanup"/);
+});
+
+test("DEV GitHub Actions deployment uses a main-only OIDC role with scoped deployment access", async () => {
+  const [role, outputs, documentation, workflow] = await Promise.all([
+    source("infra/terraform/environments/dev/github-actions-dev-deploy-role.tf"),
+    source("infra/terraform/environments/dev/outputs.tf"),
+    source("infra/terraform/README.md"),
+    source(".github/workflows/deploy-dev.yml"),
+  ]);
+
+  assert.match(role, /resource "aws_iam_openid_connect_provider" "github_actions"/);
+  assert.match(role, /https:\/\/token\.actions\.githubusercontent\.com/);
+  assert.match(role, /client_id_list\s+= \["sts\.amazonaws\.com"\]/);
+  assert.match(role, /sts:AssumeRoleWithWebIdentity/);
+  assert.match(role, /token\.actions\.githubusercontent\.com:aud/);
+  assert.match(role, /repo:3feet-lim\/cert-practice:ref:refs\/heads\/main/);
+  assert.match(role, /aws_caller_identity\.current\.account_id/);
+  assert.match(role, /aws:RequestedRegion/);
+  assert.match(role, /ServerlessDeploymentBucketName/);
+  assert.match(role, /cloudformation:DescribeStacks/);
+  assert.match(role, /lambda:UpdateFunctionCode/);
+  assert.match(role, /apigateway:POST/);
+  assert.match(role, /iam:PassRole/);
+  assert.match(role, /iam:PassedToService/);
+  assert.match(role, /aws_iam_role\.api_lambda_execution\.arn/);
+  assert.match(role, /parameter\/\$\{var\.service_name\}\/dev\/lambda-role-arn/);
+  assert.match(role, /parameter\/\$\{var\.service_name\}\/dev\/dsql-endpoint/);
+  assert.doesNotMatch(role, /AdministratorAccess|aws_iam_role\.api_lambda_execution\s*\{/);
+
+  assert.match(outputs, /output "github_actions_dev_deploy_role_arn"/);
+  assert.match(outputs, /CERTQUIZ_RELEASE_ROLE_ARN/);
+  assert.match(documentation, /github_actions_dev_deploy_role_arn/);
+  assert.match(documentation, /Environment\*\* `release-dev`/);
+  assert.match(documentation, /SERVERLESS_ACCESS_KEY/);
+  assert.match(workflow, /environment: release-dev/);
+  assert.match(workflow, /CERTQUIZ_RELEASE_ROLE_ARN/);
 });

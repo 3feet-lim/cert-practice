@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "api_lambda_runtime" {
         module.dsql.endpoint_parameter_arn,
         module.dsql.region_parameter_arn,
       ],
-      values(module.application_runtime.ssm_parameter_arns),
+      [for parameter in values(aws_ssm_parameter.contract) : parameter.arn],
     )
   }
 
@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "api_lambda_runtime" {
     sid       = "ConsumeSharedRateLimit"
     effect    = "Allow"
     actions   = ["dynamodb:TransactWriteItems"]
-    resources = [module.application_runtime.rate_limit_table_arn]
+    resources = [aws_dynamodb_table.rate_limit.arn]
   }
 
   statement {

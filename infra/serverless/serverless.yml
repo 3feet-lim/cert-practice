@@ -41,7 +41,7 @@ provider:
   memorySize: 256
   logRetentionInDays: 30
   iam:
-    # Production reads Terraform-owned values from SSM; the local runner injects harmless stand-ins.
+    # Terraform owns this permanent role; the local runner injects harmless stand-ins.
     role: ${env:CERTQUIZ_LAMBDA_ROLE_ARN, ssm:/certquiz/${sls:stage}/lambda-role-arn}
   httpApi:
     authorizers:

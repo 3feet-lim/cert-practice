@@ -1,6 +1,6 @@
 # Terraform infrastructure
 
-Terraform owns CertQuiz's persistent infrastructure: Aurora DSQL, Cognito, the optional Google identity-provider binding, private versioned SPA storage, CloudFront, optional Route 53 aliases, the stage SSM deployment contract, and permanent Lambda execution roles. Serverless Framework owns only Lambda/API Gateway/EventBridge resources and consumes this contract; neither tool creates the other's resources.
+Terraform owns CertQuiz's persistent infrastructure: Aurora DSQL, Cognito, the optional Google identity-provider binding, private versioned SPA storage, CloudFront, optional Route 53 aliases, the stage SSM deployment contract, and permanent Lambda execution roles. Each environment root owns the application runtime directly in role-specific `cognito.tf`, `web_delivery.tf`, `rate_limit.tf`, and `ssm.tf` files; only DSQL remains a shared module. Serverless Framework owns only Lambda/API Gateway/EventBridge resources and consumes this contract; neither tool creates the other's resources.
 
 ## Roots and state
 
@@ -31,6 +31,12 @@ Every stage publishes only non-secret values below `/<service>/<stage>/`:
 - `backup-recovery-policy`
 
 `terraform output ssm_parameter_names` is the canonical list for Serverless and deployment automation. The Lambda role has narrowly scoped `ssm:GetParameter` permission for this exact list, DSQL connect permission for its own cluster, and log-stream write permission for its own function. It does not receive `dsql:DbConnectAdmin`, broad log-group creation, wildcard SSM, or `iam:PassRole`.
+
+## GitHub Actions DEV deployment role
+
+`environments/dev` manages a GitHub Actions OIDC provider and a deployment role trusted only by `3feet-lim/cert-practice` tokens for `refs/heads/main` with the `sts.amazonaws.com` audience. It is separate from, and never replaces, the dev Lambda execution role.
+
+After the user applies the dev Terraform root, perform the one AWS-to-GitHub handoff: copy `terraform -chdir=infra/terraform/environments/dev output -raw github_actions_dev_deploy_role_arn` into GitHub **Environment** `release-dev` as the secret `CERTQUIZ_RELEASE_ROLE_ARN`. The automatic `deploy-dev.yml` workflow also separately requires the `SERVERLESS_ACCESS_KEY` secret in `release-dev`; it is a Serverless Framework credential, not an AWS credential or Terraform output.
 
 ## Cognito and Google identity provider
 

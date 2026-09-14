@@ -33,47 +33,58 @@ output "api_lambda_execution_role_name" {
   value       = aws_iam_role.api_lambda_execution.name
 }
 
+output "github_actions_dev_deploy_role_arn" {
+  description = "Copy into GitHub environment release-dev as CERTQUIZ_RELEASE_ROLE_ARN."
+  value       = aws_iam_role.github_actions_dev_deploy.arn
+}
+
 output "cognito_user_pool_id" {
   description = "Dev Cognito user pool ID."
-  value       = module.application_runtime.cognito_user_pool_id
+  value       = aws_cognito_user_pool.this.id
 }
 
 output "cognito_client_id" {
   description = "Dev Cognito web app client ID."
-  value       = module.application_runtime.cognito_client_id
+  value       = aws_cognito_user_pool_client.web.id
 }
 
 output "cognito_issuer" {
   description = "Dev Cognito JWT issuer."
-  value       = module.application_runtime.cognito_issuer
+  value       = local.runtime_parameter_values["cognito-issuer"]
 }
 
 output "cognito_hosted_ui_base_url" {
   description = "Dev Cognito Hosted UI base URL."
-  value       = module.application_runtime.cognito_hosted_ui_base_url
+  value       = local.cognito_hosted_ui_base_url
 }
 
 output "web_bucket_name" {
   description = "Private S3 bucket containing dev SPA assets."
-  value       = module.application_runtime.web_bucket_name
+  value       = aws_s3_bucket.web.id
 }
 
 output "cloudfront_distribution_id" {
   description = "Dev SPA CloudFront distribution ID."
-  value       = module.application_runtime.cloudfront_distribution_id
+  value       = aws_cloudfront_distribution.web.id
 }
 
 output "web_origin" {
   description = "Canonical dev SPA origin."
-  value       = module.application_runtime.web_origin
+  value       = local.web_origin
 }
 
 output "ssm_parameter_names" {
   description = "Complete dev application deployment contract in SSM."
-  value       = module.application_runtime.ssm_parameter_names
+  value = merge(
+    {
+      "dsql-endpoint" = module.dsql.endpoint_parameter_name
+      "region"        = module.dsql.region_parameter_name
+    },
+    { for name, parameter in aws_ssm_parameter.contract : name => parameter.name },
+  )
 }
 
 output "backup_recovery_policy" {
   description = "Dev backup and recovery policy declaration."
-  value       = module.application_runtime.backup_recovery_policy
+  value       = local.runtime_parameter_values["backup-recovery-policy"]
 }
