@@ -5,15 +5,16 @@ data "aws_cloudformation_stack" "serverless_dev" {
 }
 
 locals {
-  github_actions_dev_deploy_role_name = "${var.service_name}-dev-github-actions-deploy"
-  github_actions_dev_stack_name       = "${var.service_name}-api-dev"
-  github_actions_dev_stack_arn        = "arn:${data.aws_partition.current.partition}:cloudformation:${var.aws_region}:${data.aws_caller_identity.current.account_id}:stack/${local.github_actions_dev_stack_name}/*"
-  github_actions_dev_change_set_arn   = "arn:${data.aws_partition.current.partition}:cloudformation:${var.aws_region}:${data.aws_caller_identity.current.account_id}:changeSet/*/*"
-  github_actions_dev_function_arn     = "arn:${data.aws_partition.current.partition}:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.service_name}-dev-*"
-  github_actions_dev_log_group_arn    = "arn:${data.aws_partition.current.partition}:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.service_name}-dev-*"
-  github_actions_dev_event_rule_arn   = "arn:${data.aws_partition.current.partition}:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/${var.service_name}-dev-*"
-  github_actions_dev_bucket_name      = data.aws_cloudformation_stack.serverless_dev.outputs["ServerlessDeploymentBucketName"]
-  github_actions_dev_bucket_arn       = "arn:${data.aws_partition.current.partition}:s3:::${local.github_actions_dev_bucket_name}"
+  github_actions_dev_deploy_role_name     = "${var.service_name}-dev-github-actions-deploy"
+  github_actions_dev_stack_name           = "${var.service_name}-api-dev"
+  github_actions_dev_stack_arn            = "arn:${data.aws_partition.current.partition}:cloudformation:${var.aws_region}:${data.aws_caller_identity.current.account_id}:stack/${local.github_actions_dev_stack_name}/*"
+  github_actions_dev_change_set_arn       = "arn:${data.aws_partition.current.partition}:cloudformation:${var.aws_region}:${data.aws_caller_identity.current.account_id}:changeSet/*/*"
+  github_actions_dev_function_arn         = "arn:${data.aws_partition.current.partition}:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.service_name}-dev-*"
+  github_actions_dev_log_group_arn        = "arn:${data.aws_partition.current.partition}:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.service_name}-dev-*"
+  github_actions_dev_event_rule_arn       = "arn:${data.aws_partition.current.partition}:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/${var.service_name}-dev-*"
+  github_actions_dev_bucket_name          = data.aws_cloudformation_stack.serverless_dev.outputs["ServerlessDeploymentBucketName"]
+  github_actions_dev_bucket_arn           = "arn:${data.aws_partition.current.partition}:s3:::${local.github_actions_dev_bucket_name}"
+  github_actions_dev_framework_bucket_arn = "arn:${data.aws_partition.current.partition}:s3:::serverless-framework-deployments-${var.aws_region}-*"
 }
 
 resource "aws_iam_openid_connect_provider" "github_actions" {
@@ -119,6 +120,19 @@ data "aws_iam_policy_document" "github_actions_dev_deploy" {
     resources = [
       local.github_actions_dev_bucket_arn,
       "${local.github_actions_dev_bucket_arn}/serverless/${var.service_name}-api/dev/*",
+    ]
+  }
+
+  # Serverless Framework v4 creates and manages a regional deployment bucket
+  # before the stack exposes an output. Keep the full S3 action set confined to
+  # the framework's partition-and-region-specific bucket-name pattern and its
+  # objects; no application, web, or other-stage bucket is included.
+  statement {
+    sid     = "ManageServerlessFrameworkDeploymentBucket"
+    actions = ["s3:*"]
+    resources = [
+      local.github_actions_dev_framework_bucket_arn,
+      "${local.github_actions_dev_framework_bucket_arn}/*",
     ]
   }
 

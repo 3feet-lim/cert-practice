@@ -327,6 +327,20 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
     role,
     /AdministratorAccess|aws_iam_role\.api_lambda_execution\s*\{/,
   );
+  assert.match(
+    role,
+    /github_actions_dev_framework_bucket_arn\s+= "arn:\$\{data\.aws_partition\.current\.partition\}:s3:::serverless-framework-deployments-\$\{var\.aws_region\}-\*"/,
+  );
+  assert.match(role, /sid\s+= "ManageServerlessFrameworkDeploymentBucket"/);
+  assert.match(role, /actions\s+= \["s3:\*"\]/);
+  assert.match(
+    role,
+    /local\.github_actions_dev_framework_bucket_arn,\s*"\$\{local\.github_actions_dev_framework_bucket_arn\}\/\*"/,
+  );
+  assert.doesNotMatch(
+    role,
+    /resources\s+= \["arn:\$\{data\.aws_partition\.current\.partition\}:s3:::\*"\]/,
+  );
 
   assert.match(outputs, /output "github_actions_dev_deploy_role_arn"/);
   assert.match(outputs, /CERTQUIZ_RELEASE_ROLE_ARN/);
