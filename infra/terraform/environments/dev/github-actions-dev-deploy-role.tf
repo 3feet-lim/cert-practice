@@ -225,8 +225,7 @@ data "aws_iam_policy_document" "github_actions_dev_deploy" {
       "ssm:GetParameter",
     ]
     resources = [
-      "arn:${data.aws_partition.current.partition}:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.service_name}/dev/lambda-role-arn",
-      "arn:${data.aws_partition.current.partition}:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.service_name}/dev/dsql-endpoint",
+      "arn:${data.aws_partition.current.partition}:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.service_name}/dev/*",
     ]
   }
 

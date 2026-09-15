@@ -286,8 +286,11 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with sc
   assert.match(role, /iam:PassRole/);
   assert.match(role, /iam:PassedToService/);
   assert.match(role, /aws_iam_role\.api_lambda_execution\.arn/);
-  assert.match(role, /parameter\/\$\{var\.service_name\}\/dev\/lambda-role-arn/);
-  assert.match(role, /parameter\/\$\{var\.service_name\}\/dev\/dsql-endpoint/);
+  assert.match(role, /parameter\/\$\{var\.service_name\}\/dev\/\*/);
+  assert.doesNotMatch(
+    role,
+    /parameter\/\$\{var\.service_name\}\/dev\/(lambda-role-arn|dsql-endpoint)/,
+  );
   assert.doesNotMatch(role, /AdministratorAccess|aws_iam_role\.api_lambda_execution\s*\{/);
 
   assert.match(outputs, /output "github_actions_dev_deploy_role_arn"/);
