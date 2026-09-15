@@ -60,7 +60,7 @@ export async function migrateAndVerifyApplicationSchema(
     const migrations = await loadApplicationMigrations();
     const runner = new DsqlMigrationRunner(pool);
     await runner.migrate(migrations);
-    return assertApplicationSchema(runner, migrations);
+    return await assertApplicationSchema(runner, migrations);
   } finally {
     await lifecycle.close();
   }
