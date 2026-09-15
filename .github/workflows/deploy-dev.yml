@@ -46,6 +46,8 @@ jobs:
           export DSQL_ENDPOINT="$(aws ssm get-parameter --name /certquiz/dev/dsql-endpoint --query Parameter.Value --output text)"
           export DSQL_DATABASE=postgres
           export DSQL_USER=admin
+          export CERTQUIZ_LAMBDA_ROLE_ARN="$(aws ssm get-parameter --name /certquiz/dev/lambda-role-arn --query Parameter.Value --output text)"
+          export CERTQUIZ_APP_DB_ROLE=app
           pnpm --filter @cert-quiz/db run migrate:deploy
       - name: Deploy DEV Serverless API
         env:

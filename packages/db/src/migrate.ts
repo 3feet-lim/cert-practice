@@ -210,6 +210,87 @@ export class DsqlMigrationRunner implements MigrationStateReader {
   }
 }
 
+export type ApplicationDatabaseRoleGrant = Readonly<{
+  /** PostgreSQL role name the Lambda IAM execution role authenticates as. */
+  roleName: string;
+  /** IAM role ARN mapped to `roleName` via Aurora DSQL's `AWS IAM GRANT`. */
+  iamRoleArn: string;
+}>;
+
+/**
+ * Idempotently provisions the PostgreSQL role Aurora DSQL maps an IAM
+ * execution role onto. DSQL DDL has no `CREATE ROLE IF NOT EXISTS` and
+ * re-running `AWS IAM GRANT` for an existing mapping errors, so both steps
+ * check existing state first. Table grants are additive in PostgreSQL and
+ * are always re-issued, which also re-covers any tables a migration run
+ * just created. Safe to run on every deploy against a real or freshly
+ * created cluster.
+ */
+export async function provisionApplicationDatabaseRole(
+  database: MigrationQueryable,
+  grant: ApplicationDatabaseRoleGrant,
+): Promise<void> {
+  const roleName = assertSafeIdentifier(grant.roleName, "Database role name");
+  await ensureDatabaseRoleExists(database, roleName);
+  await ensureIamRoleMapping(database, roleName, grant.iamRoleArn);
+  // Aurora DSQL rejects `GRANT USAGE ON SCHEMA public` with "feature not
+  // supported on system entity"; the public schema has no explicit USAGE
+  // grant to make, so only table-level privileges are applied here.
+  await database.query(
+    `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${roleName}`,
+  );
+}
+
+async function ensureDatabaseRoleExists(
+  database: MigrationQueryable,
+  roleName: string,
+): Promise<void> {
+  const existing = await database.query(
+    "SELECT 1 FROM pg_roles WHERE rolname = $1",
+    [roleName],
+  );
+  if (existing.rows.length > 0) return;
+  await database.query(`CREATE ROLE ${roleName} WITH LOGIN`);
+}
+
+async function ensureIamRoleMapping(
+  database: MigrationQueryable,
+  roleName: string,
+  iamRoleArn: string,
+): Promise<void> {
+  const existing = await database.query(
+    "SELECT 1 FROM sys.iam_pg_role_mappings WHERE arn = $1 AND pg_role_name = $2",
+    [iamRoleArn, roleName],
+  );
+  if (existing.rows.length > 0) return;
+  try {
+    await database.query(`AWS IAM GRANT ${roleName} TO ${quoteLiteral(iamRoleArn)}`);
+  } catch (error) {
+    // Defensive fallback for a race against another concurrent provisioning
+    // run; the sys.iam_pg_role_mappings check above already avoids the
+    // common case. Only the specific "already mapped" failure is swallowed.
+    if (!isAlreadyMappedIamGrantError(error)) throw error;
+  }
+}
+
+function isAlreadyMappedIamGrantError(error: unknown): boolean {
+  const message =
+    error instanceof Error ? error.message : typeof error === "string" ? error : "";
+  const normalized = message.toLowerCase();
+  return normalized.includes("already") && normalized.includes("map");
+}
+
+/** DSQL role DDL cannot bind identifiers as query parameters. */
+function assertSafeIdentifier(identifier: string, label: string): string {
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/u.test(identifier))
+    throw new Error(`${label} must be a valid unquoted PostgreSQL identifier.`);
+  return identifier;
+}
+
+function quoteLiteral(value: string): string {
+  return `'${value.replace(/'/gu, "''")}'`;
+}
+
 async function readMigration(path: string): Promise<string> {
   const { readFile } = await import("node:fs/promises");
   return readFile(path, "utf8");

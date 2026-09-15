@@ -44,23 +44,51 @@ export async function initializeDsqlRuntime(
   }
 }
 
+export type ApplicationDatabaseRoleProvisioning = Readonly<{
+  /** PostgreSQL role name the Lambda IAM execution role authenticates as. */
+  roleName: string;
+  /** IAM role ARN mapped to `roleName` via Aurora DSQL's `AWS IAM GRANT`. */
+  iamRoleArn: string;
+}>;
+
 /**
  * Deployment/test-only schema operation. Dynamic imports keep migration source
  * loading, migration execution, and checksum verification out of Lambda's
  * production request-startup module graph.
+ *
+ * When `roleProvisioning` is supplied, the target PostgreSQL role, its IAM
+ * mapping, and its table grants are provisioned after migrations apply
+ * (self-healing the one-off `app` role setup this previously required by
+ * hand). Provisioning runs after, not before, migrations: `GRANT ... ON ALL
+ * TABLES IN SCHEMA public` only covers tables that already exist at grant
+ * time, so running it last ensures any table a migration just created in
+ * this same deploy is granted immediately rather than left ungranted until
+ * the next deploy. Role creation and the IAM mapping have no such ordering
+ * dependency on the schema, but are kept in the same post-migration step for
+ * a single, simple provisioning call.
  */
 export async function migrateAndVerifyApplicationSchema(
   poolConfiguration: DsqlPoolConfig,
+  roleProvisioning?: ApplicationDatabaseRoleProvisioning,
 ): Promise<SchemaVersionRange> {
   const lifecycle = new DsqlPoolLifecycle(poolConfiguration);
   try {
     const pool = await lifecycle.pool();
-    const [{ DsqlMigrationRunner }, { assertApplicationSchema, loadApplicationMigrations }] =
-      await Promise.all([import("./migrate.js"), import("./migrations.js")]);
+    const [
+      { DsqlMigrationRunner, provisionApplicationDatabaseRole },
+      { assertApplicationSchema, loadApplicationMigrations },
+    ] = await Promise.all([import("./migrate.js"), import("./migrations.js")]);
     const migrations = await loadApplicationMigrations();
     const runner = new DsqlMigrationRunner(pool);
     await runner.migrate(migrations);
-    return await assertApplicationSchema(runner, migrations);
+    const schema = await assertApplicationSchema(runner, migrations);
+    if (roleProvisioning) {
+      await provisionApplicationDatabaseRole(pool, {
+        roleName: roleProvisioning.roleName,
+        iamRoleArn: roleProvisioning.iamRoleArn,
+      });
+    }
+    return schema;
   } finally {
     await lifecycle.close();
   }
