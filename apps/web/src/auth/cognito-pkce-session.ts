@@ -51,7 +51,7 @@ function browserDependencies(): BrowserDependencies {
   return {
     crypto: globalThis.crypto,
     storage: globalThis.sessionStorage,
-    fetch: globalThis.fetch,
+    fetch: globalThis.fetch.bind(globalThis),
     assignLocation: (url) => window.location.assign(url),
     now: () => Date.now(),
   };
@@ -236,19 +236,9 @@ export function createCognitoPkceSession(
           body: formBody(body),
         },
       );
-      if (!response.ok) {
-        // TEMP DIAGNOSTIC - remove after root cause found
-        console.warn("[auth-diagnostic] token exchange failed", { status: response.status });
-        // END TEMP DIAGNOSTIC
-        return undefined;
-      }
+      if (!response.ok) return undefined;
       return parseTokenSession(await response.json().catch(() => undefined), dependencies.now(), previousRefreshToken);
-    } catch (error) {
-      // TEMP DIAGNOSTIC - remove after root cause found
-      console.warn("[auth-diagnostic] token exchange threw", {
-        message: error instanceof Error ? error.message : "unknown error",
-      });
-      // END TEMP DIAGNOSTIC
+    } catch {
       return undefined;
     }
   };
@@ -306,19 +296,6 @@ export function createCognitoPkceSession(
         const code = query.get("code");
         const providerError = query.get("error");
         dependencies.storage.removeItem(PENDING_TRANSACTION_KEY);
-        // TEMP DIAGNOSTIC - remove after root cause found
-        console.warn("[auth-diagnostic] completeCallback guard", {
-          hasTransaction: Boolean(transaction),
-          hasCallbackState: Boolean(callbackState),
-          hasCode: Boolean(code),
-          hasProviderError: providerError !== null,
-          providerErrorValue: providerError ?? undefined,
-          stateMatches:
-            transaction && callbackState
-              ? constantTimeEqual(transaction.state, callbackState)
-              : undefined,
-        });
-        // END TEMP DIAGNOSTIC
         if (
           !transaction ||
           !callbackState ||

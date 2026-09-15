@@ -164,7 +164,7 @@ function contractFailure<Output>(operation: string): CertQuizApiResult<Output> {
  * successful payloads and expected errors against shared strict contracts.
  */
 export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuizApi {
-  const fetchImplementation = options.fetch ?? globalThis.fetch;
+  const fetchImplementation = options.fetch ?? globalThis.fetch.bind(globalThis);
 
   const request = async <Output>(
     request: HttpRequest,
