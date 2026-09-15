@@ -55,7 +55,9 @@ jobs:
           export CERTQUIZ_DSQL_ENDPOINT="$(aws ssm get-parameter --name /certquiz/dev/dsql-endpoint --query Parameter.Value --output text)"
           pnpm --dir infra/serverless exec node run-serverless.mjs deploy --stage dev --region ap-northeast-2 --param="lambdaRoleArn=$CERTQUIZ_LAMBDA_ROLE_ARN" --param="databaseEndpoint=$CERTQUIZ_DSQL_ENDPOINT"
       - name: Smoke deployed DEV infrastructure
-        run: pnpm infra:smoke
+        run: |
+          export CERTQUIZ_DEPLOYED_WEB_ORIGIN="$(aws ssm get-parameter --name /certquiz/dev/web-origin --query Parameter.Value --output text)"
+          pnpm infra:smoke
       - name: Resolve DEV SPA runtime configuration
         id: web-runtime
         run: |

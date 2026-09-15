@@ -161,7 +161,11 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
   );
   assert.match(serverless, /path: \/v1\/\{proxy\+\}/);
   assert.match(serverless, /method: "\*"/);
-  assert.match(serverless, /method: OPTIONS/);
+  assert.doesNotMatch(
+    serverless,
+    /path: \/v1\/\{proxy\+\}\s+method: OPTIONS/,
+    "Gateway CORS must answer preflight before the Lambda route.",
+  );
   assert.match(serverless, /eventBridge:[\s\S]*schedule: rate\(1 hour\)/);
   assert.match(serverless, /handler: handler\.practiceRetentionHandler/);
   assert.doesNotMatch(
@@ -417,6 +421,11 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(workflow, /no-cache, no-store, must-revalidate/);
   assert.match(workflow, /cloudfront create-invalidation/);
   assert.match(workflow, /cloudfront wait invalidation-completed/);
+  assert.match(
+    workflow,
+    /CERTQUIZ_DEPLOYED_WEB_ORIGIN="\$\(aws ssm get-parameter --name \/certquiz\/dev\/web-origin/,
+  );
+  assert.match(workflow, /pnpm infra:smoke/);
   assert.ok(
     workflow.indexOf("Smoke deployed DEV infrastructure") <
       workflow.indexOf("Resolve DEV SPA delivery targets"),
