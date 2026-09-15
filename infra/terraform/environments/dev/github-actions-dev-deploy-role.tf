@@ -136,6 +136,37 @@ data "aws_iam_policy_document" "github_actions_dev_deploy" {
     ]
   }
 
+  # The main-push DEV workflow syncs only the Terraform-owned dev SPA bucket.
+  # Bucket listing and object read/write/delete are separated so neither action
+  # can target another bucket, stage, or account.
+  statement {
+    sid       = "ListDevWebAssetBucket"
+    actions   = ["s3:ListBucket"]
+    resources = [aws_s3_bucket.web.arn]
+  }
+
+  statement {
+    sid = "SyncDevWebAssets"
+    actions = [
+      "s3:DeleteObject",
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+    resources = ["${aws_s3_bucket.web.arn}/*"]
+  }
+
+  # Waiting for an invalidation requires GetInvalidation in addition to its
+  # creation. Both actions are restricted to the Terraform-owned dev SPA
+  # distribution and do not allow modifying its configuration.
+  statement {
+    sid = "InvalidateDevWebDistribution"
+    actions = [
+      "cloudfront:CreateInvalidation",
+      "cloudfront:GetInvalidation",
+    ]
+    resources = [aws_cloudfront_distribution.web.arn]
+  }
+
   statement {
     sid = "ManageDevLambdaFunctions"
     actions = [

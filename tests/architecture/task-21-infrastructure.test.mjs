@@ -363,7 +363,7 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(documentation, /never another account or region/);
   assert.match(
     documentation,
-    /workflow itself still triggers only on pushes to `main` and deploys the `dev` stage/,
+    /main`: it builds both DEV API and SPA assets, deploys and smokes the DEV API, then publishes the SPA only after that smoke succeeds/,
   );
   assert.match(documentation, /github_actions_dev_deploy_role_arn/);
   assert.match(documentation, /Environment\*\* `release-dev`/);
@@ -371,4 +371,32 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(workflow, /branches: \[main\]/);
   assert.match(workflow, /environment: release-dev/);
   assert.match(workflow, /CERTQUIZ_RELEASE_ROLE_ARN/);
+  assert.match(workflow, /pnpm --filter @cert-quiz\/web build/);
+  assert.match(workflow, /aws s3 sync apps\/web\/dist/);
+  assert.match(workflow, /--delete --exclude "index\.html"/);
+  assert.match(workflow, /max-age=31536000,immutable/);
+  assert.match(workflow, /aws s3 cp apps\/web\/dist\/index\.html/);
+  assert.match(workflow, /no-cache, no-store, must-revalidate/);
+  assert.match(workflow, /cloudfront create-invalidation/);
+  assert.match(workflow, /cloudfront wait invalidation-completed/);
+  assert.ok(
+    workflow.indexOf("Smoke deployed DEV infrastructure") <
+      workflow.indexOf("Resolve DEV SPA delivery targets"),
+    "SPA targets must not be read until deployed API smoke succeeds",
+  );
+
+  assert.match(role, /sid\s+= "ListDevWebAssetBucket"/);
+  assert.match(role, /actions\s+= \["s3:ListBucket"\]/);
+  assert.match(role, /resources\s+= \[aws_s3_bucket\.web\.arn\]/);
+  assert.match(role, /sid = "SyncDevWebAssets"[\s\S]*?"s3:GetObject"[\s\S]*?"s3:PutObject"/);
+  assert.match(role, /resources = \["\$\{aws_s3_bucket\.web\.arn\}\/\*"\]/);
+  assert.match(role, /sid = "InvalidateDevWebDistribution"[\s\S]*?"cloudfront:CreateInvalidation"[\s\S]*?"cloudfront:GetInvalidation"/);
+  assert.match(role, /resources = \[aws_cloudfront_distribution\.web\.arn\]/);
+  assert.doesNotMatch(role, /cloudfront:(UpdateDistribution|CreateDistribution|DeleteDistribution)/);
+  assert.match(
+    documentation,
+    /main`: it builds both DEV API and SPA assets, deploys and smokes the DEV API, then publishes the SPA only after that smoke succeeds/,
+  );
+  assert.match(documentation, /CloudFront distribution configuration is Terraform-owned/);
+  assert.match(documentation, /only invalidates the existing distribution after upload/);
 });
