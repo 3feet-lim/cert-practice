@@ -56,7 +56,7 @@ data "aws_iam_policy_document" "api_lambda_runtime" {
   statement {
     sid       = "ConsumeSharedRateLimit"
     effect    = "Allow"
-    actions   = ["dynamodb:TransactWriteItems"]
+    actions   = ["dynamodb:TransactWriteItems", "dynamodb:UpdateItem"]
     resources = [aws_dynamodb_table.rate_limit.arn]
   }
 
