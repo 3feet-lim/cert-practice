@@ -221,6 +221,24 @@ export function createApp(
         outcome: "failed",
         errorCode: "import-operation-failed",
       });
+    // TEMP DIAGNOSTIC - remove after root cause found
+    if (error instanceof Error) {
+      console.error("[onError] diagnostic", {
+        requestId,
+        path: context.req.path,
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    } else {
+      console.error("[onError] diagnostic", {
+        requestId,
+        path: context.req.path,
+        value: String(error),
+        type: typeof error,
+      });
+    }
+    // END TEMP DIAGNOSTIC
     const mapped = mapError(error, requestId);
     for (const [name, value] of Object.entries(mapped.headers ?? {}))
       context.header(name, value);
