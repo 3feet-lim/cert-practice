@@ -130,7 +130,7 @@ variable "noncurrent_asset_retention_days" {
 }
 
 variable "markdown_image_origins" {
-  description = "Trusted HTTPS origins for admin-authored Markdown images in dev."
+  description = "Trusted HTTPS origins for admin-authored Markdown images in dev; an empty list publishes the fail-closed https://images.invalid sentinel."
   type        = list(string)
   default     = []
 

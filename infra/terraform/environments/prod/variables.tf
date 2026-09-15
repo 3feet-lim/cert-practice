@@ -123,7 +123,7 @@ variable "tags" {
 }
 
 variable "markdown_image_origins" {
-  description = "Trusted HTTPS origins for admin-authored Markdown images in production."
+  description = "Trusted HTTPS origins for admin-authored Markdown images in production; an empty list publishes the fail-closed https://images.invalid sentinel."
   type        = list(string)
   default     = []
 

@@ -28,7 +28,7 @@ resource "aws_iam_openid_connect_provider" "github_actions" {
 
 data "aws_iam_policy_document" "github_actions_dev_deploy_assume_role" {
   statement {
-    sid     = "GitHubActionsMainOnly"
+    sid     = "GitHubActionsRepositoryWide"
     effect  = "Allow"
     actions = ["sts:AssumeRoleWithWebIdentity"]
 
@@ -44,9 +44,9 @@ data "aws_iam_policy_document" "github_actions_dev_deploy_assume_role" {
     }
 
     condition {
-      test     = "StringEquals"
+      test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:3feet-lim/cert-practice:ref:refs/heads/main"]
+      values   = ["repo:3feet-lim/cert-practice:*"]
     }
   }
 }

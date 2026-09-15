@@ -26,14 +26,17 @@ Every stage publishes only non-secret values below `/<service>/<stage>/`:
 - `dsql-endpoint`, `region`
 - `cognito-user-pool-id`, `cognito-client-id`, `cognito-issuer`, `cognito-hosted-ui-base-url`
 - `lambda-role-arn`
-- `web-bucket-name`, `cloudfront-distribution-id`, `cloudfront-domain-name`, `web-origin`, `api-origin`
+- `web-bucket-name`, `cloudfront-distribution-id`, `cloudfront-domain-name`, `web-origin`, `markdown-image-origins`
+- `api-origin` only when `api_origin` is supplied
 - `backup-recovery-policy`
+
+`api-origin` is genuinely optional: a `null` `api_origin` omits the `aws_ssm_parameter.contract["api-origin"]` resource rather than writing an empty SSM value. Supplying it creates that same keyed resource with the supplied HTTPS origin. `markdown-image-origins` is always published because Serverless consumes it: configured canonical HTTPS origins are joined with commas, while an empty list publishes the documented fail-closed `https://images.invalid` sentinel. The `.invalid` origin cannot be a real image source and keeps Markdown image loading denied until an allowlist is configured.
 
 `terraform output ssm_parameter_names` is the canonical list for Serverless and deployment automation. The Lambda role has narrowly scoped `ssm:GetParameter` permission for this exact list, DSQL connect permission for its own cluster, and log-stream write permission for its own function. It does not receive `dsql:DbConnectAdmin`, broad log-group creation, wildcard SSM, or `iam:PassRole`.
 
 ## GitHub Actions DEV deployment role
 
-`environments/dev` manages a GitHub Actions OIDC provider and a deployment role trusted only by `3feet-lim/cert-practice` tokens for `refs/heads/main` with the `sts.amazonaws.com` audience. It is separate from, and never replaces, the dev Lambda execution role.
+`environments/dev` manages a GitHub Actions OIDC provider and a deployment role that accepts repository-wide OIDC subjects matching exactly `repo:3feet-lim/cert-practice:*`, with the `sts.amazonaws.com` audience. This IAM trust can accept tokens for branches, tags, and GitHub environments in this repository only; it does not trust other repositories or organizations. It is separate from, and never replaces, the dev Lambda execution role. The `.github/workflows/deploy-dev.yml` workflow itself still triggers only on pushes to `main` and deploys the `dev` stage.
 
 After the user applies the dev Terraform root, perform the one AWS-to-GitHub handoff: copy `terraform -chdir=infra/terraform/environments/dev output -raw github_actions_dev_deploy_role_arn` into GitHub **Environment** `release-dev` as the secret `CERTQUIZ_RELEASE_ROLE_ARN`. The automatic `deploy-dev.yml` workflow also separately requires the `SERVERLESS_ACCESS_KEY` secret in `release-dev`; it is a Serverless Framework credential, not an AWS credential or Terraform output.
 

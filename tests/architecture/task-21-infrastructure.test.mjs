@@ -147,6 +147,35 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
   assert.doesNotMatch(serverless, /aws_cognito_user_pool|aws_dsql_cluster|aws_s3_bucket/);
 });
 
+test("Task 21 SSM contract keeps API origin optional and Markdown image origins fail closed", async () => {
+  const [devSsm, prodSsm, devVariables, prodVariables] = await Promise.all([
+    source("infra/terraform/environments/dev/ssm.tf"),
+    source("infra/terraform/environments/prod/ssm.tf"),
+    source("infra/terraform/environments/dev/variables.tf"),
+    source("infra/terraform/environments/prod/variables.tf"),
+  ]);
+
+  for (const [ssm, variables] of [
+    [devSsm, devVariables],
+    [prodSsm, prodVariables],
+  ]) {
+    assert.match(
+      ssm,
+      /markdown_image_origins = length\(var\.markdown_image_origins\) == 0 \? \["https:\/\/images\.invalid"\] : var\.markdown_image_origins/,
+    );
+    assert.match(
+      ssm,
+      /"markdown-image-origins"\s+= join\(",", local\.markdown_image_origins\)/,
+    );
+    assert.match(
+      ssm,
+      /runtime_parameter_values = merge\([\s\S]*?var\.api_origin == null \? \{\} : \{\s*"api-origin" = var\.api_origin/,
+    );
+    assert.doesNotMatch(ssm, /"api-origin"\s+= var\.api_origin == null \? ""/);
+    assert.match(variables, /empty list publishes the fail-closed https:\/\/images\.invalid sentinel/);
+  }
+});
+
 test("Task 21 EventBridge cleanup architecture cannot create an exam Attempt", async () => {
   const [lambda, production] = await Promise.all([
     source("apps/api/src/lambda.ts"),
@@ -226,7 +255,7 @@ test("Task 21 provisions CloudWatch telemetry, actionable alarms, and machine-re
   assert.match(production, /event: "api\.cleanup"/);
 });
 
-test("DEV GitHub Actions deployment uses a main-only OIDC role with scoped deployment access", async () => {
+test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with scoped deployment access", async () => {
   const [role, outputs, documentation, workflow] = await Promise.all([
     source("infra/terraform/environments/dev/github-actions-dev-deploy-role.tf"),
     source("infra/terraform/environments/dev/outputs.tf"),
@@ -238,8 +267,15 @@ test("DEV GitHub Actions deployment uses a main-only OIDC role with scoped deplo
   assert.match(role, /https:\/\/token\.actions\.githubusercontent\.com/);
   assert.match(role, /client_id_list\s+= \["sts\.amazonaws\.com"\]/);
   assert.match(role, /sts:AssumeRoleWithWebIdentity/);
-  assert.match(role, /token\.actions\.githubusercontent\.com:aud/);
-  assert.match(role, /repo:3feet-lim\/cert-practice:ref:refs\/heads\/main/);
+  assert.match(
+    role,
+    /test\s+= "StringEquals"\s+variable\s+= "token\.actions\.githubusercontent\.com:aud"\s+values\s+= \["sts\.amazonaws\.com"\]/,
+  );
+  assert.match(
+    role,
+    /test\s+= "StringLike"\s+variable\s+= "token\.actions\.githubusercontent\.com:sub"\s+values\s+= \["repo:3feet-lim\/cert-practice:\*"\]/,
+  );
+  assert.doesNotMatch(role, /repo:3feet-lim\/cert-practice:ref:refs\/heads\/main/);
   assert.match(role, /aws_caller_identity\.current\.account_id/);
   assert.match(role, /aws:RequestedRegion/);
   assert.match(role, /ServerlessDeploymentBucketName/);
@@ -255,9 +291,13 @@ test("DEV GitHub Actions deployment uses a main-only OIDC role with scoped deplo
 
   assert.match(outputs, /output "github_actions_dev_deploy_role_arn"/);
   assert.match(outputs, /CERTQUIZ_RELEASE_ROLE_ARN/);
+  assert.match(documentation, /repo:3feet-lim\/cert-practice:\*/);
+  assert.match(documentation, /branches, tags, and GitHub environments/);
+  assert.match(documentation, /workflow itself still triggers only on pushes to `main` and deploys the `dev` stage/);
   assert.match(documentation, /github_actions_dev_deploy_role_arn/);
   assert.match(documentation, /Environment\*\* `release-dev`/);
   assert.match(documentation, /SERVERLESS_ACCESS_KEY/);
+  assert.match(workflow, /branches: \[main\]/);
   assert.match(workflow, /environment: release-dev/);
   assert.match(workflow, /CERTQUIZ_RELEASE_ROLE_ARN/);
 });

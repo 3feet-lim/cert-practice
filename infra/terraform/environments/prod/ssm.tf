@@ -19,7 +19,11 @@ locals {
     "backup-recovery-policy"     = "Recovery policy declaration for ${var.service_name} ${local.runtime_environment}"
   }
 
-  runtime_parameter_values = {
+  # Serverless always consumes this parameter. An empty allowlist therefore
+  # resolves to a reserved, non-routable HTTPS origin that fails closed.
+  markdown_image_origins = length(var.markdown_image_origins) == 0 ? ["https://images.invalid"] : var.markdown_image_origins
+
+  runtime_parameter_values = merge({
     "cognito-user-pool-id"       = aws_cognito_user_pool.this.id
     "cognito-client-id"          = aws_cognito_user_pool_client.web.id
     "cognito-issuer"             = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.this.id}"
@@ -29,12 +33,15 @@ locals {
     "cloudfront-distribution-id" = aws_cloudfront_distribution.web.id
     "cloudfront-domain-name"     = aws_cloudfront_distribution.web.domain_name
     "web-origin"                 = local.web_origin
-    "markdown-image-origins"     = join(",", var.markdown_image_origins)
+    "markdown-image-origins"     = join(",", local.markdown_image_origins)
     "rate-limit-table-name"      = aws_dynamodb_table.rate_limit.name
     "rate-limit-policies"        = jsonencode(var.rate_limit_policies)
-    "api-origin"                 = var.api_origin == null ? "" : var.api_origin
     "backup-recovery-policy"     = "s3-versioning-noncurrent-${var.noncurrent_asset_retention_days}-days;dsql-provider-managed-pitr"
-  }
+    },
+    var.api_origin == null ? {} : {
+      "api-origin" = var.api_origin
+    },
+  )
 }
 
 resource "aws_ssm_parameter" "contract" {
