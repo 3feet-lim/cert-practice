@@ -10,7 +10,11 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
 import { createApp, type CreateAppDependencies } from "./app.js";
-import type { CognitoTokenVerifier, VerifiedCognitoClaims } from "./authentication.js";
+import {
+  extractGoogleSub,
+  type CognitoTokenVerifier,
+  type VerifiedCognitoClaims,
+} from "./authentication.js";
 
 const NOW = new Date("2026-01-01T12:00:00.000Z");
 const ADMIN_ID = "10000000-0000-4000-8000-000000000001";
@@ -345,4 +349,36 @@ describe("Property 3: approval transition and pending-list determinism", () => {
       { numRuns: 200 },
     );
   }, 120_000);
+});
+
+// **Validates: Requirements 1.4-1.6**
+describe("extractGoogleSub: identities claim wire format", () => {
+  it("extracts the Google subject when Cognito delivers identities as an already-parsed array", () => {
+    const realWorldIdentities = [
+      {
+        dateCreated: "1789447623966",
+        userId: "104305976091854435009",
+        providerName: "Google",
+        providerType: "Google",
+        issuer: null,
+        primary: "true",
+      },
+    ];
+    expect(extractGoogleSub(realWorldIdentities)).toBe("104305976091854435009");
+  });
+
+  it("extracts the Google subject when identities is a JSON-encoded string (backward compatibility)", () => {
+    const stringifiedIdentities = JSON.stringify([
+      { providerName: "Google", userId: "104305976091854435009" },
+    ]);
+    expect(extractGoogleSub(stringifiedIdentities)).toBe("104305976091854435009");
+  });
+
+  it("rejects identities claims that are neither an array nor a string", () => {
+    expect(() => extractGoogleSub({ providerName: "Google" })).toThrow(
+      "invalid-google-identity",
+    );
+    expect(() => extractGoogleSub(undefined)).toThrow("invalid-google-identity");
+    expect(() => extractGoogleSub(42)).toThrow("invalid-google-identity");
+  });
 });

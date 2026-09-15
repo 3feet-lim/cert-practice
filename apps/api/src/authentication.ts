@@ -48,13 +48,16 @@ type CognitoIdentity = { providerName: string; userId: string };
  * It intentionally does not accept body/query identity fields or log claims.
  */
 export function extractGoogleSub(identitiesClaim: unknown): string {
-  if (typeof identitiesClaim !== "string")
-    throw domainFailure("invalid-google-identity");
-
   let identities: unknown;
-  try {
-    identities = JSON.parse(identitiesClaim);
-  } catch {
+  if (typeof identitiesClaim === "string") {
+    try {
+      identities = JSON.parse(identitiesClaim);
+    } catch {
+      throw domainFailure("invalid-google-identity");
+    }
+  } else if (Array.isArray(identitiesClaim)) {
+    identities = identitiesClaim;
+  } else {
     throw domainFailure("invalid-google-identity");
   }
   if (!Array.isArray(identities)) throw domainFailure("invalid-google-identity");
