@@ -7,6 +7,7 @@ import {
   createMockCertQuizApi,
   type MockAuthActor,
 } from "../api/mock-adapter";
+import type { BrowserAuthSession } from "../auth/cognito-pkce-session";
 import type { MockAuthCallbackCapability } from "./mock-auth-capability";
 import type { CertQuizApi } from "../api/port";
 import { App } from "../App";
@@ -36,6 +37,7 @@ function renderRoute(
     actor?: MockAuthActor;
     api?: CertQuizApi;
     authCallbackCapability?: MockAuthCallbackCapability;
+    browserAuthSession?: BrowserAuthSession;
     runtimeMode?: "http" | "mock";
     queryClient?: ReturnType<typeof createCertQuizQueryClient>;
     quizStore?: ReturnType<typeof createQuizStore>;
@@ -50,6 +52,7 @@ function renderRoute(
         <CertQuizCompositionRoot
           api={api}
           runtimeMode={options.runtimeMode}
+          browserAuthSession={options.browserAuthSession}
           authCallbackCapability={options.authCallbackCapability}
           queryClient={queryClient}
           quizStore={quizStore}
@@ -221,34 +224,39 @@ describe("application route hierarchy", () => {
       "/auth/callback?returnTo=%2Fapp%2Fhistory%3Fperiod%3Drecent%23trend",
     );
   });
-  it("does not route an HTTP runtime through mock login or a mock callback", async () => {
+  it("starts real HTTP login and completes a safe callback without invoking mock auth", async () => {
+    const user = userEvent.setup();
     const authController = createMockAuthController();
     const api = createMockCertQuizApi({ authController });
-    const loginView = renderRoute("/login", {
+    const beginLogin = vi.fn().mockResolvedValue(undefined);
+    const completeCallback = vi.fn().mockResolvedValue({ ok: false } as const);
+    const browserAuthSession: BrowserAuthSession = {
+      beginLogin,
+      completeCallback,
+      getIdToken: vi.fn().mockResolvedValue(undefined),
+      logout: vi.fn(),
+      clear: vi.fn(),
+    };
+
+    const loginView = renderRoute("/login?returnTo=%2Fapp%2Fhistory", {
       api,
       runtimeMode: "http",
+      browserAuthSession,
       authCallbackCapability: authController,
     });
-
-    expect(
-      await screen.findByText("Google 로그인은 아직 사용할 수 없습니다."),
-    ).toBeVisible();
-    expect(
-      screen.getByRole("button", { name: "Google 로그인 준비 중" }),
-    ).toBeDisabled();
-    expect(
-      screen.queryByRole("link", { name: "Google 로그인 계속하기" }),
-    ).not.toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: "Google 로그인 계속하기" }));
+    expect(beginLogin).toHaveBeenCalledWith("/app/history");
+    expect(authController.getActor()).toBe("unauthenticated");
     loginView.unmount();
 
-    renderRoute("/auth/callback", {
+    renderRoute("/auth/callback?code=one-time-code&state=opaque-state", {
       api,
       runtimeMode: "http",
+      browserAuthSession,
       authCallbackCapability: authController,
     });
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Google 로그인 콜백 처리가 아직 구성되지 않았습니다.",
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("로그인을 완료하지 못했습니다.");
+    expect(completeCallback).toHaveBeenCalledWith("?code=one-time-code&state=opaque-state");
     expect(authController.getActor()).toBe("unauthenticated");
   });
   it("limits pending users to the approval status screen", async () => {

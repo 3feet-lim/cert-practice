@@ -11,6 +11,7 @@ import type { CertQuizApiError, CertQuizApiResult } from "../api/port";
 import { useCertQuizApi } from "../api/useCertQuizApi";
 import { useLogoutStatePurge } from "../api/queries";
 import { AuthSessionContext, type AuthSessionState } from "./auth-session-context";
+import { useBrowserAuthSession } from "./browser-auth-session";
 const AUTHENTICATION_ERROR_CODES = new Set([
   "authentication-invalid",
   "google-identity-missing",
@@ -48,6 +49,7 @@ async function resolveAuthSession(
 }
 export function AuthSessionProvider({ children }: PropsWithChildren) {
   const api = useCertQuizApi();
+  const browserAuthSession = useBrowserAuthSession();
   const purgeSession = useLogoutStatePurge();
   const requestGeneration = useRef(0);
   const [state, setState] = useState<AuthSessionState>({ status: "loading" });
@@ -78,7 +80,8 @@ export function AuthSessionProvider({ children }: PropsWithChildren) {
     requestGeneration.current += 1;
     await purgeSession();
     setState({ status: "unauthenticated" });
-  }, [purgeSession]);
+    browserAuthSession?.logout();
+  }, [browserAuthSession, purgeSession]);
   const value = useMemo(() => ({ state, refresh, logout }), [logout, refresh, state]);
   return (
     <AuthSessionContext.Provider value={value}>{children}</AuthSessionContext.Provider>

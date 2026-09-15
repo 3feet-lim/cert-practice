@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import { CertQuizCompositionRoot } from "./app/CertQuizCompositionRoot";
-import type { BearerTokenProvider } from "./api/http-adapter";
 import { App } from "./App";
 import {
   RuntimeConfigurationError,
@@ -46,11 +45,7 @@ try {
     window.location.origin,
   );
   const searchParams = new URLSearchParams(window.location.search);
-  const globalTokenProvider = (
-    window as Window & { certQuizBearerTokenProvider?: BearerTokenProvider }
-  ).certQuizBearerTokenProvider;
   const runtime = createWebRuntime(configuration, {
-    bearerTokenProvider: globalTokenProvider,
     mockActor: searchParams.get("mockActor"),
     mockScenario: searchParams.get("mockScenario"),
   });
@@ -61,6 +56,7 @@ try {
         <CertQuizCompositionRoot
           api={runtime.api}
           runtimeMode={configuration.mode}
+          browserAuthSession={runtime.browserAuthSession}
           authCallbackCapability={runtime.authCallbackCapability}
         >
           <App />

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   Link,
   Navigate,
@@ -13,6 +13,7 @@ import {
 import type { CertQuizApiError } from "../api/port";
 import { Button } from "../components/ui/Button";
 import { createAdminRequiredError, useAuthSession } from "./auth-session-context";
+import { useBrowserAuthSession } from "./browser-auth-session";
 import { useMockAuthCallback } from "./mock-auth-capability";
 import { useRuntimeMode } from "./runtime-mode";
 import { createLoginUrl, createPendingUrl, getSafeReturnUrl } from "./safe-return-url";
@@ -111,6 +112,8 @@ function RootRedirect() {
 function LoginRoute() {
   const { state, refresh } = useAuthSession();
   const runtimeMode = useRuntimeMode();
+  const browserAuthSession = useBrowserAuthSession();
+  const [loginError, setLoginError] = useState(false);
   const [searchParams] = useSearchParams();
   const returnUrl = getSafeReturnUrl(
     `?returnTo=${encodeURIComponent(searchParams.get("returnTo") ?? "")}`,
@@ -123,6 +126,13 @@ function LoginRoute() {
   if (state.status === "error") {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
+  const beginLogin = () => {
+    if (!browserAuthSession) {
+      setLoginError(true);
+      return;
+    }
+    void browserAuthSession.beginLogin(returnUrl).catch(() => setLoginError(true));
+  };
   return (
     <main className="app-shell">
       <section className="route-card" aria-labelledby="login-title" data-screen="S1">
@@ -139,13 +149,16 @@ function LoginRoute() {
             Google 로그인 계속하기
           </Link>
         ) : (
-          <div className="bootstrap-status bootstrap-status--error" role="alert">
-            <strong>Google 로그인은 아직 사용할 수 없습니다.</strong>
-            <span>OAuth/PKCE 토큰 교환이 구현되기 전까지는 로그인할 수 없습니다.</span>
-            <button className="primary-button" type="button" disabled>
-              Google 로그인 준비 중
+          <>
+            <button className="primary-button" type="button" onClick={beginLogin}>
+              Google 로그인 계속하기
             </button>
-          </div>
+            {loginError ? (
+              <p className="description" role="alert">
+                로그인 시작에 실패했습니다. 다시 시도하세요.
+              </p>
+            ) : null}
+          </>
         )}
       </section>
     </main>
@@ -154,9 +167,14 @@ function LoginRoute() {
 function CallbackRoute() {
   const { state, refresh } = useAuthSession();
   const runtimeMode = useRuntimeMode();
+  const browserAuthSession = useBrowserAuthSession();
   const mockAuthCallback = useMockAuthCallback();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const callbackStarted = useRef(false);
+  const [callbackResult, setCallbackResult] = useState<
+    "processing" | "failed" | { returnTo: string }
+  >("processing");
   const returnUrl = getSafeReturnUrl(location.search);
   const hasCallbackError = searchParams.has("error");
 
@@ -172,45 +190,94 @@ function CallbackRoute() {
     }
   }, [hasCallbackError, mockAuthCallback, refresh, runtimeMode, state.status]);
 
-  if (hasCallbackError) {
-    const error: CertQuizApiError = {
-      code: "authentication-invalid",
-      message: "로그인을 완료하지 못했습니다.",
-      requestId: "frontend-auth-callback",
-      retryable: false,
-      nextAction: "로그인 화면에서 다시 시작하세요.",
-    };
-    return <CanonicalError error={error} />;
+  useEffect(() => {
+    if (runtimeMode !== "http" || !browserAuthSession || callbackStarted.current) return;
+    callbackStarted.current = true;
+    const callbackSearch = location.search;
+    window.history.replaceState(null, "", location.pathname);
+    void browserAuthSession.completeCallback(callbackSearch).then(async (result) => {
+      if (!result.ok) {
+        setCallbackResult("failed");
+        return;
+      }
+      await refresh();
+      setCallbackResult({
+        returnTo: getSafeReturnUrl(`?returnTo=${encodeURIComponent(result.returnTo)}`),
+      });
+    });
+  }, [browserAuthSession, location.pathname, location.search, refresh, runtimeMode]);
+
+  if (runtimeMode === "mock") {
+    if (hasCallbackError) {
+      const error: CertQuizApiError = {
+        code: "authentication-invalid",
+        message: "로그인을 완료하지 못했습니다.",
+        requestId: "frontend-auth-callback",
+        retryable: false,
+        nextAction: "로그인 화면에서 다시 시작하세요.",
+      };
+      return <CanonicalError error={error} />;
+    }
+    if (
+      state.status === "loading" ||
+      (mockAuthCallback !== undefined && state.status === "unauthenticated")
+    ) {
+      return <LoadingRoute />;
+    }
+    if (state.status === "pending") {
+      return <Navigate replace to={createPendingUrl(returnUrl)} />;
+    }
+    if (state.status === "approved") return <Navigate replace to={returnUrl} />;
+    if (state.status === "error") {
+      return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
+    }
+    return (
+      <CanonicalError
+        error={{
+          code: "authentication-invalid",
+          message: "로그인 세션을 확인할 수 없습니다.",
+          requestId: "frontend-auth-callback",
+          retryable: false,
+          nextAction: "로그인 화면에서 다시 시작하세요.",
+        }}
+      />
+    );
   }
-  if (
-    state.status === "loading" ||
-    (runtimeMode === "mock" &&
-      mockAuthCallback !== undefined &&
-      state.status === "unauthenticated")
-  ) {
-    return <LoadingRoute />;
+
+  if (callbackResult === "processing" || state.status === "loading") return <LoadingRoute />;
+  if (callbackResult === "failed" || !browserAuthSession) {
+    return (
+      <CanonicalError
+        error={{
+          code: "authentication-invalid",
+          message: "로그인을 완료하지 못했습니다.",
+          requestId: "frontend-auth-callback",
+          retryable: false,
+          nextAction: "로그인 화면에서 다시 시작하세요.",
+        }}
+      />
+    );
   }
   if (state.status === "pending") {
-    return <Navigate replace to={createPendingUrl(returnUrl)} />;
+    return <Navigate replace to={createPendingUrl(callbackResult.returnTo)} />;
   }
-  if (state.status === "approved") return <Navigate replace to={returnUrl} />;
+  if (state.status === "approved") {
+    return <Navigate replace to={callbackResult.returnTo} />;
+  }
   if (state.status === "error") {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
-  const callbackError: CertQuizApiError = {
-    code: "authentication-invalid",
-    message:
-      runtimeMode === "http"
-        ? "Google 로그인 콜백 처리가 아직 구성되지 않았습니다."
-        : "로그인 세션을 확인할 수 없습니다.",
-    requestId: "frontend-auth-callback",
-    retryable: false,
-    nextAction:
-      runtimeMode === "http"
-        ? "OAuth/PKCE 토큰 교환이 구현되면 로그인 화면에서 다시 시작하세요."
-        : "로그인 화면에서 다시 시작하세요.",
-  };
-  return <CanonicalError error={callbackError} />;
+  return (
+    <CanonicalError
+      error={{
+        code: "authentication-invalid",
+        message: "로그인 세션을 확인할 수 없습니다.",
+        requestId: "frontend-auth-callback",
+        retryable: false,
+        nextAction: "로그인 화면에서 다시 시작하세요.",
+      }}
+    />
+  );
 }
 function PendingRoute() {
   const { state, refresh } = useAuthSession();

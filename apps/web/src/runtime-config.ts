@@ -1,4 +1,8 @@
-import { createHttpCertQuizApi, type BearerTokenProvider } from "./api/http-adapter";
+import { createHttpCertQuizApi } from "./api/http-adapter";
+import {
+  createCognitoPkceSession,
+  type BrowserAuthSession,
+} from "./auth/cognito-pkce-session";
 import {
   createMockAuthController,
   createMockCertQuizApi,
@@ -162,10 +166,10 @@ export function resolveWebRuntimeConfiguration(
 }
 export interface WebRuntime {
   readonly api: CertQuizApi;
+  readonly browserAuthSession?: BrowserAuthSession;
   readonly authCallbackCapability?: MockAuthCallbackCapability;
 }
 export interface CreateWebRuntimeOptions {
-  readonly bearerTokenProvider?: BearerTokenProvider;
   readonly mockActor?: string | null;
   readonly mockScenario?: string | null;
 }
@@ -183,11 +187,18 @@ export function createWebRuntime(
   options: CreateWebRuntimeOptions = {},
 ): WebRuntime {
   if (configuration.mode === "http") {
+    const browserAuthSession = createCognitoPkceSession({
+      hostedUiBaseUrl: configuration.cognitoHostedUiBaseUrl,
+      clientId: configuration.cognitoClientId,
+      redirectUri: configuration.redirectUri,
+      logoutUri: configuration.logoutUri,
+    });
     return {
       api: createHttpCertQuizApi({
         baseUrl: configuration.apiBaseUrl,
-        getBearerToken: options.bearerTokenProvider,
+        getBearerToken: () => browserAuthSession.getIdToken(),
       }),
+      browserAuthSession,
     };
   }
   const authController = createMockAuthController(
