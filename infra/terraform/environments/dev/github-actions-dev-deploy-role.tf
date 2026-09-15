@@ -168,6 +168,8 @@ data "aws_iam_policy_document" "github_actions_dev_deploy" {
       "logs:DeleteLogGroup",
       "logs:DescribeLogGroups",
       "logs:PutRetentionPolicy",
+      "logs:TagResource",
+      "logs:UntagResource",
     ]
     resources = [local.github_actions_dev_log_group_arn]
   }
