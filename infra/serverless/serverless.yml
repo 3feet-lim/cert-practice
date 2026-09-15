@@ -2,6 +2,11 @@ service: certquiz-api
 frameworkVersion: "4"
 configValidationMode: error
 
+# pg's CommonJS dynamic requires must remain executable in the Lambda bundle.
+build:
+  esbuild:
+    format: cjs
+
 stages:
   default:
     params:

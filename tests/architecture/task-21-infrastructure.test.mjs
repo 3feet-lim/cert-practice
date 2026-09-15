@@ -121,6 +121,11 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
 
   assert.match(
     serverless,
+    /build:\s+esbuild:\s+format: cjs/,
+    "Serverless must emit a CommonJS handler so pg dynamic requires remain executable",
+  );
+  assert.match(
+    serverless,
     /iam:\s+# Terraform owns[\s\S]*role: \$\{env:CERTQUIZ_LAMBDA_ROLE_ARN, ssm:\/certquiz\/\$\{sls:stage\}\/lambda-role-arn\}/,
   );
   assert.match(

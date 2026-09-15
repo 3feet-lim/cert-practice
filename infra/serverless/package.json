@@ -2,7 +2,6 @@
   "name": "@cert-quiz/serverless",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "package:dev": "node ./run-serverless.mjs package --stage dev --region ap-northeast-2",
     "offline:dev": "node ./run-local-serverless.mjs",
