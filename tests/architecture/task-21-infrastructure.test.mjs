@@ -103,7 +103,12 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
       assert.match(runtime, new RegExp(`resource "${resource}"`));
     }
     for (const address of runtimeResourceAddresses) {
-      assert.match(moved, new RegExp(`from\\s*=\\s*module\\.application_runtime\\.${escapeRegExp(address)}[\\s\\S]*?to\\s*=\\s*${escapeRegExp(address)}`));
+      assert.match(
+        moved,
+        new RegExp(
+          `from\\s*=\\s*module\\.application_runtime\\.${escapeRegExp(address)}[\\s\\S]*?to\\s*=\\s*${escapeRegExp(address)}`,
+        ),
+      );
     }
     assert.match(runtime, /enable_google_identity_provider/);
     assert.match(runtime, /google_oauth_client_secret/);
@@ -144,7 +149,10 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
   assert.match(serverless, /method: OPTIONS/);
   assert.match(serverless, /eventBridge:[\s\S]*schedule: rate\(1 hour\)/);
   assert.match(serverless, /handler: handler\.practiceRetentionHandler/);
-  assert.doesNotMatch(serverless, /aws_cognito_user_pool|aws_dsql_cluster|aws_s3_bucket/);
+  assert.doesNotMatch(
+    serverless,
+    /aws_cognito_user_pool|aws_dsql_cluster|aws_s3_bucket/,
+  );
 });
 
 test("Task 21 SSM contract keeps API origin optional and Markdown image origins fail closed", async () => {
@@ -172,7 +180,10 @@ test("Task 21 SSM contract keeps API origin optional and Markdown image origins 
       /runtime_parameter_values = merge\([\s\S]*?var\.api_origin == null \? \{\} : \{\s*"api-origin" = var\.api_origin/,
     );
     assert.doesNotMatch(ssm, /"api-origin"\s+= var\.api_origin == null \? ""/);
-    assert.match(variables, /empty list publishes the fail-closed https:\/\/images\.invalid sentinel/);
+    assert.match(
+      variables,
+      /empty list publishes the fail-closed https:\/\/images\.invalid sentinel/,
+    );
   }
 });
 
@@ -232,10 +243,21 @@ test("Task 21 provisions CloudWatch telemetry, actionable alarms, and machine-re
     source("apps/api/src/production.ts"),
   ]);
 
-  assert.match(serverless, /TELEMETRY_NAMESPACE: \$\{self:custom\.telemetryNamespace\}/);
+  assert.match(
+    serverless,
+    /TELEMETRY_NAMESPACE: \$\{self:custom\.telemetryNamespace\}/,
+  );
   assert.match(serverless, /TELEMETRY_SERVICE: \$\{self:custom\.telemetryService\}/);
   assert.match(serverless, /Type: AWS::CloudWatch::Dashboard/);
-  for (const alarm of ["Api5xxAlarm", "FinalizeFailureAlarm", "CleanupFailureAlarm", "ImportRollbackAlarm", "ProjectionLeakGuardAlarm", "DbLatencyAlarm", "BudgetAlarm"]) {
+  for (const alarm of [
+    "Api5xxAlarm",
+    "FinalizeFailureAlarm",
+    "CleanupFailureAlarm",
+    "ImportRollbackAlarm",
+    "ProjectionLeakGuardAlarm",
+    "DbLatencyAlarm",
+    "BudgetAlarm",
+  ]) {
     assert.match(serverless, new RegExp(`^    ${alarm}:`, "m"));
   }
   assert.match(serverless, /MetricName: Api5xx/);
@@ -250,12 +272,19 @@ test("Task 21 provisions CloudWatch telemetry, actionable alarms, and machine-re
   assert.match(runbooks, /"projection-leak"/);
 
   assert.match(telemetry, /createCloudWatchEmbeddedMetricsTelemetry/);
-  for (const metric of ["FinalizeFailures", "CleanupFailures", "ImportRollbacks", "ProjectionSchemaFailures", "DbConnectLatencyMs"]) assert.match(telemetry, new RegExp(metric));
+  for (const metric of [
+    "FinalizeFailures",
+    "CleanupFailures",
+    "ImportRollbacks",
+    "ProjectionSchemaFailures",
+    "DbConnectLatencyMs",
+  ])
+    assert.match(telemetry, new RegExp(metric));
   assert.match(production, /event: "db\.runtime"/);
   assert.match(production, /event: "api\.cleanup"/);
 });
 
-test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with scoped deployment access", async () => {
+test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with account-and-region-scoped deployment access", async () => {
   const [role, outputs, documentation, workflow] = await Promise.all([
     source("infra/terraform/environments/dev/github-actions-dev-deploy-role.tf"),
     source("infra/terraform/environments/dev/outputs.tf"),
@@ -276,7 +305,10 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with sc
     /test\s+= "StringLike"\s+variable\s+= "token\.actions\.githubusercontent\.com:sub"\s+values\s+= \["repo:3feet-lim@139703302\/cert-practice@1354159331:\*"\]/,
   );
   assert.doesNotMatch(role, /repo:3feet-lim\/cert-practice/);
-  assert.doesNotMatch(role, /repo:3feet-lim@139703302\/cert-practice@1354159331:ref:refs\/heads\/main/);
+  assert.doesNotMatch(
+    role,
+    /repo:3feet-lim@139703302\/cert-practice@1354159331:ref:refs\/heads\/main/,
+  );
   assert.match(role, /aws_caller_identity\.current\.account_id/);
   assert.match(role, /aws:RequestedRegion/);
   assert.match(role, /ServerlessDeploymentBucketName/);
@@ -286,19 +318,34 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with sc
   assert.match(role, /iam:PassRole/);
   assert.match(role, /iam:PassedToService/);
   assert.match(role, /aws_iam_role\.api_lambda_execution\.arn/);
-  assert.match(role, /parameter\/\$\{var\.service_name\}\/dev\/\*/);
+  assert.match(
+    role,
+    /arn:\$\{data\.aws_partition\.current\.partition\}:ssm:\$\{var\.aws_region\}:\$\{data\.aws_caller_identity\.current\.account_id\}:parameter\/\*/,
+  );
+  assert.doesNotMatch(role, /parameter\/\$\{var\.service_name\}\/dev\/\*/);
   assert.doesNotMatch(
     role,
-    /parameter\/\$\{var\.service_name\}\/dev\/(lambda-role-arn|dsql-endpoint)/,
+    /AdministratorAccess|aws_iam_role\.api_lambda_execution\s*\{/,
   );
-  assert.doesNotMatch(role, /AdministratorAccess|aws_iam_role\.api_lambda_execution\s*\{/);
 
   assert.match(outputs, /output "github_actions_dev_deploy_role_arn"/);
   assert.match(outputs, /CERTQUIZ_RELEASE_ROLE_ARN/);
   assert.match(documentation, /repo:3feet-lim@139703302\/cert-practice@1354159331:\*/);
   assert.match(documentation, /branch, tag, and GitHub environment independent/);
-  assert.match(documentation, /immutable GitHub owner and repository identifiers `139703302` and `1354159331`/);
-  assert.match(documentation, /workflow itself still triggers only on pushes to `main` and deploys the `dev` stage/);
+  assert.match(
+    documentation,
+    /immutable GitHub owner and repository identifiers `139703302` and `1354159331`/,
+  );
+  assert.match(documentation, /`arn:<partition>:ssm:<region>:<account>:parameter\/\*`/);
+  assert.match(
+    documentation,
+    /Serverless Framework reads its framework-managed `\/serverless-framework\/deployment\/s3-bucket` parameter/,
+  );
+  assert.match(documentation, /never another account or region/);
+  assert.match(
+    documentation,
+    /workflow itself still triggers only on pushes to `main` and deploys the `dev` stage/,
+  );
   assert.match(documentation, /github_actions_dev_deploy_role_arn/);
   assert.match(documentation, /Environment\*\* `release-dev`/);
   assert.match(documentation, /SERVERLESS_ACCESS_KEY/);

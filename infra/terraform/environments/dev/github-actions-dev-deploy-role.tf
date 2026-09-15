@@ -219,13 +219,17 @@ data "aws_iam_policy_document" "github_actions_dev_deploy" {
     }
   }
 
+  # Serverless Framework reads its framework-managed deployment parameter
+  # (/serverless-framework/deployment/s3-bucket) before deploying. Restrict the
+  # wildcard to this account and deployment region while allowing all parameter
+  # names so framework-managed paths remain deployable.
   statement {
     sid = "ReadDevDeploymentInputs"
     actions = [
       "ssm:GetParameter",
     ]
     resources = [
-      "arn:${data.aws_partition.current.partition}:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.service_name}/dev/*",
+      "arn:${data.aws_partition.current.partition}:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/*",
     ]
   }
 
