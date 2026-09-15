@@ -49,6 +49,21 @@ provider:
     # Terraform owns this permanent role; the local runner injects harmless stand-ins.
     role: ${env:CERTQUIZ_LAMBDA_ROLE_ARN, ssm:/certquiz/${sls:stage}/lambda-role-arn}
   httpApi:
+    # API Gateway applies this to authorizer rejections before requests reach Hono.
+    # WEB_ORIGIN is the exact Terraform-published SPA origin; never use wildcards.
+    cors:
+      allowedOrigins:
+        - ${env:CERTQUIZ_WEB_ORIGIN, ssm:/certquiz/${sls:stage}/web-origin}
+      allowedHeaders:
+        - authorization
+        - content-type
+        - x-request-id
+      allowedMethods:
+        - GET
+        - POST
+        - PATCH
+        - OPTIONS
+      maxAge: 600
     authorizers:
       cognitoJwt:
         type: jwt

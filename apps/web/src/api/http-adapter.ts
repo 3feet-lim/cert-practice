@@ -111,6 +111,29 @@ function requestIdFrom(response: Response, fallback: string): string {
   return requestIdSchema.safeParse(value).success ? value! : fallback;
 }
 
+function authorizerFallbackFailure<Output>(
+  operation: string,
+  response: Response,
+): CertQuizApiResult<Output> | undefined {
+  if (response.status === 401) {
+    return adapterFailure(
+      "authentication-invalid",
+      "Authentication is required.",
+      requestIdFrom(response, `http:${operation}:authorizer-401`),
+      false,
+    );
+  }
+  if (response.status === 403) {
+    return adapterFailure(
+      "approval-required",
+      "Access to the CertQuiz API is not authorized.",
+      requestIdFrom(response, `http:${operation}:authorizer-403`),
+      false,
+    );
+  }
+  return undefined;
+}
+
 function unavailableFailure<Output>(
   operation: string,
   response: Response,
@@ -192,7 +215,10 @@ export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuiz
       ) {
         return { ok: false, error: parsedError.data.error as CertQuizApiError };
       }
-      return unavailableFailure(request.operation, response);
+      return (
+        authorizerFallbackFailure(request.operation, response) ??
+        unavailableFailure(request.operation, response)
+      );
     }
 
     const parsed = schema.safeParse(body);

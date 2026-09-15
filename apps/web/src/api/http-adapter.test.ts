@@ -76,6 +76,70 @@ describe("createHttpCertQuizApi", () => {
       },
     });
   });
+  it("converts readable non-envelope authorizer rejections into canonical auth UI results", async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: "Unauthorized" }), {
+          status: 401,
+          headers: { "content-type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: "Forbidden" }), {
+          status: 403,
+          headers: { "content-type": "application/json", "x-request-id": "gw:403" },
+        }),
+      );
+    const api = createHttpCertQuizApi({ baseUrl: "https://api.example.test", fetch });
+
+    await expect(api.getApprovalStatus()).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "authentication-invalid",
+        message: "Authentication is required.",
+        requestId: "http:approval:authorizer-401",
+        retryable: false,
+      },
+    });
+    await expect(api.getApprovalStatus()).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "approval-required",
+        message: "Access to the CertQuiz API is not authorized.",
+        requestId: "gw:403",
+        retryable: false,
+      },
+    });
+  });
+
+  it("preserves a valid authorization error envelope over the status fallback", async () => {
+    const api = createHttpCertQuizApi({
+      baseUrl: "https://api.example.test",
+      fetch: async () =>
+        new Response(
+          JSON.stringify({
+            error: {
+              code: "admin-required",
+              message: "Administrator access is required.",
+              requestId: "api:admin:forbidden",
+              retryable: false,
+            },
+          }),
+          { status: 403, headers: { "content-type": "application/json" } },
+        ),
+    });
+
+    await expect(api.getApprovalStatus()).resolves.toEqual({
+      ok: false,
+      error: {
+        code: "admin-required",
+        message: "Administrator access is required.",
+        requestId: "api:admin:forbidden",
+        retryable: false,
+      },
+    });
+  });
 });
 
 function success(data: unknown, requestId = "api:request"): Response {

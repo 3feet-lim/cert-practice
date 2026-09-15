@@ -112,4 +112,10 @@ test("Task 21 deployed smoke resolves a stack HttpApiUrl by default and keeps ov
   assert.match(smoke, /Health endpoint returned/);
   assert.match(smoke, /strict-transport-security/);
   assert.match(smoke, /if \(!webOrigin\) return/);
+  assert.match(smoke, /\/v1\/me\/approval/);
+  assert.match(smoke, /Unauthenticated approval request returned/);
+  assert.match(
+    smoke,
+    /expectHeader\(unauthenticated, "access-control-allow-origin", webOrigin\)/,
+  );
 });

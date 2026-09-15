@@ -145,6 +145,17 @@ async function verifyCors(apiOrigin, webOrigin) {
   }
   expectHeader(preflight, "access-control-allow-origin", webOrigin);
 
+  // JWT authorizer rejections bypass Hono, so gateway-level CORS must cover them.
+  const unauthenticated = await request(`${apiOrigin}/v1/me/approval`, {
+    headers: { Origin: webOrigin },
+  });
+  if (unauthenticated.status !== 401) {
+    throw new Error(
+      `Unauthenticated approval request returned ${unauthenticated.status}, expected 401.`,
+    );
+  }
+  expectHeader(unauthenticated, "access-control-allow-origin", webOrigin);
+
   const rejectedPreflight = await request(`${apiOrigin}/v1/catalog`, {
     method: "OPTIONS",
     headers: {

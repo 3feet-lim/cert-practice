@@ -149,6 +149,16 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
     /RATE_LIMIT_POLICIES: \$\{env:CERTQUIZ_RATE_LIMIT_POLICIES, ssm:\/certquiz\/\$\{sls:stage\}\/rate-limit-policies\}/,
   );
   assert.match(serverless, /type: jwt/);
+  assert.match(
+    serverless,
+    /httpApi:[\s\S]*?cors:[\s\S]*?allowedOrigins:[\s\S]*?\$\{env:CERTQUIZ_WEB_ORIGIN, ssm:\/certquiz\/\$\{sls:stage\}\/web-origin\}[\s\S]*?allowedHeaders:[\s\S]*?authorization[\s\S]*?content-type[\s\S]*?x-request-id[\s\S]*?allowedMethods:[\s\S]*?GET[\s\S]*?POST[\s\S]*?PATCH[\s\S]*?OPTIONS/,
+    "Gateway CORS must use the Terraform-published exact SPA origin and browser request headers.",
+  );
+  assert.doesNotMatch(
+    serverless,
+    /allowedOrigins:[\s\S]*?- \*|allowedOrigins:[\s\S]*?- ['"]\*['"]/,
+    "Gateway CORS must never allow wildcard origins.",
+  );
   assert.match(serverless, /path: \/v1\/\{proxy\+\}/);
   assert.match(serverless, /method: "\*"/);
   assert.match(serverless, /method: OPTIONS/);
