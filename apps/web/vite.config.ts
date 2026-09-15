@@ -3,7 +3,8 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  base: "./",
+  // CloudFront serves SPA fallbacks for deep links, so production assets must be root-absolute.
+  base: "/",
   build: {
     assetsDir: "assets",
   },
