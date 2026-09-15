@@ -371,6 +371,22 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(workflow, /branches: \[main\]/);
   assert.match(workflow, /environment: release-dev/);
   assert.match(workflow, /CERTQUIZ_RELEASE_ROLE_ARN/);
+  assert.match(workflow, /Resolve DEV SPA runtime configuration/);
+  assert.match(
+    workflow,
+    /cloudformation describe-stacks --stack-name certquiz-api-dev/,
+  );
+  assert.match(workflow, /OutputKey=='HttpApiUrl'/);
+  assert.match(workflow, /\/certquiz\/dev\/cognito-hosted-ui-base-url/);
+  assert.match(workflow, /\/certquiz\/dev\/cognito-client-id/);
+  assert.match(workflow, /VITE_CERTQUIZ_RUNTIME_MODE: http/);
+  assert.match(
+    workflow,
+    /VITE_CERTQUIZ_API_BASE_URL: \$\{\{ steps\.web-runtime\.outputs\.api_base_url \}\}/,
+  );
+  assert.match(workflow, /VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL/);
+  assert.match(workflow, /VITE_CERTQUIZ_COGNITO_CLIENT_ID/);
+  assert.match(workflow, /Build DEV SPA with public runtime configuration/);
   assert.match(workflow, /pnpm --filter @cert-quiz\/web build/);
   assert.match(workflow, /aws s3 sync apps\/web\/dist/);
   assert.match(workflow, /--delete --exclude "index\.html"/);
@@ -388,15 +404,30 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(role, /sid\s+= "ListDevWebAssetBucket"/);
   assert.match(role, /actions\s+= \["s3:ListBucket"\]/);
   assert.match(role, /resources\s+= \[aws_s3_bucket\.web\.arn\]/);
-  assert.match(role, /sid = "SyncDevWebAssets"[\s\S]*?"s3:GetObject"[\s\S]*?"s3:PutObject"/);
+  assert.match(
+    role,
+    /sid = "SyncDevWebAssets"[\s\S]*?"s3:GetObject"[\s\S]*?"s3:PutObject"/,
+  );
   assert.match(role, /resources = \["\$\{aws_s3_bucket\.web\.arn\}\/\*"\]/);
-  assert.match(role, /sid = "InvalidateDevWebDistribution"[\s\S]*?"cloudfront:CreateInvalidation"[\s\S]*?"cloudfront:GetInvalidation"/);
+  assert.match(
+    role,
+    /sid = "InvalidateDevWebDistribution"[\s\S]*?"cloudfront:CreateInvalidation"[\s\S]*?"cloudfront:GetInvalidation"/,
+  );
   assert.match(role, /resources = \[aws_cloudfront_distribution\.web\.arn\]/);
-  assert.doesNotMatch(role, /cloudfront:(UpdateDistribution|CreateDistribution|DeleteDistribution)/);
+  assert.doesNotMatch(
+    role,
+    /cloudfront:(UpdateDistribution|CreateDistribution|DeleteDistribution)/,
+  );
   assert.match(
     documentation,
     /main`: it builds both DEV API and SPA assets, deploys and smokes the DEV API, then publishes the SPA only after that smoke succeeds/,
   );
-  assert.match(documentation, /CloudFront distribution configuration is Terraform-owned/);
-  assert.match(documentation, /only invalidates the existing distribution after upload/);
+  assert.match(
+    documentation,
+    /CloudFront distribution configuration is Terraform-owned/,
+  );
+  assert.match(
+    documentation,
+    /only invalidates the existing distribution after upload/,
+  );
 });

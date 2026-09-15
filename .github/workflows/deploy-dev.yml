@@ -41,7 +41,6 @@ jobs:
           pnpm --filter @cert-quiz/domain build
           pnpm --filter @cert-quiz/db build
           pnpm --filter @cert-quiz/api build
-          pnpm --filter @cert-quiz/web build
       - name: Deploy DEV Serverless API
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
@@ -51,6 +50,27 @@ jobs:
           pnpm --dir infra/serverless exec node run-serverless.mjs deploy --stage dev --region ap-northeast-2 --param="lambdaRoleArn=$CERTQUIZ_LAMBDA_ROLE_ARN" --param="databaseEndpoint=$CERTQUIZ_DSQL_ENDPOINT"
       - name: Smoke deployed DEV infrastructure
         run: pnpm infra:smoke
+      - name: Resolve DEV SPA runtime configuration
+        id: web-runtime
+        run: |
+          api_base_url="$(aws cloudformation describe-stacks --stack-name certquiz-api-dev --query "Stacks[0].Outputs[?OutputKey=='HttpApiUrl'].OutputValue | [0]" --output text)"
+          cognito_hosted_ui_base_url="$(aws ssm get-parameter --name /certquiz/dev/cognito-hosted-ui-base-url --query Parameter.Value --output text)"
+          cognito_client_id="$(aws ssm get-parameter --name /certquiz/dev/cognito-client-id --query Parameter.Value --output text)"
+          test -n "$api_base_url" && test "$api_base_url" != "None"
+          test -n "$cognito_hosted_ui_base_url" && test "$cognito_hosted_ui_base_url" != "None"
+          test -n "$cognito_client_id" && test "$cognito_client_id" != "None"
+          echo "api_base_url=$api_base_url" >> "$GITHUB_OUTPUT"
+          echo "cognito_hosted_ui_base_url=$cognito_hosted_ui_base_url" >> "$GITHUB_OUTPUT"
+          echo "cognito_client_id=$cognito_client_id" >> "$GITHUB_OUTPUT"
+      - name: Build DEV SPA with public runtime configuration
+        env:
+          VITE_CERTQUIZ_RUNTIME_MODE: http
+          VITE_CERTQUIZ_API_BASE_URL: ${{ steps.web-runtime.outputs.api_base_url }}
+          VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL: ${{ steps.web-runtime.outputs.cognito_hosted_ui_base_url }}
+          VITE_CERTQUIZ_COGNITO_CLIENT_ID: ${{ steps.web-runtime.outputs.cognito_client_id }}
+          VITE_CERTQUIZ_AUTH_REDIRECT_PATH: /auth/callback
+          VITE_CERTQUIZ_AUTH_LOGOUT_PATH: /login
+        run: pnpm --filter @cert-quiz/web build
       - name: Resolve DEV SPA delivery targets
         id: web-targets
         run: |

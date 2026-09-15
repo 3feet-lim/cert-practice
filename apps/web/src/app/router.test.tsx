@@ -36,6 +36,7 @@ function renderRoute(
     actor?: MockAuthActor;
     api?: CertQuizApi;
     authCallbackCapability?: MockAuthCallbackCapability;
+    runtimeMode?: "http" | "mock";
     queryClient?: ReturnType<typeof createCertQuizQueryClient>;
     quizStore?: ReturnType<typeof createQuizStore>;
   } = {},
@@ -48,6 +49,7 @@ function renderRoute(
       <MemoryRouter initialEntries={[path]}>
         <CertQuizCompositionRoot
           api={api}
+          runtimeMode={options.runtimeMode}
           authCallbackCapability={options.authCallbackCapability}
           queryClient={queryClient}
           quizStore={quizStore}
@@ -218,6 +220,36 @@ describe("application route hierarchy", () => {
       "href",
       "/auth/callback?returnTo=%2Fapp%2Fhistory%3Fperiod%3Drecent%23trend",
     );
+  });
+  it("does not route an HTTP runtime through mock login or a mock callback", async () => {
+    const authController = createMockAuthController();
+    const api = createMockCertQuizApi({ authController });
+    const loginView = renderRoute("/login", {
+      api,
+      runtimeMode: "http",
+      authCallbackCapability: authController,
+    });
+
+    expect(
+      await screen.findByText("Google 로그인은 아직 사용할 수 없습니다."),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Google 로그인 준비 중" }),
+    ).toBeDisabled();
+    expect(
+      screen.queryByRole("link", { name: "Google 로그인 계속하기" }),
+    ).not.toBeInTheDocument();
+    loginView.unmount();
+
+    renderRoute("/auth/callback", {
+      api,
+      runtimeMode: "http",
+      authCallbackCapability: authController,
+    });
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Google 로그인 콜백 처리가 아직 구성되지 않았습니다.",
+    );
+    expect(authController.getActor()).toBe("unauthenticated");
   });
   it("limits pending users to the approval status screen", async () => {
     renderRoute("/app/history", { actor: "pending" });

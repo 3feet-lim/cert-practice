@@ -11,9 +11,13 @@ import {
   type MockAuthCallbackCapability,
 } from "./mock-auth-capability";
 import { createCertQuizQueryClient } from "./query-client";
+import { RuntimeModeProvider } from "./runtime-mode";
+import type { WebRuntimeMode } from "../runtime-config";
 
 export type CertQuizCompositionRootProps = PropsWithChildren<{
   api: CertQuizApi;
+  /** Mock is the test default; browser bootstrap always supplies an explicit mode. */
+  runtimeMode?: WebRuntimeMode;
   authCallbackCapability?: MockAuthCallbackCapability;
   queryClient?: QueryClient;
   quizStore?: QuizStoreApi;
@@ -22,6 +26,7 @@ export type CertQuizCompositionRootProps = PropsWithChildren<{
 /** The only application boundary that selects adapters and owns request/transient state. */
 export function CertQuizCompositionRoot({
   api,
+  runtimeMode = "mock",
   authCallbackCapability,
   queryClient,
   quizStore,
@@ -31,11 +36,13 @@ export function CertQuizCompositionRoot({
 
   return (
     <CertQuizApiProvider api={api}>
-      <MockAuthCallbackProvider value={authCallbackCapability}>
-        <QueryClientProvider client={queryClient ?? ownedQueryClient}>
-          <QuizStoreProvider store={quizStore}>{children}</QuizStoreProvider>
-        </QueryClientProvider>
-      </MockAuthCallbackProvider>
+      <RuntimeModeProvider value={runtimeMode}>
+        <MockAuthCallbackProvider value={authCallbackCapability}>
+          <QueryClientProvider client={queryClient ?? ownedQueryClient}>
+            <QuizStoreProvider store={quizStore}>{children}</QuizStoreProvider>
+          </QueryClientProvider>
+        </MockAuthCallbackProvider>
+      </RuntimeModeProvider>
     </CertQuizApiProvider>
   );
 }

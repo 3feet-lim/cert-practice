@@ -14,6 +14,7 @@ import type { CertQuizApiError } from "../api/port";
 import { Button } from "../components/ui/Button";
 import { createAdminRequiredError, useAuthSession } from "./auth-session-context";
 import { useMockAuthCallback } from "./mock-auth-capability";
+import { useRuntimeMode } from "./runtime-mode";
 import { createLoginUrl, createPendingUrl, getSafeReturnUrl } from "./safe-return-url";
 
 const ImportPage = lazy(() =>
@@ -109,6 +110,7 @@ function RootRedirect() {
 }
 function LoginRoute() {
   const { state, refresh } = useAuthSession();
+  const runtimeMode = useRuntimeMode();
   const [searchParams] = useSearchParams();
   const returnUrl = getSafeReturnUrl(
     `?returnTo=${encodeURIComponent(searchParams.get("returnTo") ?? "")}`,
@@ -129,18 +131,29 @@ function LoginRoute() {
         <p className="description">
           승인된 사용자는 개인 연습 세션과 모의고사 이력을 이용할 수 있습니다.
         </p>
-        <Link
-          className="primary-link"
-          to={`/auth/callback?returnTo=${encodeURIComponent(returnUrl)}`}
-        >
-          Google 로그인 계속하기
-        </Link>
+        {runtimeMode === "mock" ? (
+          <Link
+            className="primary-link"
+            to={`/auth/callback?returnTo=${encodeURIComponent(returnUrl)}`}
+          >
+            Google 로그인 계속하기
+          </Link>
+        ) : (
+          <div className="bootstrap-status bootstrap-status--error" role="alert">
+            <strong>Google 로그인은 아직 사용할 수 없습니다.</strong>
+            <span>OAuth/PKCE 토큰 교환이 구현되기 전까지는 로그인할 수 없습니다.</span>
+            <button className="primary-button" type="button" disabled>
+              Google 로그인 준비 중
+            </button>
+          </div>
+        )}
       </section>
     </main>
   );
 }
 function CallbackRoute() {
   const { state, refresh } = useAuthSession();
+  const runtimeMode = useRuntimeMode();
   const mockAuthCallback = useMockAuthCallback();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -149,6 +162,7 @@ function CallbackRoute() {
 
   useEffect(() => {
     if (
+      runtimeMode === "mock" &&
       !hasCallbackError &&
       mockAuthCallback !== undefined &&
       state.status === "unauthenticated"
@@ -156,7 +170,7 @@ function CallbackRoute() {
       mockAuthCallback.completeMockLogin();
       void refresh();
     }
-  }, [hasCallbackError, mockAuthCallback, refresh, state.status]);
+  }, [hasCallbackError, mockAuthCallback, refresh, runtimeMode, state.status]);
 
   if (hasCallbackError) {
     const error: CertQuizApiError = {
@@ -170,7 +184,9 @@ function CallbackRoute() {
   }
   if (
     state.status === "loading" ||
-    (mockAuthCallback !== undefined && state.status === "unauthenticated")
+    (runtimeMode === "mock" &&
+      mockAuthCallback !== undefined &&
+      state.status === "unauthenticated")
   ) {
     return <LoadingRoute />;
   }
@@ -183,10 +199,16 @@ function CallbackRoute() {
   }
   const callbackError: CertQuizApiError = {
     code: "authentication-invalid",
-    message: "로그인 세션을 확인할 수 없습니다.",
+    message:
+      runtimeMode === "http"
+        ? "Google 로그인 콜백 처리가 아직 구성되지 않았습니다."
+        : "로그인 세션을 확인할 수 없습니다.",
     requestId: "frontend-auth-callback",
     retryable: false,
-    nextAction: "로그인 화면에서 다시 시작하세요.",
+    nextAction:
+      runtimeMode === "http"
+        ? "OAuth/PKCE 토큰 교환이 구현되면 로그인 화면에서 다시 시작하세요."
+        : "로그인 화면에서 다시 시작하세요.",
   };
   return <CanonicalError error={callbackError} />;
 }

@@ -3,10 +3,34 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import { CertQuizCompositionRoot } from "./app/CertQuizCompositionRoot";
-import { createHttpCertQuizApi, type BearerTokenProvider } from "./api/http-adapter";
-import { createMockAuthController, createMockCertQuizApi } from "./api/mock-adapter";
+import type { BearerTokenProvider } from "./api/http-adapter";
 import { App } from "./App";
+import {
+  RuntimeConfigurationError,
+  createWebRuntime,
+  resolveWebRuntimeConfiguration,
+} from "./runtime-config";
 import "./styles.css";
+
+function RuntimeConfigurationErrorScreen({ message }: { message: string }) {
+  return (
+    <main className="app-shell">
+      <section
+        className="route-card"
+        aria-labelledby="runtime-configuration-error-title"
+      >
+        <p className="eyebrow">CONFIGURATION ERROR</p>
+        <h1 id="runtime-configuration-error-title">
+          웹 런타임 구성이 올바르지 않습니다.
+        </h1>
+        <div className="bootstrap-status bootstrap-status--error" role="alert">
+          <strong>{message}</strong>
+          <span>배포 설정을 확인한 후 페이지를 새로고침하세요.</span>
+        </div>
+      </section>
+    </main>
+  );
+}
 
 const rootElement = document.getElementById("root");
 
@@ -14,41 +38,40 @@ if (!rootElement) {
   throw new Error("CertQuiz root element was not found");
 }
 
-const searchParams = new URLSearchParams(window.location.search);
-const mockActor = searchParams.get("mockActor");
-const e2eScenario = searchParams.get("mockScenario");
-const useHttpApi = import.meta.env.VITE_CERTQUIZ_API_MODE === "http";
-const authController = createMockAuthController(
-  mockActor === "approved" || mockActor === "admin" ? mockActor : "unauthenticated",
-);
-const globalTokenProvider = (
-  window as Window & { certQuizBearerTokenProvider?: BearerTokenProvider }
-).certQuizBearerTokenProvider;
-const api = useHttpApi
-  ? createHttpCertQuizApi({
-      baseUrl: import.meta.env.VITE_CERTQUIZ_API_BASE_URL ?? window.location.origin,
-      getBearerToken: globalTokenProvider,
-    })
-  : createMockCertQuizApi({
-      authController,
-      e2eScenario:
-        e2eScenario === "completed-results" ||
-        e2eScenario === "catalog-loading" ||
-        e2eScenario === "catalog-empty" ||
-        e2eScenario === "catalog-retry-once"
-          ? e2eScenario
-          : undefined,
-    });
+const root = createRoot(rootElement);
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <BrowserRouter>
-      <CertQuizCompositionRoot
-        api={api}
-        authCallbackCapability={useHttpApi ? undefined : authController}
-      >
-        <App />
-      </CertQuizCompositionRoot>
-    </BrowserRouter>
-  </StrictMode>,
-);
+try {
+  const configuration = resolveWebRuntimeConfiguration(
+    import.meta.env,
+    window.location.origin,
+  );
+  const searchParams = new URLSearchParams(window.location.search);
+  const globalTokenProvider = (
+    window as Window & { certQuizBearerTokenProvider?: BearerTokenProvider }
+  ).certQuizBearerTokenProvider;
+  const runtime = createWebRuntime(configuration, {
+    bearerTokenProvider: globalTokenProvider,
+    mockActor: searchParams.get("mockActor"),
+    mockScenario: searchParams.get("mockScenario"),
+  });
+
+  root.render(
+    <StrictMode>
+      <BrowserRouter>
+        <CertQuizCompositionRoot
+          api={runtime.api}
+          runtimeMode={configuration.mode}
+          authCallbackCapability={runtime.authCallbackCapability}
+        >
+          <App />
+        </CertQuizCompositionRoot>
+      </BrowserRouter>
+    </StrictMode>,
+  );
+} catch (error) {
+  if (error instanceof RuntimeConfigurationError) {
+    root.render(<RuntimeConfigurationErrorScreen message={error.message} />);
+  } else {
+    throw error;
+  }
+}
