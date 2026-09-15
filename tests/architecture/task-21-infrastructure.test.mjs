@@ -371,6 +371,18 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(workflow, /branches: \[main\]/);
   assert.match(workflow, /environment: release-dev/);
   assert.match(workflow, /CERTQUIZ_RELEASE_ROLE_ARN/);
+  assert.match(workflow, /Apply and verify DEV DSQL migrations/);
+  assert.match(workflow, /DSQL_ENDPOINT="\$\(aws ssm get-parameter --name \/certquiz\/dev\/dsql-endpoint/);
+  assert.match(workflow, /DSQL_USER=admin/);
+  assert.match(workflow, /pnpm --filter @cert-quiz\/db run migrate:deploy/);
+  assert.ok(
+    workflow.indexOf("Apply and verify DEV DSQL migrations") <
+      workflow.indexOf("Deploy DEV Serverless API"),
+    "DEV migrations must finish before Serverless API deployment",
+  );
+  assert.match(role, /sid\s+= "ConnectToDevDsqlAsMigrationAdmin"/);
+  assert.match(role, /actions\s+= \["dsql:DbConnectAdmin"\]/);
+  assert.match(role, /resources = \[module\.dsql\.cluster_arn\]/);
   assert.match(workflow, /Resolve DEV SPA runtime configuration/);
   assert.match(
     workflow,

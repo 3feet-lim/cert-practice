@@ -4,7 +4,7 @@ import {
   LifecycleServices,
   SessionFactory,
 } from "@cert-quiz/domain";
-import { initializeDsqlRuntime } from "@cert-quiz/db";
+import { initializeDsqlRuntime } from "@cert-quiz/db/runtime";
 import type { Hono } from "hono";
 
 import { createApp } from "./app.js";

@@ -41,6 +41,12 @@ jobs:
           pnpm --filter @cert-quiz/domain build
           pnpm --filter @cert-quiz/db build
           pnpm --filter @cert-quiz/api build
+      - name: Apply and verify DEV DSQL migrations
+        run: |
+          export DSQL_ENDPOINT="$(aws ssm get-parameter --name /certquiz/dev/dsql-endpoint --query Parameter.Value --output text)"
+          export DSQL_DATABASE=postgres
+          export DSQL_USER=admin
+          pnpm --filter @cert-quiz/db run migrate:deploy
       - name: Deploy DEV Serverless API
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}

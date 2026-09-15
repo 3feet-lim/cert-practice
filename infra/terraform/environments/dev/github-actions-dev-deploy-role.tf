@@ -64,6 +64,14 @@ resource "aws_iam_role" "github_actions_dev_deploy" {
 }
 
 data "aws_iam_policy_document" "github_actions_dev_deploy" {
+  # The main-push workflow uses the DB migration CLI before Lambda deployment.
+  # It must connect as the DSQL admin user, but only to the Terraform-owned dev cluster.
+  statement {
+    sid       = "ConnectToDevDsqlAsMigrationAdmin"
+    actions   = ["dsql:DbConnectAdmin"]
+    resources = [module.dsql.cluster_arn]
+  }
+
   statement {
     sid = "DeployDevServerlessStack"
     actions = [

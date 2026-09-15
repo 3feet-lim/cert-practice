@@ -1,6 +1,4 @@
-import { DsqlPoolLifecycle } from "./dsql-pool.js";
-import { DsqlMigrationRunner } from "./migrate.js";
-import { assertApplicationSchema, loadApplicationMigrations } from "./migrations.js";
+import { migrateAndVerifyApplicationSchema } from "./dsql-runtime.js";
 
 function required(name: string): string {
   const value = process.env[name];
@@ -8,7 +6,7 @@ function required(name: string): string {
   return value;
 }
 
-const lifecycle = new DsqlPoolLifecycle({
+const schema = await migrateAndVerifyApplicationSchema({
   endpoint: required("DSQL_ENDPOINT"),
   region: required("AWS_REGION"),
   database: process.env.DSQL_DATABASE || undefined,
@@ -16,15 +14,6 @@ const lifecycle = new DsqlPoolLifecycle({
   ...(process.env.PGSSLROOTCERT ? { caPath: process.env.PGSSLROOTCERT } : {}),
 });
 
-try {
-  const pool = await lifecycle.pool();
-  const migrations = await loadApplicationMigrations();
-  const runner = new DsqlMigrationRunner(pool);
-  await runner.migrate(migrations);
-  const schema = await assertApplicationSchema(runner, migrations);
-  process.stdout.write(
-    `Applied and verified application schema versions ${schema.minimum}-${schema.maximum}.\n`,
-  );
-} finally {
-  await lifecycle.close();
-}
+process.stdout.write(
+  `Applied and verified application schema versions ${schema.minimum}-${schema.maximum}.\n`,
+);

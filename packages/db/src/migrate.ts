@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 
-import { isOCCError } from "@aws/aurora-dsql-node-postgres-connector";
 import type { QueryResultRow } from "pg";
 
+import { isDsqlOccAbort } from "./dsql-occ.js";
 import {
   loadApplicationMigrations,
   type ApplicationMigration,
@@ -30,16 +30,7 @@ export type DsqlOccRetryOptions = Readonly<{
 const DSQL_OCC_RETRY_ATTEMPTS = 8;
 const DSQL_OCC_RETRY_DELAY_MS = 25;
 
-/** Recognizes both connector-wrapped conflicts and raw PostgreSQL OC000 errors. */
-export function isDsqlOccAbort(error: unknown): boolean {
-  if (isOCCError(error)) return true;
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code?: unknown }).code === "OC000"
-  );
-}
+export { isDsqlOccAbort } from "./dsql-occ.js";
 
 /** Retries Aurora DSQL optimistic-concurrency aborts with bounded backoff. */
 export async function retryDsqlOcc<T>(

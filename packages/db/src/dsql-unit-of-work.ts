@@ -26,7 +26,7 @@ import {
 import type { PoolClient, QueryResult, QueryResultRow } from "pg";
 
 import type { DsqlPool } from "./dsql-pool.js";
-import { isDsqlOccAbort } from "./migrate.js";
+import { isDsqlOccAbort } from "./dsql-occ.js";
 
 export type SqlClient = Pick<PoolClient, "query" | "release">;
 export type SqlPool = Pick<DsqlPool, "connect">;
