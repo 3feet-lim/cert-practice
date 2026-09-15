@@ -13,10 +13,10 @@ function setDeploymentEnvironment() {
     vi.stubEnv(name, value);
 }
 
-function apiGatewayV2Event(path: string) {
+function apiGatewayV2Event(path: string, method = "GET") {
   return {
     version: "2.0",
-    routeKey: `GET ${path}`,
+    routeKey: `${method} ${path}`,
     rawPath: path,
     rawQueryString: "",
     headers: { origin: deploymentEnvironment.WEB_ORIGIN },
@@ -26,14 +26,14 @@ function apiGatewayV2Event(path: string) {
       domainName: "api.example.test",
       domainPrefix: "api",
       http: {
-        method: "GET",
+        method,
         path,
         protocol: "HTTP/1.1",
         sourceIp: "198.51.100.10",
         userAgent: "vitest",
       },
       requestId: "request-id",
-      routeKey: `GET ${path}`,
+      routeKey: `${method} ${path}`,
       stage: "$default",
       time: "01/Jan/2026:00:00:00 +0000",
       timeEpoch: 1_767_225_600_000,
@@ -42,8 +42,12 @@ function apiGatewayV2Event(path: string) {
   };
 }
 
-async function invoke(handler: (...args: never[]) => Promise<unknown>, path: string) {
-  return (await handler(apiGatewayV2Event(path) as never, {} as never)) as {
+async function invoke(
+  handler: (...args: never[]) => Promise<unknown>,
+  path: string,
+  method = "GET",
+) {
+  return (await handler(apiGatewayV2Event(path, method) as never, {} as never)) as {
     statusCode: number;
     body: string;
     headers: Record<string, string | undefined>;
@@ -76,6 +80,21 @@ describe("deployed Lambda routing", () => {
     expect(response.headers["strict-transport-security"]).toContain("max-age=");
     expect(response.headers["content-security-policy"]).toContain(
       "https://images.dev.example.test",
+    );
+  });
+
+  it("serves public CORS preflight without loading production composition", async () => {
+    setDeploymentEnvironment();
+    vi.doMock("./production.js", () => {
+      throw new Error("production composition must not load for preflight");
+    });
+
+    const { handler } = await import("./lambda.js");
+    const response = await invoke(handler as never, "/v1/catalog", "OPTIONS");
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers["access-control-allow-origin"]).toBe(
+      deploymentEnvironment.WEB_ORIGIN,
     );
   });
 

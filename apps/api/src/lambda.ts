@@ -53,13 +53,14 @@ export function deployedHealthApp() {
   return cachedDeployedHealthApp;
 }
 
-function isApiGatewayV2HealthRequest(event: unknown): boolean {
+function isApiGatewayV2PublicRequest(event: unknown): boolean {
   const request = event as ApiGatewayV2Request | null;
+  if (request === null || typeof request !== "object") return false;
+  const { rawPath } = request;
+  const method = request.requestContext?.http?.method;
   return (
-    request !== null &&
-    typeof request === "object" &&
-    request.rawPath === "/v1/health" &&
-    request.requestContext?.http?.method === "GET"
+    (rawPath === "/v1/health" && method === "GET") ||
+    (typeof rawPath === "string" && rawPath.startsWith("/v1/") && method === "OPTIONS")
   );
 }
 
@@ -80,7 +81,7 @@ export async function handler(...args: Parameters<ReturnType<typeof handle>>) {
     return handle(app)(...args);
   }
 
-  if (isApiGatewayV2HealthRequest(args[0])) {
+  if (isApiGatewayV2PublicRequest(args[0])) {
     return handle(deployedHealthApp())(...args);
   }
 

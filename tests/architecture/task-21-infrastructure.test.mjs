@@ -161,10 +161,10 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
   );
   assert.match(serverless, /path: \/v1\/\{proxy\+\}/);
   assert.match(serverless, /method: "\*"/);
-  assert.doesNotMatch(
+  assert.match(
     serverless,
     /path: \/v1\/\{proxy\+\}\s+method: OPTIONS/,
-    "Gateway CORS must answer preflight before the Lambda route.",
+    "A public Lambda route must run Hono's exact-origin preflight policy.",
   );
   assert.match(serverless, /eventBridge:[\s\S]*schedule: rate\(1 hour\)/);
   assert.match(serverless, /handler: handler\.practiceRetentionHandler/);

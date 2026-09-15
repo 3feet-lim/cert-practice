@@ -109,12 +109,15 @@ functions:
     description: CertQuiz Hono API
     handler: handler.handler
     events:
-      # Health is public; API Gateway itself answers CORS preflight before any
-      # JWT authorizer or Lambda route. Every other /v1 route gets the API
-      # Gateway JWT defense before Hono re-verifies it.
+      # Health and browser preflight are public. API Gateway CORS adds the
+      # configured headers to authorizer rejections; Hono applies the same
+      # exact-origin policy to Lambda-served preflight and route responses.
       - httpApi:
           path: /v1/health
           method: GET
+      - httpApi:
+          path: /v1/{proxy+}
+          method: OPTIONS
       - httpApi:
           path: /v1/{proxy+}
           method: "*"
