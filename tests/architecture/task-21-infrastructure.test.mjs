@@ -273,9 +273,10 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with sc
   );
   assert.match(
     role,
-    /test\s+= "StringLike"\s+variable\s+= "token\.actions\.githubusercontent\.com:sub"\s+values\s+= \["repo:3feet-lim\/cert-practice:\*"\]/,
+    /test\s+= "StringLike"\s+variable\s+= "token\.actions\.githubusercontent\.com:sub"\s+values\s+= \["repo:3feet-lim@139703302\/cert-practice@1354159331:\*"\]/,
   );
-  assert.doesNotMatch(role, /repo:3feet-lim\/cert-practice:ref:refs\/heads\/main/);
+  assert.doesNotMatch(role, /repo:3feet-lim\/cert-practice/);
+  assert.doesNotMatch(role, /repo:3feet-lim@139703302\/cert-practice@1354159331:ref:refs\/heads\/main/);
   assert.match(role, /aws_caller_identity\.current\.account_id/);
   assert.match(role, /aws:RequestedRegion/);
   assert.match(role, /ServerlessDeploymentBucketName/);
@@ -291,8 +292,9 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with sc
 
   assert.match(outputs, /output "github_actions_dev_deploy_role_arn"/);
   assert.match(outputs, /CERTQUIZ_RELEASE_ROLE_ARN/);
-  assert.match(documentation, /repo:3feet-lim\/cert-practice:\*/);
-  assert.match(documentation, /branches, tags, and GitHub environments/);
+  assert.match(documentation, /repo:3feet-lim@139703302\/cert-practice@1354159331:\*/);
+  assert.match(documentation, /branch, tag, and GitHub environment independent/);
+  assert.match(documentation, /immutable GitHub owner and repository identifiers `139703302` and `1354159331`/);
   assert.match(documentation, /workflow itself still triggers only on pushes to `main` and deploys the `dev` stage/);
   assert.match(documentation, /github_actions_dev_deploy_role_arn/);
   assert.match(documentation, /Environment\*\* `release-dev`/);

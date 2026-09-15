@@ -46,7 +46,7 @@ data "aws_iam_policy_document" "github_actions_dev_deploy_assume_role" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:3feet-lim/cert-practice:*"]
+      values   = ["repo:3feet-lim@139703302/cert-practice@1354159331:*"]
     }
   }
 }
