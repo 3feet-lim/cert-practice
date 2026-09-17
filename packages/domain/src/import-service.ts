@@ -609,11 +609,34 @@ function opaqueToken(random: RandomSource): string {
     random.nextInt(256).toString(16).padStart(2, "0"),
   ).join("");
 }
+/**
+ * 64-bit FNV-1a over a full string, so every input character affects the
+ * output. Not cryptographic; only used to spread deterministic IDs.
+ */
+function fnv1a64(input: string, offsetBasis: bigint): bigint {
+  const FNV_PRIME_64 = 0x100000001b3n;
+  const MASK_64 = 0xffffffffffffffffn;
+  let hash = offsetBasis;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= BigInt(input.charCodeAt(index));
+    hash = (hash * FNV_PRIME_64) & MASK_64;
+  }
+  return hash;
+}
+
+/**
+ * Derives a stable, collision-resistant UUID-shaped id from the full
+ * (seed, kind, index) tuple. Earlier revisions only consumed the seed's
+ * first 8 hex characters, so nesting a generated id as the next seed (as
+ * choice ids do with their question id) discarded the very bits that made
+ * the seed unique, colliding whenever the same kind/index repeated across
+ * different questions. Hashing the full message avoids that.
+ */
 function stableGeneratedId(seed: string, kind: string, index: number): string {
-  const kindHex = [...kind]
-    .map((character) => character.charCodeAt(0).toString(16).padStart(2, "0"))
-    .join("");
-  const hex = `${seed.replace(/-/g, "").slice(0, 8)}${kindHex.slice(0, 16).padEnd(16, "0")}${index.toString(16).padStart(8, "0")}`;
+  const message = `${seed}:${kind}:${index}`;
+  const high = fnv1a64(message, 0xcbf29ce484222325n).toString(16).padStart(16, "0");
+  const low = fnv1a64(message, 0x9e3779b97f4a7c15n).toString(16).padStart(16, "0");
+  const hex = `${high}${low}`;
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
 }
 function required<T>(value: T | undefined): T {
