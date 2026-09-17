@@ -17,6 +17,11 @@ export type ApiTelemetryEvent = Readonly<{
   durationMs?: number;
   count?: number;
   errorCode?: string;
+  /** Structural diagnostics only (error name / SQL code / constraint / table) — never a free-text message or SQL detail, which can embed literal row values. */
+  errorName?: string;
+  sqlErrorCode?: string;
+  sqlConstraint?: string;
+  sqlTable?: string;
 }>;
 
 export type TelemetryPort = Readonly<{

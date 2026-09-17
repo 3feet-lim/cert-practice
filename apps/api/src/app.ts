@@ -68,7 +68,11 @@ import {
   securityBoundary,
   type ApiSecurityConfiguration,
 } from "./security.js";
-import { emitTelemetry, type TelemetryPort } from "./telemetry.js";
+import {
+  emitTelemetry,
+  type ApiTelemetryEvent,
+  type TelemetryPort,
+} from "./telemetry.js";
 
 export type CreateAppDependencies = AuthenticationDependencies & {
   /** Optional while composition roots migrate; import routes fail closed without it. */
@@ -144,6 +148,31 @@ async function parseImportRequest<Schema extends { parse(input: unknown): unknow
   }
 }
 
+/**
+ * Structural diagnostics only (constructor name, and a duck-typed SQL error's
+ * code/constraint/table). Never the free-text message or SQL detail, which
+ * can embed literal row values.
+ */
+function describeUnexpectedError(error: unknown): Pick<
+  ApiTelemetryEvent,
+  "errorName" | "sqlErrorCode" | "sqlConstraint" | "sqlTable"
+> {
+  if (!(error instanceof Error)) return {};
+  const candidate = error as Error & {
+    code?: unknown;
+    constraint?: unknown;
+    table?: unknown;
+  };
+  return {
+    errorName: candidate.name,
+    ...(typeof candidate.code === "string" ? { sqlErrorCode: candidate.code } : {}),
+    ...(typeof candidate.constraint === "string"
+      ? { sqlConstraint: candidate.constraint }
+      : {}),
+    ...(typeof candidate.table === "string" ? { sqlTable: candidate.table } : {}),
+  };
+}
+
 async function runTransaction<T>(
   dependencies: CreateAppDependencies,
   work: (repositories: TransactionRepositories) => Promise<T>,
@@ -164,6 +193,7 @@ async function runTransaction<T>(
       outcome: isDomainFailure(error) ? "rejected" : "failed",
       errorCode: isDomainFailure(error) ? undefined : "transaction-failed",
       durationMs: performance.now() - startedAt,
+      ...(isDomainFailure(error) ? {} : describeUnexpectedError(error)),
     });
     if (isDomainFailure(error)) throw error;
     throw domainFailure("dependency-unavailable");
