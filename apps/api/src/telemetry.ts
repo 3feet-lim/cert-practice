@@ -17,11 +17,17 @@ export type ApiTelemetryEvent = Readonly<{
   durationMs?: number;
   count?: number;
   errorCode?: string;
-  /** Structural diagnostics only (error name / SQL code / constraint / table) — never a free-text message or SQL detail, which can embed literal row values. */
+  /**
+   * Structural diagnostics only (error name / DB error code / constraint /
+   * table) — never a free-text message or SQL detail, which can embed
+   * literal row values. Field names deliberately avoid "sql"/"bind" so
+   * redactTelemetry's sensitive-key filter (meant for raw query text and
+   * bound parameters) doesn't blank these out too.
+   */
   errorName?: string;
-  sqlErrorCode?: string;
-  sqlConstraint?: string;
-  sqlTable?: string;
+  dbErrorCode?: string;
+  dbConstraint?: string;
+  dbTable?: string;
 }>;
 
 export type TelemetryPort = Readonly<{

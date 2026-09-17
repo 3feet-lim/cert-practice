@@ -155,7 +155,7 @@ async function parseImportRequest<Schema extends { parse(input: unknown): unknow
  */
 function describeUnexpectedError(error: unknown): Pick<
   ApiTelemetryEvent,
-  "errorName" | "sqlErrorCode" | "sqlConstraint" | "sqlTable"
+  "errorName" | "dbErrorCode" | "dbConstraint" | "dbTable"
 > {
   if (!(error instanceof Error)) return {};
   const candidate = error as Error & {
@@ -165,11 +165,11 @@ function describeUnexpectedError(error: unknown): Pick<
   };
   return {
     errorName: candidate.name,
-    ...(typeof candidate.code === "string" ? { sqlErrorCode: candidate.code } : {}),
+    ...(typeof candidate.code === "string" ? { dbErrorCode: candidate.code } : {}),
     ...(typeof candidate.constraint === "string"
-      ? { sqlConstraint: candidate.constraint }
+      ? { dbConstraint: candidate.constraint }
       : {}),
-    ...(typeof candidate.table === "string" ? { sqlTable: candidate.table } : {}),
+    ...(typeof candidate.table === "string" ? { dbTable: candidate.table } : {}),
   };
 }
 
