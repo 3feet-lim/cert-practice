@@ -176,6 +176,8 @@ function describeUnexpectedError(error: unknown): Pick<
 async function runTransaction<T>(
   dependencies: CreateAppDependencies,
   work: (repositories: TransactionRepositories) => Promise<T>,
+  /** Lets a specific route recognize a known infrastructure error and map it to a precise domain failure instead of the generic fallback. */
+  translateError?: (error: unknown) => ReturnType<typeof domainFailure> | undefined,
 ): Promise<T> {
   const startedAt = performance.now();
   try {
@@ -196,8 +198,18 @@ async function runTransaction<T>(
       ...(isDomainFailure(error) ? {} : describeUnexpectedError(error)),
     });
     if (isDomainFailure(error)) throw error;
-    throw domainFailure("dependency-unavailable");
+    throw translateError?.(error) ?? domainFailure("dependency-unavailable");
   }
+}
+
+/** A staged import revision whose (certification, content) pair is already the active revision. */
+function isDuplicateActiveImportContent(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const candidate = error as Error & { code?: unknown; constraint?: unknown };
+  return (
+    candidate.code === "23505" &&
+    candidate.constraint === "catalog_revisions_certification_key_content_hash_key"
+  );
 }
 
 /** Request parsers consume validation errors; an uncaught Zod failure is a strict response guard. */
@@ -276,7 +288,8 @@ export function createApp(
     enforceRateLimit(context, dependencies.rateLimit, scope, dependencies.clientIp);
   const inTransaction = <T>(
     work: (repositories: TransactionRepositories) => Promise<T>,
-  ) => runTransaction(dependencies, work);
+    translateError?: (error: unknown) => ReturnType<typeof domainFailure> | undefined,
+  ) => runTransaction(dependencies, work, translateError);
   for (const path of authenticatedRouteManifest) created.use(path, authenticate);
 
   const requireLifecycle = (): LifecycleServices => {
@@ -421,15 +434,20 @@ export function createApp(
       throw domainFailure("validation-failed");
     }
     const tokenDigest = await sha256Hex(request.commitToken);
-    await inTransaction((repositories) =>
-      repositories.catalog.commitValidatedImport({
-        validationId: request.validationId,
-        actorUserId: context.get("actor").userId,
-        tokenDigest,
-        contentHash: materialized.contentHash,
-        materialization: materialized.materialization,
-        now: dependencies.now(),
-      }),
+    await inTransaction(
+      (repositories) =>
+        repositories.catalog.commitValidatedImport({
+          validationId: request.validationId,
+          actorUserId: context.get("actor").userId,
+          tokenDigest,
+          contentHash: materialized.contentHash,
+          materialization: materialized.materialization,
+          now: dependencies.now(),
+        }),
+      (error) =>
+        isDuplicateActiveImportContent(error)
+          ? domainFailure("content-already-active")
+          : undefined,
     );
     const certificationId = materialized.materialization.source.certifications[0]?.id;
     if (!certificationId) throw domainFailure("dependency-unavailable");

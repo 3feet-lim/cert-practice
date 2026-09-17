@@ -26,6 +26,7 @@ const messages = {
   "invalid-scoring-configuration": "The scoring configuration is invalid.",
   "dependency-unavailable": "The service is temporarily unavailable. Please retry.",
   "submission-failed": "Submission could not be completed. Please retry.",
+  "content-already-active": "This exact content is already the active revision. No import is needed.",
 } as const;
 const statuses = {
   unauthenticated: 401,
@@ -42,6 +43,7 @@ const statuses = {
   "invalid-scoring-configuration": 422,
   "dependency-unavailable": 503,
   "submission-failed": 503,
+  "content-already-active": 409,
 } as const;
 const transportCodes = {
   unauthenticated: "authentication-invalid",
@@ -58,6 +60,7 @@ const transportCodes = {
   "invalid-scoring-configuration": "invalid-scoring-config",
   "dependency-unavailable": "dependency-unavailable",
   "submission-failed": "dependency-unavailable",
+  "content-already-active": "content-already-active",
 } as const;
 
 export function mapError(error: unknown, requestId: RequestId): MappedHttpError {

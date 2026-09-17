@@ -20,7 +20,8 @@ export type DomainErrorCode =
   | "conflict"
   | "invalid-scoring-configuration"
   | "dependency-unavailable"
-  | "submission-failed";
+  | "submission-failed"
+  | "content-already-active";
 
 export type DomainError = {
   code: DomainErrorCode;
