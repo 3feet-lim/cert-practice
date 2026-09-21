@@ -136,6 +136,15 @@ select {
   box-shadow: 0 20px 60px rgb(38 51 77 / 8%);
 }
 
+.content-card {
+  width: 100%;
+  padding: 56px;
+  border: 1px solid #dce2ec;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgb(38 51 77 / 8%);
+}
+
 .eyebrow {
   margin: 0 0 16px;
   color: #4f46e5;

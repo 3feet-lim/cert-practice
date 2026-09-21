@@ -111,7 +111,7 @@ function CatalogContent() {
 
 export function CatalogHomePage() {
   return (
-    <section className="welcome-card" aria-labelledby="welcome-title" data-screen="S2">
+    <section className="content-card" aria-labelledby="welcome-title" data-screen="S2">
       <p className="eyebrow">CERTQUIZ</p>
       <h1 id="welcome-title">클라우드 자격증 연습을 시작하세요.</h1>
       <p className="description">

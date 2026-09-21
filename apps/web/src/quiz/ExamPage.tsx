@@ -190,7 +190,7 @@ export function ExamPage() {
   });
 
   return (
-    <section className="welcome-card" aria-labelledby="exam-title" data-screen="S5">
+    <section className="content-card" aria-labelledby="exam-title" data-screen="S5">
       <p className="eyebrow">S5 · EXAM</p>
       <h1 id="exam-title">모의고사</h1>
       <p className="description">남은 시간과 제출 결과는 서버 기준으로 처리됩니다.</p>

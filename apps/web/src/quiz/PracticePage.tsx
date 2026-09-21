@@ -98,7 +98,7 @@ export function PracticePage() {
   });
 
   return (
-    <section className="welcome-card" aria-labelledby="practice-title" data-screen="S4">
+    <section className="content-card" aria-labelledby="practice-title" data-screen="S4">
       <p className="eyebrow">S4 · PRACTICE</p>
       <h1 id="practice-title">연습 모드</h1>
       <p className="description">
