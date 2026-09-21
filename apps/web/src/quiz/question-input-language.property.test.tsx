@@ -57,16 +57,16 @@ describe("Property 8: question input and language state preservation", () => {
             question.translationStatus === "translated" &&
             question.id !== submittedQuestion?.id,
         );
-        const englishOnlyQuestion = fixtures.practice.active.questions.find(
+        const koreanOnlyQuestion = fixtures.practice.active.questions.find(
           (question) =>
-            question.translationStatus === "en_only" &&
+            question.translationStatus === "ko_only" &&
             question.id !== submittedQuestion?.id &&
             question.id !== selectionQuestion?.id,
         );
         if (
           submittedQuestion?.kind !== "practice-submitted" ||
           !selectionQuestion ||
-          !englishOnlyQuestion
+          !koreanOnlyQuestion
         ) {
           throw new Error("Expected fixtures for Property 8 presenter coverage.");
         }
@@ -74,7 +74,7 @@ describe("Property 8: question input and language state preservation", () => {
         const questions: readonly ActiveQuestion[] = [
           { ...selectionQuestion, selectedChoiceIds: [], flagged: state.flagged },
           {
-            ...englishOnlyQuestion,
+            ...koreanOnlyQuestion,
             selectedChoiceIds: [],
             flagged: !state.flagged,
           },
@@ -82,12 +82,12 @@ describe("Property 8: question input and language state preservation", () => {
         ];
         const initialQuestion = questions[state.initialIndex];
         const activeSelectionQuestion = questions[0];
-        const activeEnglishOnlyQuestion = questions[1];
+        const activeKoreanOnlyQuestion = questions[1];
         const activeSubmittedQuestion = questions[2];
         if (
           !initialQuestion ||
           !activeSelectionQuestion ||
-          !activeEnglishOnlyQuestion ||
+          !activeKoreanOnlyQuestion ||
           !activeSubmittedQuestion
         ) {
           throw new Error("Expected three presenter questions.");
@@ -105,9 +105,9 @@ describe("Property 8: question input and language state preservation", () => {
           state.initialIndex,
         );
         expect(localizedQuestionText(initialQuestion.stem, state.language)).toBe(
-          state.language === "ko" && initialQuestion.stem.ko !== null
-            ? initialQuestion.stem.ko
-            : initialQuestion.stem.en,
+          state.language === "en" && initialQuestion.stem.en !== null
+            ? initialQuestion.stem.en
+            : initialQuestion.stem.ko,
         );
 
         store.getState().setCurrentIndex(sessionTarget, 0);
@@ -136,14 +136,14 @@ describe("Property 8: question input and language state preservation", () => {
         );
         const nextLanguage = oppositeLanguage(state.language);
         expect(localizedQuestionText(activeSelectionQuestion.stem, nextLanguage)).toBe(
-          nextLanguage === "ko" && activeSelectionQuestion.stem.ko !== null
-            ? activeSelectionQuestion.stem.ko
-            : activeSelectionQuestion.stem.en,
+          nextLanguage === "en" && activeSelectionQuestion.stem.en !== null
+            ? activeSelectionQuestion.stem.en
+            : activeSelectionQuestion.stem.ko,
         );
 
         store.getState().setCurrentIndex(sessionTarget, 1);
-        expect(localizedQuestionText(activeEnglishOnlyQuestion.stem, "ko")).toBe(
-          activeEnglishOnlyQuestion.stem.en,
+        expect(localizedQuestionText(activeKoreanOnlyQuestion.stem, "en")).toBe(
+          activeKoreanOnlyQuestion.stem.ko,
         );
         expect(store.getState().draftChoiceIdsByQuestion[selectionTarget]).toEqual(
           expectedSelection,
@@ -151,7 +151,7 @@ describe("Property 8: question input and language state preservation", () => {
 
         store.getState().setCurrentIndex(sessionTarget, 2);
         expect(localizedQuestionText(submittedQuestion.explanation, "ko")).toBe(
-          submittedQuestion.explanation.ko ?? submittedQuestion.explanation.en,
+          submittedQuestion.explanation.ko,
         );
 
         const navigatorItems = createQuestionNavigatorItems(

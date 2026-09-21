@@ -26,7 +26,7 @@ export type QuestionSnapshot = {
   requiredChoiceCount: number;
   selectedChoiceIds: readonly Uuid[];
   flagged: boolean;
-  translationStatus: "translated" | "en_only";
+  translationStatus: "translated" | "ko_only";
   correctChoiceIds: readonly Uuid[];
   isCorrect: boolean;
   earnedScore: string;

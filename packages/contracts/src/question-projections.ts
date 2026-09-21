@@ -3,12 +3,12 @@ import { z } from "zod";
 import { decimalStringSchema, uuidSchema } from "./common.js";
 
 export const languageModeSchema = z.enum(["en", "ko"]);
-export const translationStatusSchema = z.enum(["translated", "en_only"]);
+export const translationStatusSchema = z.enum(["translated", "ko_only"]);
 
 export const localizedTextSchema = z
   .object({
-    en: z.string().min(1),
-    ko: z.string().min(1).nullable(),
+    en: z.string().min(1).nullable(),
+    ko: z.string().min(1),
   })
   .strict();
 

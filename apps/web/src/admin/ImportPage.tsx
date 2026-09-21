@@ -83,9 +83,9 @@ function ImportSummary({ validation }: { validation: DryRunImportResponse }) {
           </dd>
         </div>
         <div>
-          <dt className="text-sm text-muted-foreground">영어 전용</dt>
+          <dt className="text-sm text-muted-foreground">한국어만 있음</dt>
           <dd className="mt-1 font-semibold">
-            {summaryValue(summary.translationStatusCounts.enOnly)}
+            {summaryValue(summary.translationStatusCounts.koOnly)}
           </dd>
         </div>
       </dl>

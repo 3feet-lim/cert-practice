@@ -31,7 +31,7 @@ type SemanticImportCase = {
   duplicateChoice: boolean;
   invalidCorrectChoices: boolean;
   invalidRequiredChoiceCount: boolean;
-  blankEnglishStem: boolean;
+  blankKoreanStem: boolean;
   translation: "none" | "complete" | "incomplete";
 };
 
@@ -50,7 +50,7 @@ const semanticImportCaseArbitrary = fc.record({
   duplicateChoice: fc.boolean(),
   invalidCorrectChoices: fc.boolean(),
   invalidRequiredChoiceCount: fc.boolean(),
-  blankEnglishStem: fc.boolean(),
+  blankKoreanStem: fc.boolean(),
   translation: fc.constantFrom<SemanticImportCase["translation"]>(
     "none",
     "complete",
@@ -86,25 +86,25 @@ function validImportDocument(): ImportDocument {
         {
           id: "one",
           domainId: "left",
-          stemEn: "One",
-          explanationEn: "Because",
+          stemKo: "하나",
+          explanationKo: "왜냐하면",
           requiredChoiceCount: 1,
           correctChoiceIds: ["a"],
           choices: [
-            { id: "a", textEn: "A" },
-            { id: "b", textEn: "B" },
+            { id: "a", textKo: "가" },
+            { id: "b", textKo: "나" },
           ],
         },
         {
           id: "two",
           domainId: "right",
-          stemEn: "Two",
-          explanationEn: "Because",
+          stemKo: "둘",
+          explanationKo: "왜냐하면",
           requiredChoiceCount: 1,
           correctChoiceIds: ["c"],
           choices: [
-            { id: "c", textEn: "C" },
-            { id: "d", textEn: "D" },
+            { id: "c", textKo: "다" },
+            { id: "d", textKo: "라" },
           ],
         },
       ],
@@ -137,16 +137,16 @@ function semanticDocument(input: SemanticImportCase): ImportDocument {
     firstQuestion.choices[1]!.id = firstQuestion.choices[0]!.id;
   if (input.invalidCorrectChoices) firstQuestion.correctChoiceIds = ["missing"];
   if (input.invalidRequiredChoiceCount) firstQuestion.requiredChoiceCount = 2;
-  if (input.blankEnglishStem) firstQuestion.stemEn = " \t";
+  if (input.blankKoreanStem) firstQuestion.stemKo = " \t";
 
   if (input.translation === "complete") {
     for (const question of document.certification.questions) {
-      question.stemKo = `${question.stemEn} 한국어`;
-      question.explanationKo = `${question.explanationEn} 한국어`;
-      for (const choice of question.choices) choice.textKo = `${choice.textEn} 한국어`;
+      question.stemEn = `${question.stemKo} english`;
+      question.explanationEn = `${question.explanationKo} english`;
+      for (const choice of question.choices) choice.textEn = `${choice.textKo} english`;
     }
   }
-  if (input.translation === "incomplete") firstQuestion.stemKo = "일부 한국어";
+  if (input.translation === "incomplete") firstQuestion.stemEn = "some english";
   return document;
 }
 
@@ -158,7 +158,7 @@ function semanticOracle(input: SemanticImportCase) {
   if (input.duplicateChoice) errors.add("duplicate-choice-id");
   if (input.invalidCorrectChoices) errors.add("invalid-correct-choices");
   if (input.invalidRequiredChoiceCount) errors.add("invalid-required-choice-count");
-  if (input.blankEnglishStem) errors.add("missing-english-content");
+  if (input.blankKoreanStem) errors.add("missing-korean-content");
   if (!input.invalidWeights && input.unknownDomain)
     errors.add("insufficient-domain-pool");
 
@@ -170,8 +170,8 @@ function semanticOracle(input: SemanticImportCase) {
     },
     translationCounts:
       input.translation === "complete"
-        ? { translated: 2, enOnly: 0 }
-        : { translated: 0, enOnly: 2 },
+        ? { translated: 2, koOnly: 0 }
+        : { translated: 0, koOnly: 2 },
   };
 }
 
@@ -199,7 +199,7 @@ function excessiveChoiceDocument() {
   const document = validImportDocument();
   document.certification.questions[0]!.choices = Array.from(
     { length: 21 },
-    (_, index) => ({ id: `choice-${index}`, textEn: `Choice ${index}` }),
+    (_, index) => ({ id: `choice-${index}`, textKo: `선택 ${index}` }),
   );
   return JSON.stringify(document);
 }
@@ -228,7 +228,7 @@ function expectUnavailableSummary(
   expect(result.response.summary.translationStatusCounts.translated.status).toBe(
     "unavailable",
   );
-  expect(result.response.summary.translationStatusCounts.enOnly.status).toBe(
+  expect(result.response.summary.translationStatusCounts.koOnly.status).toBe(
     "unavailable",
   );
 }
@@ -266,9 +266,9 @@ describe("Property 23: import dry-run validation", () => {
                 status: "available",
                 value: expected.translationCounts.translated,
               },
-              enOnly: {
+              koOnly: {
                 status: "available",
-                value: expected.translationCounts.enOnly,
+                value: expected.translationCounts.koOnly,
               },
             },
             errorCount: expected.errors.length,
@@ -416,18 +416,18 @@ function generationSourceForAllocation(
         certificationId,
         domainId: domain.id,
         domainName: domain.id,
-        stem: { en: domain.id, ko: null },
-        explanation: { en: "Because", ko: null },
+        stem: { en: null, ko: domain.id },
+        explanation: { en: null, ko: "왜냐하면" },
         choices: [
           {
             id: `${domain.id}-choice-${index}`,
             externalId: "a",
-            text: { en: "A", ko: null },
+            text: { en: null, ko: "가" },
           },
         ],
         correctChoiceIndexes: [0],
         requiredChoiceCount: 1,
-        translationStatus: "en_only" as const,
+        translationStatus: "ko_only" as const,
       })),
     ),
   };
@@ -594,12 +594,12 @@ function generationSource(): FullCatalogGenerationSource {
       certificationId,
       domainId,
       domainName: domainId,
-      stem: { en: domainId, ko: null },
-      explanation: { en: "Because", ko: null },
-      choices: [{ id: ids[index]!, externalId: "a", text: { en: "A", ko: null } }],
+      stem: { en: null, ko: domainId },
+      explanation: { en: null, ko: "왜냐하면" },
+      choices: [{ id: ids[index]!, externalId: "a", text: { en: null, ko: "가" } }],
       correctChoiceIndexes: [0],
       requiredChoiceCount: 1,
-      translationStatus: "en_only" as const,
+      translationStatus: "ko_only" as const,
     })),
   };
 }

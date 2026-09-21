@@ -4,10 +4,10 @@ import type { QuestionNavigatorItem } from "../components/StaticPresentation";
 import type { QuizQuestionTarget, QuizTarget } from "./quiz-store";
 
 export function localizedQuestionText(
-  value: { en: string; ko: string | null },
+  value: { en: string | null; ko: string },
   language: LanguageMode,
 ): string {
-  return language === "ko" && value.ko !== null ? value.ko : value.en;
+  return language === "en" && value.en !== null ? value.en : value.ko;
 }
 
 export function clampQuestionIndex(index: number, questionCount: number): number {

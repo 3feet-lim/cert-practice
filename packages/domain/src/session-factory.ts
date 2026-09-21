@@ -18,7 +18,7 @@ import type { RandomSource, UuidFactory } from "./random.js";
 export type GenerationChoice = {
   id: string;
   externalId: string;
-  text: { en: string; ko: string | null };
+  text: { en: string | null; ko: string };
 };
 export type GenerationQuestion = {
   id: string;
@@ -26,12 +26,12 @@ export type GenerationQuestion = {
   certificationId: string;
   domainId: string;
   domainName: string;
-  stem: { en: string; ko: string | null };
-  explanation: { en: string; ko: string | null };
+  stem: { en: string | null; ko: string };
+  explanation: { en: string | null; ko: string };
   choices: readonly GenerationChoice[];
   correctChoiceIndexes: readonly number[];
   requiredChoiceCount: number;
-  translationStatus: "translated" | "en_only";
+  translationStatus: "translated" | "ko_only";
 };
 export type FullCatalogGenerationSource = Omit<CatalogGenerationSource, "questions"> & {
   questions: readonly GenerationQuestion[];

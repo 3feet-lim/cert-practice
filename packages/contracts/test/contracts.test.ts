@@ -451,11 +451,11 @@ describe("admin import DTOs", () => {
           {
             id: "q1",
             domainId: "sdlc",
-            stemEn: "Question",
-            explanationEn: "Explanation",
+            stemKo: "Question",
+            explanationKo: "Explanation",
             requiredChoiceCount: 1,
             correctChoiceIds: ["a"],
-            choices: [{ id: "a", textEn: "Answer" }],
+            choices: [{ id: "a", textKo: "Answer" }],
           },
         ],
       },
@@ -471,7 +471,7 @@ describe("admin import DTOs", () => {
         domainQuestionCounts: { sdlc: available },
         translationStatusCounts: {
           translated: available,
-          enOnly: { status: "available", value: 0 },
+          koOnly: { status: "available", value: 0 },
         },
         errorCount: 0,
       },
@@ -486,7 +486,7 @@ describe("admin import DTOs", () => {
         summary: {
           totalQuestions: available,
           domainQuestionCounts: {},
-          translationStatusCounts: { translated: available, enOnly: available },
+          translationStatusCounts: { translated: available, koOnly: available },
           errorCount: 0,
         },
         errors: [],

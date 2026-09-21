@@ -9,8 +9,8 @@ const requiredContentSchema = z.string().min(1);
 export const importChoiceSchema = z
   .object({
     id: externalKeySchema,
-    textEn: requiredContentSchema,
-    textKo: requiredContentSchema.nullable().optional(),
+    textEn: requiredContentSchema.nullable().optional(),
+    textKo: requiredContentSchema,
   })
   .strict();
 
@@ -18,10 +18,10 @@ export const importQuestionSchema = z
   .object({
     id: externalKeySchema,
     domainId: externalKeySchema,
-    stemEn: requiredContentSchema,
-    stemKo: requiredContentSchema.nullable().optional(),
-    explanationEn: requiredContentSchema,
-    explanationKo: requiredContentSchema.nullable().optional(),
+    stemEn: requiredContentSchema.nullable().optional(),
+    stemKo: requiredContentSchema,
+    explanationEn: requiredContentSchema.nullable().optional(),
+    explanationKo: requiredContentSchema,
     requiredChoiceCount: z.number().int().positive(),
     correctChoiceIds: z.array(externalKeySchema).min(1),
     choices: z.array(importChoiceSchema).min(1).max(20),
@@ -107,7 +107,7 @@ export const importValidationSummarySchema = z
     translationStatusCounts: z
       .object({
         translated: importSummaryValueSchema,
-        enOnly: importSummaryValueSchema,
+        koOnly: importSummaryValueSchema,
       })
       .strict(),
     errorCount: z.number().int().nonnegative(),

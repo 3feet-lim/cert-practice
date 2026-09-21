@@ -238,7 +238,7 @@ function document({
   const domains = reverseDomains
     ? '[{"id":"right","name":"Right","weightPercent":"50"},{"id":"left","name":"Left","weightPercent":"50"}]'
     : '[{"id":"left","name":"Left","weightPercent":"50"},{"id":"right","name":"Right","weightPercent":"50"}]';
-  return `{"provider":{"id":"provider","name":"Provider"},"certification":{"id":"cert","code":"CERT-IMPORT","name":${JSON.stringify(name)},"totalQuestions":${totalQuestionsLiteral},"timeLimitMinutes":10,"passThreshold":"75","scoringMode":"all_or_nothing","domains":${domains},"questions":[{"id":"left-question","domainId":"left","stemEn":"Left stem","explanationEn":"Left explanation","requiredChoiceCount":1,"correctChoiceIds":["a"],"choices":[{"id":"a","textEn":"A"},{"id":"b","textEn":"B"}]},{"id":"right-question","domainId":"right","stemEn":"Right stem","explanationEn":"Right explanation","requiredChoiceCount":1,"correctChoiceIds":["c"],"choices":[{"id":"c","textEn":"C"},{"id":"d","textEn":"D"}]}]}}`;
+  return `{"provider":{"id":"provider","name":"Provider"},"certification":{"id":"cert","code":"CERT-IMPORT","name":${JSON.stringify(name)},"totalQuestions":${totalQuestionsLiteral},"timeLimitMinutes":10,"passThreshold":"75","scoringMode":"all_or_nothing","domains":${domains},"questions":[{"id":"left-question","domainId":"left","stemKo":"좌측 문제","explanationKo":"좌측 설명","requiredChoiceCount":1,"correctChoiceIds":["a"],"choices":[{"id":"a","textKo":"가"},{"id":"b","textKo":"나"}]},{"id":"right-question","domainId":"right","stemKo":"우측 문제","explanationKo":"우측 설명","requiredChoiceCount":1,"correctChoiceIds":["c"],"choices":[{"id":"c","textKo":"다"},{"id":"d","textKo":"라"}]}]}}`;
 }
 
 type QueryHooks = {

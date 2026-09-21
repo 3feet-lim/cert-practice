@@ -121,7 +121,7 @@ interface QuestionSource {
     "kind" | "selectedChoiceIds" | "flagged"
   >;
   correctChoiceIds: string[];
-  explanation: { en: string; ko: string | null };
+  explanation: { en: string | null; ko: string };
   domainIndex: number;
   domainQuestionIndex: number;
 }
@@ -143,7 +143,7 @@ function createQuestionSources(
       const questionId = ids.named(`question-${questionNumber}`);
       const requiredChoiceCount = questionNumber % 6 === 0 ? 2 : 1;
       const translationStatus =
-        questionNumber % 5 === 0 ? ("en_only" as const) : ("translated" as const);
+        questionNumber % 5 === 0 ? ("ko_only" as const) : ("translated" as const);
       const sourceChoices = Array.from({ length: 4 }, (_, choiceIndex) => {
         const choiceId = ids.named(
           `question-${questionNumber}-choice-${choiceIndex + 1}`,
@@ -151,11 +151,11 @@ function createQuestionSources(
         return {
           id: choiceId,
           text: {
-            en: `Question ${questionNumber} choice ${choiceIndex + 1}`,
-            ko:
+            en:
               translationStatus === "translated"
-                ? `${questionNumber}번 문제 선지 ${choiceIndex + 1}`
+                ? `Question ${questionNumber} choice ${choiceIndex + 1}`
                 : null,
+            ko: `${questionNumber}번 문제 선지 ${choiceIndex + 1}`,
           },
         };
       });
@@ -170,11 +170,11 @@ function createQuestionSources(
           displayNumber: questionNumber,
           domainName: domain.name,
           stem: {
-            en: `Deterministic DOP-C02 question ${questionNumber}`,
-            ko:
+            en:
               translationStatus === "translated"
-                ? `결정적 DOP-C02 문제 ${questionNumber}`
+                ? `Deterministic DOP-C02 question ${questionNumber}`
                 : null,
+            ko: `결정적 DOP-C02 문제 ${questionNumber}`,
           },
           choices,
           requiredChoiceCount,
@@ -182,11 +182,11 @@ function createQuestionSources(
         },
         correctChoiceIds,
         explanation: {
-          en: `Explanation for deterministic question ${questionNumber}.`,
-          ko:
+          en:
             translationStatus === "translated"
-              ? `결정적 문제 ${questionNumber} 해설입니다.`
+              ? `Explanation for deterministic question ${questionNumber}.`
               : null,
+          ko: `결정적 문제 ${questionNumber} 해설입니다.`,
         },
         domainIndex,
         domainQuestionIndex,
@@ -245,22 +245,22 @@ function createImportDocument(sources: readonly QuestionSource[]): ImportDocumen
       questions: sources.map((source, index) => ({
         id: `dop-c02-q-${String(index + 1).padStart(3, "0")}`,
         domainId: DOP_C02_DOMAINS[source.domainIndex]?.key ?? "unknown",
-        stemEn: source.publicQuestion.stem.en,
-        ...(source.publicQuestion.stem.ko === null
+        stemKo: source.publicQuestion.stem.ko,
+        ...(source.publicQuestion.stem.en === null
           ? {}
-          : { stemKo: source.publicQuestion.stem.ko }),
-        explanationEn: source.explanation.en,
-        ...(source.explanation.ko === null
+          : { stemEn: source.publicQuestion.stem.en }),
+        explanationKo: source.explanation.ko,
+        ...(source.explanation.en === null
           ? {}
-          : { explanationKo: source.explanation.ko }),
+          : { explanationEn: source.explanation.en }),
         requiredChoiceCount: source.publicQuestion.requiredChoiceCount,
         correctChoiceIds: source.correctChoiceIds.map(
           (choiceId) => `choice-${choiceId.replaceAll("-", "").slice(0, 8)}`,
         ),
         choices: source.publicQuestion.choices.map((choice) => ({
           id: `choice-${choice.id.replaceAll("-", "").slice(0, 8)}`,
-          textEn: choice.text.en,
-          ...(choice.text.ko === null ? {} : { textKo: choice.text.ko }),
+          textKo: choice.text.ko,
+          ...(choice.text.en === null ? {} : { textEn: choice.text.en }),
         })),
       })),
     },
@@ -658,7 +658,7 @@ export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
       ),
       translationStatusCounts: {
         translated: { status: "available", value: 60 },
-        enOnly: { status: "available", value: 15 },
+        koOnly: { status: "available", value: 15 },
       },
       errorCount: 0,
     },
@@ -684,7 +684,7 @@ export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
           status: "unavailable",
           reason: "Translation counts require valid questions.",
         },
-        enOnly: {
+        koOnly: {
           status: "unavailable",
           reason: "Translation counts require valid questions.",
         },

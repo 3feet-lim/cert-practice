@@ -61,12 +61,12 @@ type SnapshotContent = {
     passThreshold: string;
   };
   domainName: string;
-  stem: { en: string; ko: string | null };
-  explanation: { en: string; ko: string | null };
-  choices: readonly { id: string; text: { en: string; ko: string | null } }[];
+  stem: { en: string | null; ko: string };
+  explanation: { en: string | null; ko: string };
+  choices: readonly { id: string; text: { en: string | null; ko: string } }[];
   correctChoiceIds: readonly string[];
   requiredChoiceCount: number;
-  translationStatus: "translated" | "en_only";
+  translationStatus: "translated" | "ko_only";
 };
 
 export type LifecycleDependencies = {
@@ -528,7 +528,7 @@ function content(question: PersistedQuestionSnapshot): SnapshotContent {
     typeof parsed.domainName !== "string" ||
     typeof parsed.requiredChoiceCount !== "number" ||
     (parsed.translationStatus !== "translated" &&
-      parsed.translationStatus !== "en_only")
+      parsed.translationStatus !== "ko_only")
   )
     throw domainFailure("dependency-unavailable");
   return parsed as SnapshotContent;
@@ -542,7 +542,10 @@ function toQuestionSnapshot(question: PersistedQuestionSnapshot): QuestionSnapsh
     displayNumber: question.displayIndex + 1,
     domainName: source.domainName,
     stem: source.stem,
-    choices: source.choices as QuestionSnapshot["choices"],
+    choices: source.choices.map((choice) => ({
+      id: choice.id,
+      text: choice.text,
+    })) as QuestionSnapshot["choices"],
     requiredChoiceCount: source.requiredChoiceCount,
     selectedChoiceIds: selected as QuestionSnapshot["selectedChoiceIds"],
     flagged: question.flagged,

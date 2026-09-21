@@ -306,18 +306,18 @@ function materialize(
         domainName: source.domains.find(
           (domain) => domain.id === required(domainIds.get(question.domainId)),
         )!.name,
-        stem: { en: question.stemEn, ko: question.stemKo ?? null },
-        explanation: { en: question.explanationEn, ko: question.explanationKo ?? null },
+        stem: { en: question.stemEn ?? null, ko: question.stemKo },
+        explanation: { en: question.explanationEn ?? null, ko: question.explanationKo },
         choices: question.choices.map((choice, choiceIndex) => ({
           id: stableGeneratedId(source.questions[index]!.id, "choice", choiceIndex),
-          text: { en: choice.textEn, ko: choice.textKo ?? null },
+          text: { en: choice.textEn ?? null, ko: choice.textKo },
           externalId: choice.id,
         })),
         correctChoiceIndexes: question.correctChoiceIds.map((id) =>
           question.choices.findIndex((choice) => choice.id === id),
         ),
         requiredChoiceCount: question.requiredChoiceCount,
-        translationStatus: translated(question) ? "translated" : "en_only",
+        translationStatus: translated(question) ? "translated" : "ko_only",
       })),
     },
   };
@@ -399,29 +399,29 @@ function semanticErrors(document: ImportDocument): ImportValidationError[] {
           ),
         );
       choiceIds.add(choice.id);
-      if (!nonBlank(choice.textEn))
+      if (!nonBlank(choice.textKo))
         errors.push(
           error(
-            "missing-english-content",
-            ["certification", "questions", index, "choices", choiceIndex, "textEn"],
-            "English choice content is required.",
+            "missing-korean-content",
+            ["certification", "questions", index, "choices", choiceIndex, "textKo"],
+            "Korean choice content is required.",
           ),
         );
     });
-    if (!nonBlank(question.stemEn))
+    if (!nonBlank(question.stemKo))
       errors.push(
         error(
-          "missing-english-content",
-          ["certification", "questions", index, "stemEn"],
-          "English stem content is required.",
+          "missing-korean-content",
+          ["certification", "questions", index, "stemKo"],
+          "Korean stem content is required.",
         ),
       );
-    if (!nonBlank(question.explanationEn))
+    if (!nonBlank(question.explanationKo))
       errors.push(
         error(
-          "missing-english-content",
-          ["certification", "questions", index, "explanationEn"],
-          "English explanation content is required.",
+          "missing-korean-content",
+          ["certification", "questions", index, "explanationKo"],
+          "Korean explanation content is required.",
         ),
       );
     const correct = new Set(question.correctChoiceIds);
@@ -496,7 +496,7 @@ function response(
       domainQuestionCounts: {},
       translationStatusCounts: {
         translated: unavailable("Document is invalid."),
-        enOnly: unavailable("Document is invalid."),
+        koOnly: unavailable("Document is invalid."),
       },
       errorCount: errors.length,
     },
@@ -509,7 +509,7 @@ function summaryFromRaw(raw: unknown, errorCount: number) {
       domainQuestionCounts: {},
       translationStatusCounts: {
         translated: unavailable("Document shape is invalid."),
-        enOnly: unavailable("Document shape is invalid."),
+        koOnly: unavailable("Document shape is invalid."),
       },
       errorCount,
     };
@@ -518,7 +518,7 @@ function summaryFromRaw(raw: unknown, errorCount: number) {
     domainQuestionCounts: {},
     translationStatusCounts: {
       translated: unavailable("Document structure is invalid."),
-      enOnly: unavailable("Document structure is invalid."),
+      koOnly: unavailable("Document structure is invalid."),
     },
     errorCount,
   };
@@ -544,7 +544,7 @@ function summaryFor(document: ImportDocument, errorCount: number) {
     domainQuestionCounts: counts,
     translationStatusCounts: {
       translated: { status: "available" as const, value: translatedCount },
-      enOnly: {
+      koOnly: {
         status: "available" as const,
         value: document.certification.questions.length - translatedCount,
       },
@@ -556,13 +556,9 @@ function translated(
   question: ImportDocument["certification"]["questions"][number],
 ): boolean {
   return (
-    question.stemKo !== undefined &&
-    question.stemKo !== null &&
-    question.explanationKo !== undefined &&
-    question.explanationKo !== null &&
-    question.choices.every(
-      (choice) => choice.textKo !== undefined && choice.textKo !== null,
-    )
+    nonBlank(question.stemEn ?? "") &&
+    nonBlank(question.explanationEn ?? "") &&
+    question.choices.every((choice) => nonBlank(choice.textEn ?? ""))
   );
 }
 function unavailable(reason: string): ImportSummaryValue {

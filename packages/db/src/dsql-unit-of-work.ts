@@ -1353,15 +1353,15 @@ type FullSourceRow = QueryResultRow & {
   certification_id: string;
   domain_id: string;
   domain_name: string;
-  stem_en: string;
+  stem_en: string | null;
   stem_ko: string | null;
-  explanation_en: string;
+  explanation_en: string | null;
   explanation_ko: string | null;
   required_choice_count: number;
-  translation_status: "translated" | "en_only";
+  translation_status: "translated" | "ko_only";
   choice_id: string;
   choice_external_id: string;
-  text_en: string;
+  text_en: string | null;
   text_ko: string | null;
   order_index: number;
   is_correct: boolean;
@@ -1470,12 +1470,15 @@ async function loadFullSource(
         certificationId: first.certification_id,
         domainId: first.domain_id,
         domainName: first.domain_name,
-        stem: { en: first.stem_en, ko: first.stem_ko },
-        explanation: { en: first.explanation_en, ko: first.explanation_ko },
+        stem: { en: first.stem_en, ko: requiredKorean(first.stem_ko, "question stem") },
+        explanation: {
+          en: first.explanation_en,
+          ko: requiredKorean(first.explanation_ko, "question explanation"),
+        },
         choices: group.map((row) => ({
           id: row.choice_id,
           externalId: row.choice_external_id,
-          text: { en: row.text_en, ko: row.text_ko },
+          text: { en: row.text_en, ko: requiredKorean(row.text_ko, "choice text") },
         })),
         correctChoiceIndexes: group.flatMap((row, index) =>
           row.is_correct ? [index] : [],
@@ -1518,6 +1521,20 @@ function bigint(value: string | bigint): bigint {
 }
 function required<T>(value: T | null | undefined, name: string): T {
   if (value === null || value === undefined) throw new Error(`Missing ${name}.`);
+  return value;
+}
+/**
+ * Korean is the application-enforced canonical language: import-service.ts
+ * validates it is present before any catalog revision is written, but the
+ * questions/choices columns remain nullable at the DB level because Aurora
+ * DSQL does not support ALTER COLUMN ... SET NOT NULL. A null value read
+ * back here means the write-time invariant was violated outside the normal
+ * import path, which is a data integrity failure the DB itself could not
+ * prevent, not an expected null translation.
+ */
+function requiredKorean(value: string | null, name: string): string {
+  if (value === null)
+    throw new Error(`Persisted ${name} is missing required Korean content.`);
   return value;
 }
 function requiredRow<T extends QueryResultRow, U>(

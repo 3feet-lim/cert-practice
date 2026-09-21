@@ -73,7 +73,7 @@ const invalidImportResponse = {
     },
     translationStatusCounts: {
       translated: { status: "available" as const, value: 1 },
-      enOnly: { status: "available" as const, value: 1 },
+      koOnly: { status: "available" as const, value: 1 },
     },
     errorCount: 2,
   },

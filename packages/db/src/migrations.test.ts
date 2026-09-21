@@ -17,9 +17,10 @@ describe("production migration manifest", () => {
       "0002_practice.sql",
       "0003_exams.sql",
       "0004_snapshot_scope_and_result_payload.sql",
+      "0005_korean_canonical_content.sql",
     ]);
     expect(first.every((migration) => !migration.path.includes("/spike/"))).toBe(true);
-    expect(schemaVersionRange(first)).toEqual({ minimum: 1, maximum: 4 });
+    expect(schemaVersionRange(first)).toEqual({ minimum: 1, maximum: 5 });
   });
 
   it("translates synchronous index DDL and removes unsupported DSQL key ordering", () => {
@@ -46,7 +47,7 @@ describe("production migration manifest", () => {
         },
         manifest,
       ),
-    ).resolves.toEqual({ minimum: 1, maximum: 4 });
+    ).resolves.toEqual({ minimum: 1, maximum: 5 });
     await expect(
       assertApplicationSchema({ listAppliedMigrations: async () => [] }, manifest),
     ).rejects.toThrow("missing migration");

@@ -14,11 +14,11 @@ describe("QuizQuestionPresenter", () => {
     const multiChoice = fixtures.practice.active.questions.find(
       (question) => question.requiredChoiceCount === 2 && question.id !== submitted?.id,
     );
-    const englishOnly = fixtures.practice.active.questions.find(
+    const koreanOnly = fixtures.practice.active.questions.find(
       (question) =>
-        question.translationStatus === "en_only" && question.id !== submitted?.id,
+        question.translationStatus === "ko_only" && question.id !== submitted?.id,
     );
-    if (!submitted || !multiChoice || !englishOnly) {
+    if (!submitted || !multiChoice || !koreanOnly) {
       throw new Error(
         "Expected deterministic questions for quiz interaction coverage.",
       );
@@ -32,7 +32,7 @@ describe("QuizQuestionPresenter", () => {
         <QuizQuestionPresenter
           initialIndex={0}
           onFlagChange={onFlagChange}
-          questions={[multiChoice, englishOnly, submitted]}
+          questions={[multiChoice, koreanOnly, submitted]}
           sessionTarget={`practice:${fixtures.ids.practiceSessionId}`}
         />
       </QuizStoreProvider>,
@@ -47,20 +47,20 @@ describe("QuizQuestionPresenter", () => {
     expect(choices[2]).not.toBeChecked();
     expect(screen.getByText(/\(2\/2 선택\)/)).toBeVisible();
 
-    await user.click(screen.getByRole("button", { name: "한국어" }));
     await user.click(screen.getByRole("button", { name: /Flag/ }));
     expect(onFlagChange).toHaveBeenCalledWith(multiChoice.id, !multiChoice.flagged);
 
     await user.click(
       screen.getByRole("button", {
-        name: new RegExp(`^${englishOnly.displayNumber}번 문항`),
+        name: new RegExp(`^${koreanOnly.displayNumber}번 문항`),
       }),
     );
     expect(screen.getByRole("status")).toHaveTextContent(
-      "한국어 번역이 없어 영어로 표시합니다.",
+      "영어 번역이 없어 한국어로 표시합니다.",
     );
-    expect(screen.getByText(englishOnly.stem.en)).toBeVisible();
+    expect(screen.getByText(koreanOnly.stem.ko)).toBeVisible();
 
+    await user.click(screen.getByRole("button", { name: "한국어" }));
     await user.click(
       screen.getByRole("button", {
         name: new RegExp(`^${multiChoice.displayNumber}번 문항`),

@@ -86,15 +86,15 @@ function source(options: SourceOptions = {}): FullCatalogGenerationSource {
         certificationId,
         domainId,
         domainName: options.domainName ?? "Domain",
-        stem: { en: options.stem ?? "Question", ko: null },
-        explanation: { en: options.explanation ?? "Explanation", ko: null },
+        stem: { en: null, ko: options.stem ?? "Question" },
+        explanation: { en: null, ko: options.explanation ?? "Explanation" },
         choices: [
-          { id: choiceA, externalId: "a", text: { en: "A", ko: null } },
-          { id: choiceB, externalId: "b", text: { en: "B", ko: null } },
+          { id: choiceA, externalId: "a", text: { en: null, ko: "A" } },
+          { id: choiceB, externalId: "b", text: { en: null, ko: "B" } },
         ],
         correctChoiceIndexes: [0],
         requiredChoiceCount: 1,
-        translationStatus: "en_only",
+        translationStatus: "ko_only",
       },
     ],
   };
@@ -238,6 +238,8 @@ function expectExactPracticeResult(
     correctChoiceIds: [CHOICE_A],
     isCorrect: correct,
     earnedScore: correct ? "1" : "0",
+    // Snapshot content is ko-only (en absent); toLocalizedText falls back to
+    // the Korean text for display and clears the other locale slot.
     explanation: { en: "Explanation", ko: null },
   });
 }
@@ -295,11 +297,11 @@ function twoDomainSource(
     id: id(21),
     domainId: rightDomain.id,
     domainName: rightDomain.name,
-    stem: { en: "Right question", ko: null },
-    explanation: { en: "Right explanation", ko: null },
+    stem: { en: null, ko: "Right question" },
+    explanation: { en: null, ko: "Right explanation" },
     choices: [
-      { id: id(32), externalId: "a", text: { en: "Right A", ko: null } },
-      { id: id(33), externalId: "b", text: { en: "Right B", ko: null } },
+      { id: id(32), externalId: "a", text: { en: null, ko: "Right A" } },
+      { id: id(33), externalId: "b", text: { en: null, ko: "Right B" } },
     ],
   };
   return {

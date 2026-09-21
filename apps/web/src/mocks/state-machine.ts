@@ -716,7 +716,7 @@ export class CertQuizMockStateMachine {
         domainQuestionCounts: { mock: availableOne },
         translationStatusCounts: {
           translated: availableOne,
-          enOnly: { status: "available", value: 0 },
+          koOnly: { status: "available", value: 0 },
         },
         errorCount: 0,
       },

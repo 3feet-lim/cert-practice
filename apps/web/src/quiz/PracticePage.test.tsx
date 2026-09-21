@@ -13,6 +13,7 @@ import type { CertQuizApi, CertQuizApiResult } from "../api/port";
 import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
 import { createCertQuizFixtures } from "../mocks/fixtures";
 import { PracticePage } from "./PracticePage";
+import { localizedQuestionText } from "./quiz-presentation";
 
 afterEach(cleanup);
 
@@ -99,7 +100,9 @@ describe("PracticePage", () => {
     const { sessionId, question } = await currentPractice(api);
     renderPractice(api, sessionId);
 
-    expect(await screen.findByText(question.stem.en)).toBeVisible();
+    expect(
+      await screen.findByText(localizedQuestionText(question.stem, "en")),
+    ).toBeVisible();
     expect(
       screen.queryByRole("heading", { name: "제출 결과" }),
     ).not.toBeInTheDocument();
@@ -169,7 +172,9 @@ describe("PracticePage", () => {
 
       const choices = await screen.findAllByRole(role);
       expect(choices).toHaveLength(question.choices.length);
-      expect(choices[0]).toHaveAccessibleName(question.choices[0]?.text.en ?? "");
+      expect(choices[0]).toHaveAccessibleName(
+        question.choices[0] ? localizedQuestionText(question.choices[0].text, "en") : "",
+      );
       expect(choices[0]).toHaveAttribute("name", `question-${question.id}`);
       if (role === "checkbox") {
         expect(
@@ -194,7 +199,7 @@ describe("PracticePage", () => {
     }
     question.explanation = {
       en: '<script>alert("xss")</script>\n\n[unsafe](javascript:evil)\n\n![blocked](data:image/png;base64,abc)\n\n![diagram](https://images.example.test/diagram.png)',
-      ko: null,
+      ko: "설명",
     };
     renderPractice(practiceApi(session), session.practiceSessionId);
 

@@ -131,14 +131,14 @@ describe("deterministic CertQuiz fixture corpus", () => {
     expect(fixtures.practice.active.questions).toHaveLength(75);
     expect(
       fixtures.practice.active.questions.filter(
-        ({ translationStatus }) => translationStatus === "en_only",
+        ({ translationStatus }) => translationStatus === "ko_only",
       ),
     ).toHaveLength(15);
-    const englishOnly = fixtures.practice.active.questions.find(
-      ({ translationStatus }) => translationStatus === "en_only",
+    const koreanOnly = fixtures.practice.active.questions.find(
+      ({ translationStatus }) => translationStatus === "ko_only",
     );
-    expect(englishOnly?.stem.ko).toBeNull();
-    expect(englishOnly?.choices.every(({ text }) => text.ko === null)).toBe(true);
+    expect(koreanOnly?.stem.en).toBeNull();
+    expect(koreanOnly?.choices.every(({ text }) => text.en === null)).toBe(true);
   });
 
   it("keeps all pre-reveal questions free of answer and explanation fields", () => {
@@ -211,7 +211,7 @@ describe("deterministic CertQuiz fixture corpus", () => {
     });
     expect(fixtures.import.dryRunValid.summary.translationStatusCounts).toEqual({
       translated: { status: "available", value: 60 },
-      enOnly: { status: "available", value: 15 },
+      koOnly: { status: "available", value: 15 },
     });
     expect(
       new Date(fixtures.import.dryRunValid.expiresAt ?? 0).getTime() -

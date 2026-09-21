@@ -62,7 +62,8 @@ export function QuestionPresenter({
   const isMultipleChoice = question.requiredChoiceCount > 1;
   const submitted = isSubmittedQuestion(question);
   const showReveal = reveal && submitted;
-  const translated = language === "ko" && question.translationStatus === "translated";
+  const showingKoreanFallbackForEnglish =
+    language === "en" && question.translationStatus === "ko_only";
   const selectedCount = question.selectedChoiceIds.length;
   const currentIndex = navigatorItems.findIndex(({ state }) => state === "current");
   const selectionDisabled =
@@ -78,9 +79,9 @@ export function QuestionPresenter({
           <h2 id="question-presenter-title" className="mt-1 text-xl font-bold">
             {question.domainName} 문제
           </h2>
-          {language === "ko" && !translated ? (
+          {showingKoreanFallbackForEnglish ? (
             <p role="status" className="mt-2 text-sm text-warning">
-              한국어 번역이 없어 영어로 표시합니다.
+              영어 번역이 없어 한국어로 표시합니다.
             </p>
           ) : null}
         </div>
