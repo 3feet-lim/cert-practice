@@ -99,8 +99,9 @@ export function PracticePage() {
 
   return (
     <section className="content-card" aria-labelledby="practice-title" data-screen="S4">
-      <p className="eyebrow">S4 · PRACTICE</p>
-      <h1 id="practice-title">연습 모드</h1>
+      <h1 id="practice-title" className="sr-only">
+        연습 모드
+      </h1>
       <p className="description">
         답변은 초안으로 저장되며, 제출 후에만 정답과 해설을 확인할 수 있습니다.
       </p>

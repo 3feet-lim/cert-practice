@@ -73,15 +73,15 @@ export function QuestionPresenter({
     interactionDisabled || submitted || onChoiceChange === undefined;
 
   return (
-    <section aria-labelledby="question-presenter-title" className="grid gap-6">
+    <section
+      aria-label={`Q${question.displayNumber} / ${totalQuestions} · ${question.domainName}`}
+      className="grid gap-6"
+    >
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-card">
         <div>
           <p className="text-sm font-semibold text-muted-foreground">
-            문항 {question.displayNumber} / {totalQuestions} · {question.domainName}
+            도메인 · {question.domainName}
           </p>
-          <h2 id="question-presenter-title" className="mt-1 text-xl font-bold">
-            {question.domainName} 문제
-          </h2>
           {showingKoreanFallbackForEnglishQuestion ? (
             <p role="status" className="mt-2 text-sm text-warning">
               영어 문제 또는 선택지 번역이 없어 한국어로 표시합니다.
@@ -124,6 +124,7 @@ export function QuestionPresenter({
 
       <article className="rounded-xl border border-border bg-card p-6 shadow-card">
         <p className="whitespace-pre-wrap text-base font-medium leading-7 text-foreground">
+          <span className="mr-2 font-bold text-primary">Q{question.displayNumber}.</span>
           {localizedQuestionText(question.stem, language)}
         </p>
         <fieldset className="mt-6 grid gap-3" aria-describedby="required-choice-count">
@@ -133,7 +134,7 @@ export function QuestionPresenter({
               ? `정확히 ${question.requiredChoiceCount}개를 선택하세요. (${selectedCount}/${question.requiredChoiceCount} 선택)`
               : "정확히 1개를 선택하세요."}
           </p>
-          {question.choices.map((choice) => {
+          {question.choices.map((choice, index) => {
             const selected = question.selectedChoiceIds.includes(choice.id);
             const correct = showReveal && question.correctChoiceIds.includes(choice.id);
             return (
@@ -157,7 +158,14 @@ export function QuestionPresenter({
                 }
                 disabled={selectionDisabled}
                 key={choice.id}
-                label={localizedQuestionText(choice.text, language)}
+                label={
+                  <>
+                    <span className="mr-2 font-bold text-primary">
+                      {String.fromCharCode("A".charCodeAt(0) + index)}.
+                    </span>{" "}
+                    {localizedQuestionText(choice.text, language)}
+                  </>
+                }
                 name={`question-${question.id}`}
                 onChange={() => onChoiceChange?.(choice.id)}
                 readOnly={selectionDisabled}

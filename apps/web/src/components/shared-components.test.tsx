@@ -404,8 +404,9 @@ describe("QuestionPresenter", () => {
       />,
     );
 
-    expect(screen.getByRole("radio", { name: "블루/그린" })).toBeChecked();
-    expect(screen.getByText("문항 2 / 2 · SDLC Automation")).toBeVisible();
+    expect(screen.getByRole("radio", { name: "A. 블루/그린" })).toBeChecked();
+    expect(screen.getByText("도메인 · SDLC Automation")).toBeVisible();
+    expect(screen.getByText("Q2.")).toBeVisible();
     expect(screen.getByRole("button", { name: "한국어" })).toHaveAttribute(
       "aria-pressed",
       "true",

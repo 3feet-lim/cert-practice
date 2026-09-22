@@ -177,7 +177,9 @@ describe("PracticePage", () => {
       const choices = await screen.findAllByRole(role);
       expect(choices).toHaveLength(question.choices.length);
       expect(choices[0]).toHaveAccessibleName(
-        question.choices[0] ? localizedQuestionText(question.choices[0].text, "ko") : "",
+        question.choices[0]
+          ? `A. ${localizedQuestionText(question.choices[0].text, "ko")}`
+          : "",
       );
       expect(choices[0]).toHaveAttribute("name", `question-${question.id}`);
       if (role === "checkbox") {
