@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { resolveCertQuizResult } from "../api/query-result";
 import { useCertQuizApi } from "../api/useCertQuizApi";
 import { certQuizQueryKeys } from "./query-keys";
+import { providerLogoSrc } from "./provider-logos";
 import { useActivePracticeSessionsQuery, useCatalogQuery } from "../api/queries";
 import { AccessibleDialog } from "../components/AccessibleDialog";
 import { AsyncBoundary } from "../components/AsyncBoundary";
@@ -103,13 +104,14 @@ function CatalogContent() {
           {data.providers.map((provider) => (
             <section key={provider.id} aria-labelledby={`provider-${provider.id}`}>
               <div className="mb-4 flex items-center gap-3">
-                {provider.logoUrl ? (
-                  <img
-                    src={provider.logoUrl}
-                    alt=""
-                    aria-hidden="true"
-                    className="size-9 rounded-lg object-contain"
-                  />
+                {providerLogoSrc(provider.name) || provider.logoUrl ? (
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-white p-1 shadow-sm">
+                    <img
+                      src={providerLogoSrc(provider.name) ?? provider.logoUrl ?? undefined}
+                      alt={provider.name}
+                      className="size-full object-contain"
+                    />
+                  </span>
                 ) : (
                   <span
                     aria-hidden="true"
