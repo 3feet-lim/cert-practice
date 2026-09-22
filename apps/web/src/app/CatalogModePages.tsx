@@ -102,27 +102,51 @@ function CatalogContent() {
         <div className="grid gap-6">
           {data.providers.map((provider) => (
             <section key={provider.id} aria-labelledby={`provider-${provider.id}`}>
-              <h2 id={`provider-${provider.id}`}>{provider.name}</h2>
+              <div className="mb-4 flex items-center gap-3">
+                {provider.logoUrl ? (
+                  <img
+                    src={provider.logoUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="size-9 rounded-lg object-contain"
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    className="grid size-9 place-items-center rounded-lg bg-primary text-sm font-black text-primary-foreground shadow-sm"
+                  >
+                    {provider.name.slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+                <h2
+                  id={`provider-${provider.id}`}
+                  className="text-base font-extrabold tracking-tight text-foreground"
+                >
+                  {provider.name}
+                </h2>
+              </div>
               <div className="flex flex-wrap gap-4">
                 {provider.certifications.map((certification) => (
-                  <Card key={certification.id} className="w-80">
+                  <Card key={certification.id} className="w-80 flex flex-col">
                     <CardHeader>
                       <p className="eyebrow">{certification.code}</p>
                       <CardTitle>{certification.name}</CardTitle>
+                    </CardHeader>
+                    <div className="mt-auto flex flex-col gap-4">
                       <CardDescription>
                         {certification.totalQuestions}문항 ·{" "}
                         {certification.timeLimitMinutes}분 · 합격 기준{" "}
                         {certification.passThreshold}%
                       </CardDescription>
-                    </CardHeader>
-                    <CardFooter>
-                      <Link
-                        className={linkButtonClassName}
-                        to={`/app/certifications/${certification.id}`}
-                      >
-                        학습 모드 선택
-                      </Link>
-                    </CardFooter>
+                      <CardFooter className="mt-0">
+                        <Link
+                          className={linkButtonClassName}
+                          to={`/app/certifications/${certification.id}`}
+                        >
+                          학습 모드 선택
+                        </Link>
+                      </CardFooter>
+                    </div>
                   </Card>
                 ))}
               </div>
