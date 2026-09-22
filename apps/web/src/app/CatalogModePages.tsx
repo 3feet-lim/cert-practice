@@ -50,7 +50,7 @@ function ActivePracticeBanner() {
 
   return (
     <section aria-label="이어 풀 수 있는 연습">
-      <Card tone="highlight">
+      <Card tone="highlight" className="max-w-2xl">
         <p className="eyebrow mb-2">ACTIVE PRACTICE</p>
         <h2 className="text-xl font-bold tracking-tight text-foreground">
           이어 풀 수 있는 연습이 있습니다.

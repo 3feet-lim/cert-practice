@@ -83,7 +83,9 @@ function commitCommand(): ImportCommitCommand {
       source: {
         revisionId,
         certificationKey: "CERT",
-        providers: [{ id: providerId, revisionId, name: "Provider", logoUrl: null }],
+        providers: [
+          { id: providerId, revisionId, externalKey: "provider", name: "Provider", logoUrl: null },
+        ],
         certifications: [
           {
             id: certificationId,
@@ -112,7 +114,13 @@ function commitCommand(): ImportCommitCommand {
       },
       generation: {
         revisionId,
-        provider: { id: providerId, revisionId, name: "Provider", logoUrl: null },
+        provider: {
+          id: providerId,
+          revisionId,
+          externalKey: "provider",
+          name: "Provider",
+          logoUrl: null,
+        },
         certification: {
           id: certificationId,
           revisionId,

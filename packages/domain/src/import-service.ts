@@ -245,6 +245,7 @@ function materialize(
       {
         id: providerId,
         revisionId,
+        externalKey: document.provider.id,
         name: document.provider.name,
         logoUrl: document.provider.logoUrl ?? null,
       },

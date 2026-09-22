@@ -8,6 +8,7 @@ const UUID_PATTERN =
 export type CatalogProvider = {
   id: string;
   revisionId: string;
+  externalKey: string;
   name: string;
   logoUrl: string | null;
 };
@@ -204,14 +205,14 @@ export function projectActiveCatalog(
         continue;
       }
 
-      const provider = providers.get(result.provider.id) ?? {
+      const provider = providers.get(result.provider.externalKey) ?? {
         id: result.provider.id,
         name: result.provider.name,
         logoUrl: result.provider.logoUrl,
         certifications: [],
       };
-      if (!providers.has(result.provider.id))
-        providers.set(result.provider.id, provider);
+      if (!providers.has(result.provider.externalKey))
+        providers.set(result.provider.externalKey, provider);
       provider.certifications.push({
         id: certification.id,
         code: certification.code,

@@ -63,6 +63,7 @@ export function createDopC02CatalogFixture(): DOPC02CatalogFixture {
         {
           id: providerId,
           revisionId,
+          externalKey: "aws",
           name: "AWS",
           logoUrl: null,
         },

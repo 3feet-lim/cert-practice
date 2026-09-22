@@ -212,7 +212,13 @@ class DsqlRepositories implements TransactionRepositories {
           await this.db.query(
             `INSERT INTO providers (id, revision_id, external_key, name, logo_url)
              VALUES ($1, $2, $3, $4, $5)`,
-            [provider.id, revision.id, provider.id, provider.name, provider.logoUrl],
+            [
+              provider.id,
+              revision.id,
+              provider.externalKey,
+              provider.name,
+              provider.logoUrl,
+            ],
           );
         for (const certification of source.certifications)
           await this.db.query(
@@ -1317,6 +1323,7 @@ async function loadActiveSources(
 type ProviderSourceRow = QueryResultRow & {
   id: string;
   revision_id: string;
+  external_key: string;
   name: string;
   logo_url: string | null;
 };
@@ -1374,7 +1381,7 @@ async function loadSource(
 ): Promise<CatalogRevisionSource> {
   const [providers, certifications, domains, questions] = await Promise.all([
     db.query<ProviderSourceRow>(
-      `SELECT id, revision_id, name, logo_url FROM providers WHERE revision_id = $1`,
+      `SELECT id, revision_id, external_key, name, logo_url FROM providers WHERE revision_id = $1`,
       [revisionId],
     ),
     db.query<CertificationSourceRow>(
@@ -1396,6 +1403,7 @@ async function loadSource(
     providers: providers.rows.map((row) => ({
       id: row.id,
       revisionId: row.revision_id,
+      externalKey: row.external_key,
       name: row.name,
       logoUrl: row.logo_url,
     })),

@@ -66,6 +66,7 @@ function source(options: SourceOptions = {}): FullCatalogGenerationSource {
     provider: {
       id: providerId,
       revisionId,
+      externalKey: options.certificationKey ?? "CERT",
       name: options.providerName ?? "Provider",
       logoUrl: null,
     },

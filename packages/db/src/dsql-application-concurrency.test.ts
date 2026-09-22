@@ -763,7 +763,13 @@ async function validatedImport(
         revisionId,
         certificationKey,
         providers: [
-          { id: providerId, revisionId, name: `Provider ${label}`, logoUrl: null },
+          {
+            id: providerId,
+            revisionId,
+            externalKey: `provider-${label}`,
+            name: `Provider ${label}`,
+            logoUrl: null,
+          },
         ],
         certifications: [
           {
@@ -796,6 +802,7 @@ async function validatedImport(
         provider: {
           id: providerId,
           revisionId,
+          externalKey: `provider-${label}`,
           name: `Provider ${label}`,
           logoUrl: null,
         },

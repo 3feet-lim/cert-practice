@@ -388,6 +388,7 @@ function generationSourceForAllocation(
     provider: {
       id: "allocation-provider",
       revisionId,
+      externalKey: "allocation-provider",
       name: "Provider",
       logoUrl: null,
     },
@@ -557,7 +558,13 @@ function generationSource(): FullCatalogGenerationSource {
   const certificationId = ids[1]!;
   return {
     revisionId,
-    provider: { id: ids[2]!, revisionId, name: "Provider", logoUrl: null },
+    provider: {
+      id: ids[2]!,
+      revisionId,
+      externalKey: "provider",
+      name: "Provider",
+      logoUrl: null,
+    },
     certification: {
       id: certificationId,
       revisionId,
