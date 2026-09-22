@@ -163,7 +163,7 @@ function CatalogContent() {
 export function CatalogHomePage() {
   return (
     <section className="content-card" aria-labelledby="welcome-title" data-screen="S2">
-      <p className="eyebrow">CERTQUIZ</p>
+      <p className="eyebrow">CertForge</p>
       <h1 id="welcome-title">클라우드 자격증 연습을 시작하세요.</h1>
       <p className="description">
         Provider별로 학습 가능한 자격증과 진행 중인 연습을 확인합니다.

@@ -211,17 +211,11 @@ describe("application route hierarchy", () => {
   });
   it("preserves an approved destination while sending unauthenticated users to login", async () => {
     renderRoute("/app/history?period=recent#trend", { actor: "unauthenticated" });
-    expect(
-      await screen.findByRole("heading", { name: "Google 계정으로 로그인" }),
-    ).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "CertForge" })).toBeVisible();
+    expect(screen.getByText("Google 계정으로 로그인")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Google 로그인 계속하기" })).toBeVisible();
     expect(screen.getByTestId("location")).toHaveTextContent(
       "/login?returnTo=%2Fapp%2Fhistory%3Fperiod%3Drecent%23trend",
-    );
-    expect(
-      screen.getByRole("link", { name: "Google 로그인 계속하기" }),
-    ).toHaveAttribute(
-      "href",
-      "/auth/callback?returnTo=%2Fapp%2Fhistory%3Fperiod%3Drecent%23trend",
     );
   });
   it("starts real HTTP login and completes a safe callback without invoking mock auth", async () => {
@@ -284,7 +278,7 @@ describe("application route hierarchy", () => {
     });
 
     await user.click(
-      await screen.findByRole("link", { name: "Google 로그인 계속하기" }),
+      await screen.findByRole("button", { name: "Google 로그인 계속하기" }),
     );
     expect(
       await screen.findByRole("heading", {
@@ -372,7 +366,7 @@ describe("application route hierarchy", () => {
     ).toBeVisible();
     await user.click(screen.getByRole("button", { name: "로그아웃" }));
     expect(
-      await screen.findByRole("heading", { name: "Google 계정으로 로그인" }),
+      await screen.findByRole("heading", { name: "CertForge" }),
     ).toBeVisible();
     expect(
       queryClient.getQueryCache().findAll({ queryKey: certQuizQueryKeys.all }),

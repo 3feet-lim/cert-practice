@@ -25,12 +25,12 @@ function ShellBrand({ productName, productHref, eyebrow }: ShellBrandProps) {
         aria-hidden="true"
         className="grid size-9 place-items-center rounded-lg bg-primary text-sm font-black text-primary-foreground shadow-sm"
       >
-        CQ
+        CF
       </span>
       <span className="grid leading-tight">
         <span className="text-base font-extrabold tracking-tight">{productName}</span>
         {eyebrow ? (
-          <span className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          <span className="text-[0.65rem] font-semibold italic text-muted-foreground">
             {eyebrow}
           </span>
         ) : null}
@@ -63,7 +63,7 @@ export interface PublicShellProps {
 export function PublicShell({
   children,
   aside,
-  productName = "CertQuiz",
+  productName = "CertForge",
   productHref = "./index.html",
   footer,
   className,
@@ -112,7 +112,7 @@ export interface PendingShellProps {
 /** Restricted layout that exposes only approval-status presentation. */
 export function PendingShell({
   children,
-  productName = "CertQuiz",
+  productName = "CertForge",
   productHref = "./index.html",
   statusLabel = "승인 대기",
   className,
@@ -160,9 +160,9 @@ export function AppShell({
   navigationLabel = "주요 메뉴",
   userActions,
   sidebarFooter,
-  productName = "CertQuiz",
+  productName = "CertForge",
   productHref = "./index.html",
-  productEyebrow = "Certification practice",
+  productEyebrow = "Forge. Sharpen. Certify.",
   className,
 }: AppShellProps) {
   const hasSidebar = Boolean(

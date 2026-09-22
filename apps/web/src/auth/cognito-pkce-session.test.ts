@@ -190,7 +190,7 @@ describe("Cognito PKCE browser session", () => {
     const storage = new MemorySessionStorage();
     storage.setItem(
       "certquiz.auth.tokens.v1",
-      JSON.stringify({ idToken: idToken(now / 1000 - 1), refreshToken: "refresh-value", expiresAtMs: now - 1 }),
+      JSON.stringify({ idToken: idToken(now / 1000 - 1), refreshToken: "refresh-value", expiresAtMs: now - 1_000 }),
     );
     const refreshFetch = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ id_token: idToken(now / 1000 + 3600) }), { status: 200 }),
@@ -205,7 +205,7 @@ describe("Cognito PKCE browser session", () => {
 
     storage.setItem(
       "certquiz.auth.tokens.v1",
-      JSON.stringify({ idToken: idToken(now / 1000 - 1), refreshToken: "refresh-value", expiresAtMs: now - 1 }),
+      JSON.stringify({ idToken: idToken(now / 1000 - 1), refreshToken: "refresh-value", expiresAtMs: now - 1_000 }),
     );
     const failed = createSession({
       storage,

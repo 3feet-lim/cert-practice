@@ -39,7 +39,7 @@ describe("static application shells", () => {
     );
 
     expect(screen.getByRole("banner")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /CertQuiz/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /CertForge/ })).toHaveAttribute(
       "href",
       "../../index.html",
     );

@@ -7,6 +7,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
   useSearchParams,
 } from "react-router-dom";
 
@@ -113,6 +114,7 @@ function LoginRoute() {
   const { state, refresh } = useAuthSession();
   const runtimeMode = useRuntimeMode();
   const browserAuthSession = useBrowserAuthSession();
+  const navigate = useNavigate();
   const [loginError, setLoginError] = useState(false);
   const [searchParams] = useSearchParams();
   const returnUrl = getSafeReturnUrl(
@@ -127,6 +129,10 @@ function LoginRoute() {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
   const beginLogin = () => {
+    if (runtimeMode === "mock") {
+      navigate(`/auth/callback?returnTo=${encodeURIComponent(returnUrl)}`);
+      return;
+    }
     if (!browserAuthSession) {
       setLoginError(true);
       return;
@@ -136,30 +142,24 @@ function LoginRoute() {
   return (
     <main className="app-shell">
       <section className="route-card" aria-labelledby="login-title" data-screen="S1">
-        <p className="eyebrow">CERTQUIZ</p>
-        <h1 id="login-title">Google 계정으로 로그인</h1>
+        <h1 id="login-title" className="text-4xl font-extrabold tracking-tight">
+          CertForge
+        </h1>
+        <p className="mt-2 text-sm font-semibold italic text-muted-foreground">
+          Forge. Sharpen. Certify.
+        </p>
+        <p className="mt-4 text-lg font-semibold">Google 계정으로 로그인</p>
         <p className="description">
           승인된 사용자는 개인 연습 세션과 모의고사 이력을 이용할 수 있습니다.
         </p>
-        {runtimeMode === "mock" ? (
-          <Link
-            className="primary-link"
-            to={`/auth/callback?returnTo=${encodeURIComponent(returnUrl)}`}
-          >
-            Google 로그인 계속하기
-          </Link>
-        ) : (
-          <>
-            <button className="primary-button" type="button" onClick={beginLogin}>
-              Google 로그인 계속하기
-            </button>
-            {loginError ? (
-              <p className="description" role="alert">
-                로그인 시작에 실패했습니다. 다시 시도하세요.
-              </p>
-            ) : null}
-          </>
-        )}
+        <Button className="mt-6" onClick={beginLogin}>
+          Google 로그인 계속하기
+        </Button>
+        {loginError ? (
+          <p className="description" role="alert">
+            로그인 시작에 실패했습니다. 다시 시도하세요.
+          </p>
+        ) : null}
       </section>
     </main>
   );
@@ -365,12 +365,12 @@ function ApprovedLayout() {
               aria-hidden="true"
               className="grid size-9 place-items-center rounded-lg bg-primary text-sm font-black text-primary-foreground shadow-sm"
             >
-              CQ
+              CF
             </span>
             <span className="grid leading-tight">
-              <span className="text-base font-extrabold tracking-tight">CertQuiz</span>
-              <span className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                Certification practice
+              <span className="text-base font-extrabold tracking-tight">CertForge</span>
+              <span className="text-[0.65rem] font-semibold italic text-muted-foreground">
+                Forge. Sharpen. Certify.
               </span>
             </span>
           </Link>
