@@ -18,6 +18,14 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/Card";
+import { cn } from "../lib/cn";
+
+/** Mirrors Button's primary-variant classes so a router `Link` can look identical to a `<Button>`. */
+const linkButtonClassName = cn(
+  "inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold transition-colors",
+  "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
+  "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover",
+);
 
 type PracticeDecision = Extract<
   StartPracticeResponse,
@@ -36,21 +44,38 @@ function RequestError({ message, onRetry }: { message: string; onRetry: () => vo
 
 function ActivePracticeBanner() {
   const activeSessions = useActivePracticeSessionsQuery();
-  const session = activeSessions.data?.sessions[0];
+  const sessions = activeSessions.data?.sessions ?? [];
 
-  if (!activeSessions.isSuccess || !session) return null;
+  if (!activeSessions.isSuccess || sessions.length === 0) return null;
 
   return (
-    <section className="route-card" aria-label="이어 풀 수 있는 연습">
-      <p className="eyebrow">ACTIVE PRACTICE</p>
-      <h2>이어 풀 수 있는 연습이 있습니다.</h2>
-      <p className="description">
-        {session.certificationCode} · {session.currentQuestionNumber} /{" "}
-        {session.totalQuestions}번 문항
-      </p>
-      <Link className="primary-link" to={`/app/practice/${session.practiceSessionId}`}>
-        연습 이어 풀기
-      </Link>
+    <section aria-label="이어 풀 수 있는 연습">
+      <Card tone="highlight">
+        <p className="eyebrow mb-2">ACTIVE PRACTICE</p>
+        <h2 className="text-xl font-bold tracking-tight text-foreground">
+          이어 풀 수 있는 연습이 있습니다.
+        </h2>
+        <ul className="mt-4 grid gap-3">
+          {sessions.map((session) => (
+            <li
+              key={session.practiceSessionId}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/20 bg-card p-4 shadow-sm"
+            >
+              <p className="text-sm text-foreground">
+                {session.certificationCode} · {session.currentQuestionNumber} /{" "}
+                {session.totalQuestions}번 문항
+              </p>
+              <Link
+                className={linkButtonClassName}
+                aria-label={`${session.certificationCode} 연습 이어 풀기`}
+                to={`/app/practice/${session.practiceSessionId}`}
+              >
+                연습 이어 풀기
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Card>
     </section>
   );
 }
@@ -78,9 +103,9 @@ function CatalogContent() {
           {data.providers.map((provider) => (
             <section key={provider.id} aria-labelledby={`provider-${provider.id}`}>
               <h2 id={`provider-${provider.id}`}>{provider.name}</h2>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex flex-wrap gap-4">
                 {provider.certifications.map((certification) => (
-                  <Card key={certification.id}>
+                  <Card key={certification.id} className="w-80">
                     <CardHeader>
                       <p className="eyebrow">{certification.code}</p>
                       <CardTitle>{certification.name}</CardTitle>
@@ -92,7 +117,7 @@ function CatalogContent() {
                     </CardHeader>
                     <CardFooter>
                       <Link
-                        className="primary-link"
+                        className={linkButtonClassName}
                         to={`/app/certifications/${certification.id}`}
                       >
                         학습 모드 선택
