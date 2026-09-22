@@ -53,9 +53,10 @@ function ActivePracticeBanner() {
     <section aria-label="이어 풀 수 있는 연습">
       <Card tone="highlight" className="max-w-2xl">
         <p className="eyebrow mb-2">ACTIVE PRACTICE</p>
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          이어 풀 수 있는 연습이 있습니다.
-        </h2>
+        <h2 className="text-xl font-bold tracking-tight text-foreground">이어 풀기</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          진행 중인 연습을 이어서 풀어보세요.
+        </p>
         <ul className="mt-4 grid gap-3">
           {sessions.map((session) => (
             <li
@@ -163,14 +164,27 @@ function CatalogContent() {
 export function CatalogHomePage() {
   return (
     <section className="content-card" aria-labelledby="welcome-title" data-screen="S2">
-      <p className="eyebrow">CertForge</p>
-      <h1 id="welcome-title">클라우드 자격증 연습을 시작하세요.</h1>
-      <p className="description">
-        Provider별로 학습 가능한 자격증과 진행 중인 연습을 확인합니다.
-      </p>
-      <div className="mt-6 grid gap-6">
+      <div>
+        <h1 id="welcome-title" className="text-3xl font-bold tracking-tight">
+          학습 홈
+        </h1>
+        <p className="mt-2 text-base text-muted-foreground">
+          이어 풀던 연습을 계속하거나, 새 자격증을 선택해 시작하세요.
+        </p>
+      </div>
+      <div className="mt-10 grid gap-10">
         <ActivePracticeBanner />
-        <CatalogContent />
+        <section aria-labelledby="catalog-heading">
+          <div className="mb-5">
+            <h2 id="catalog-heading" className="text-xl font-bold tracking-tight">
+              자격증 찾아보기
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              준비 중인 자격증을 선택해 학습을 시작하세요.
+            </p>
+          </div>
+          <CatalogContent />
+        </section>
       </div>
     </section>
   );

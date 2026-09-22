@@ -443,10 +443,22 @@ function ApprovedLayout() {
             ) : null}
           </nav>
           <div className="ml-auto flex items-center gap-3">
-            <span className="text-sm font-medium text-muted-foreground">
-              {state.user.displayName}
-            </span>
-            <Button variant="ghost" onClick={() => void logout()}>
+            <div
+              aria-label={`현재 사용자: ${state.user.displayName}`}
+              className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2 shadow-sm"
+              role="group"
+            >
+              <span
+                aria-hidden="true"
+                className="grid size-7 place-items-center rounded-full bg-primary text-xs font-black text-primary-foreground"
+              >
+                {state.user.displayName.slice(0, 1)}
+              </span>
+              <span className="text-sm font-bold text-foreground">
+                {state.user.displayName}
+              </span>
+            </div>
+            <Button className="font-bold" variant="secondary" onClick={() => void logout()}>
               로그아웃
             </Button>
           </div>

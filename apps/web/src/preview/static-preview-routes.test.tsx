@@ -294,6 +294,7 @@ describe("S6-S9 static result, history, and leaderboard previews", () => {
 
     const history = renderPreview("/app/history?preview=success");
     expect(screen.getByRole("table", { name: "모의고사 응시 이력" })).toBeVisible();
+    expect(screen.getByText("S8 · HISTORY")).toBeVisible();
     expect(screen.getByText("표로 데이터 보기")).toBeVisible();
     await userEvent.setup().click(screen.getByText("표로 데이터 보기"));
     expect(

@@ -286,7 +286,13 @@ function TrendGraphic({ points }: { points: readonly { accuracyRate: string }[] 
   );
 }
 
-export function StaticHistoryScreen({ fixture }: { fixture: HistoryFixtures }) {
+export function StaticHistoryScreen({
+  fixture,
+  screenMarker = "S8 · HISTORY",
+}: {
+  fixture: HistoryFixtures;
+  screenMarker?: string | null;
+}) {
   if (fixture.state === "error") {
     return (
       <StatePanel
@@ -311,7 +317,7 @@ export function StaticHistoryScreen({ fixture }: { fixture: HistoryFixtures }) {
   return (
     <div className="grid max-w-6xl gap-8">
       <PageHeader
-        eyebrow="S8 · HISTORY"
+        eyebrow={screenMarker ?? undefined}
         title="모의고사 이력"
         description="연습 결과는 응시 횟수와 점수 추이에서 제외됩니다."
       />

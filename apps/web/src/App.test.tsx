@@ -23,7 +23,7 @@ describe("App bootstrap", () => {
     expect(
       await screen.findByRole("heading", {
         level: 1,
-        name: "클라우드 자격증 연습을 시작하세요.",
+        name: "학습 홈",
       }),
     ).toBeInTheDocument();
     expect(screen.getByText("Approved Learner")).toBeVisible();
@@ -45,7 +45,7 @@ describe("App bootstrap", () => {
     expect(
       await screen.findByRole("heading", {
         level: 1,
-        name: "클라우드 자격증 연습을 시작하세요.",
+        name: "학습 홈",
       }),
     ).toBeVisible();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();

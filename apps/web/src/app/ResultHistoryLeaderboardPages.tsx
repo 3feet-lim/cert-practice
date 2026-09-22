@@ -115,6 +115,7 @@ export function HistoryPage() {
         <AsyncBoundary state={trendsState}>
           {(trendData) => (
             <StaticHistoryScreen
+              screenMarker={null}
               fixture={
                 page.attempts.length === 0
                   ? {

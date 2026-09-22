@@ -84,6 +84,13 @@ describe("application route hierarchy", () => {
       expect(document.querySelector(`[data-screen="${screenId}"]`)).not.toBeNull();
     }
   });
+  it("hides the static screen marker from runtime history", async () => {
+    renderRoute("/app/history");
+
+    expect(await screen.findByRole("heading", { name: "모의고사 이력" })).toBeVisible();
+    expect(screen.queryByText("S8 · HISTORY")).not.toBeInTheDocument();
+  });
+
   it("renders the runtime populated pending-user page for an admin actor", async () => {
     renderRoute("/app/admin/users", { actor: "admin" });
 
@@ -334,7 +341,7 @@ describe("application route hierarchy", () => {
     });
     expect(
       await screen.findByRole("heading", {
-        name: "클라우드 자격증 연습을 시작하세요.",
+        name: "학습 홈",
       }),
     ).toBeVisible();
     expect(screen.getByTestId("location")).toHaveTextContent("/app");
@@ -373,9 +380,13 @@ describe("application route hierarchy", () => {
     const view = renderRoute("/app", { queryClient, quizStore });
     expect(
       await screen.findByRole("heading", {
-        name: "클라우드 자격증 연습을 시작하세요.",
+        name: "학습 홈",
       }),
     ).toBeVisible();
+    expect(
+      screen.getByRole("group", { name: "현재 사용자: Approved Learner" }),
+    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "로그아웃" })).toHaveClass("border");
     await user.click(screen.getByRole("button", { name: "로그아웃" }));
     expect(
       await screen.findByRole("heading", { name: "CertForge" }),
@@ -391,7 +402,10 @@ describe("application route hierarchy", () => {
   it("renders grouped catalog data and an independent active-practice link", async () => {
     renderRoute("/app");
 
+    expect(await screen.findByRole("heading", { name: "학습 홈" })).toBeVisible();
     expect(await screen.findByRole("heading", { name: "AWS" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "이어 풀기" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "자격증 찾아보기" })).toBeVisible();
     expect(screen.getByText("DOP-C02")).toBeVisible();
     expect(screen.getByRole("link", { name: "학습 모드 선택" })).toHaveAttribute(
       "href",
