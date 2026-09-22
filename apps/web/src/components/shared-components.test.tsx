@@ -416,6 +416,29 @@ describe("QuestionPresenter", () => {
     expect(screen.getByText("배포를 사용합니다.")).toBeVisible();
   });
 
+  it("shows an explanation-specific fallback only when the English explanation is missing", () => {
+    render(
+      <QuestionPresenter
+        language="en"
+        navigatorItems={[{ number: 2, href: "#question-2", state: "current" }]}
+        question={{
+          ...baseQuestion,
+          explanation: { en: null, ko: "한국어 해설" },
+          translationStatus: "ko_only",
+        }}
+        totalQuestions={1}
+      />,
+    );
+
+    expect(
+      screen.queryByText("영어 문제 또는 선택지 번역이 없어 한국어로 표시합니다."),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "영어 해설이 없어 한국어로 표시합니다.",
+    );
+    expect(screen.getByText("한국어 해설")).toBeVisible();
+  });
+
   it("uses checkboxes and reports exact required selection counts without revealing answers", () => {
     render(
       <QuestionPresenter

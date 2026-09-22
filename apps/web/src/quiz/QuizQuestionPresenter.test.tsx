@@ -50,15 +50,23 @@ describe("QuizQuestionPresenter", () => {
     await user.click(screen.getByRole("button", { name: /Flag/ }));
     expect(onFlagChange).toHaveBeenCalledWith(multiChoice.id, !multiChoice.flagged);
 
+    expect(screen.getByRole("button", { name: "한국어" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
     await user.click(
       screen.getByRole("button", {
         name: new RegExp(`^${koreanOnly.displayNumber}번 문항`),
       }),
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "영어 번역이 없어 한국어로 표시합니다.",
-    );
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.getByText(koreanOnly.stem.ko)).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "English" }));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "영어 문제 또는 선택지 번역이 없어 한국어로 표시합니다.",
+    );
 
     await user.click(screen.getByRole("button", { name: "한국어" }));
     await user.click(

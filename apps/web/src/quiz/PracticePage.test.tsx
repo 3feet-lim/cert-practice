@@ -101,8 +101,12 @@ describe("PracticePage", () => {
     renderPractice(api, sessionId);
 
     expect(
-      await screen.findByText(localizedQuestionText(question.stem, "en")),
+      await screen.findByText(localizedQuestionText(question.stem, "ko")),
     ).toBeVisible();
+    expect(screen.getByRole("button", { name: "한국어" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(
       screen.queryByRole("heading", { name: "제출 결과" }),
     ).not.toBeInTheDocument();
@@ -173,7 +177,7 @@ describe("PracticePage", () => {
       const choices = await screen.findAllByRole(role);
       expect(choices).toHaveLength(question.choices.length);
       expect(choices[0]).toHaveAccessibleName(
-        question.choices[0] ? localizedQuestionText(question.choices[0].text, "en") : "",
+        question.choices[0] ? localizedQuestionText(question.choices[0].text, "ko") : "",
       );
       expect(choices[0]).toHaveAttribute("name", `question-${question.id}`);
       if (role === "checkbox") {
@@ -204,6 +208,7 @@ describe("PracticePage", () => {
     renderPractice(practiceApi(session), session.practiceSessionId);
 
     expect(await screen.findByRole("heading", { name: "제출 결과" })).toBeVisible();
+    await userEvent.setup().click(screen.getByRole("button", { name: "English" }));
     expect(document.querySelector("script")).not.toBeInTheDocument();
     expect(screen.getByText(/<script>alert\("xss"\)<\/script>/)).toBeVisible();
     expect(screen.getByText("unsafe")).not.toHaveAttribute("href");

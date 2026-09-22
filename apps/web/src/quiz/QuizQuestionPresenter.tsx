@@ -42,7 +42,7 @@ export function QuizQuestionPresenter({
     (state) => state.currentIndexBySession[sessionTarget],
   );
   const language = useQuizStore(
-    (state) => state.languageBySession[sessionTarget] ?? "en",
+    (state) => state.languageBySession[sessionTarget] ?? "ko",
   );
   const drafts = useQuizStore((state) => state.draftChoiceIdsByQuestion);
 

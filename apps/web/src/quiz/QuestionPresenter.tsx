@@ -62,8 +62,11 @@ export function QuestionPresenter({
   const isMultipleChoice = question.requiredChoiceCount > 1;
   const submitted = isSubmittedQuestion(question);
   const showReveal = reveal && submitted;
-  const showingKoreanFallbackForEnglish =
-    language === "en" && question.translationStatus === "ko_only";
+  const showingKoreanFallbackForEnglishQuestion =
+    language === "en" &&
+    (question.stem.en === null || question.choices.some((choice) => choice.text.en === null));
+  const showingKoreanFallbackForEnglishExplanation =
+    language === "en" && submitted && question.explanation.en === null;
   const selectedCount = question.selectedChoiceIds.length;
   const currentIndex = navigatorItems.findIndex(({ state }) => state === "current");
   const selectionDisabled =
@@ -79,9 +82,9 @@ export function QuestionPresenter({
           <h2 id="question-presenter-title" className="mt-1 text-xl font-bold">
             {question.domainName} 문제
           </h2>
-          {showingKoreanFallbackForEnglish ? (
+          {showingKoreanFallbackForEnglishQuestion ? (
             <p role="status" className="mt-2 text-sm text-warning">
-              영어 번역이 없어 한국어로 표시합니다.
+              영어 문제 또는 선택지 번역이 없어 한국어로 표시합니다.
             </p>
           ) : null}
         </div>
@@ -182,6 +185,11 @@ export function QuestionPresenter({
               </span>
             </div>
             <h4 className="mt-5 font-bold">해설</h4>
+            {showingKoreanFallbackForEnglishExplanation ? (
+              <p role="status" className="mt-2 text-sm text-warning">
+                영어 해설이 없어 한국어로 표시합니다.
+              </p>
+            ) : null}
             <SafeMarkdown
               className="mt-2"
               content={localizedQuestionText(question.explanation, language)}

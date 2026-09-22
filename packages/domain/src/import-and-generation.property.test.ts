@@ -540,9 +540,15 @@ describe("Property 7: snapshot generation", () => {
     const session = sampleSession(source, new SequenceRandomSource([0]));
     expect(session.questions.map((question) => question.id)).toHaveLength(2);
     expect(new Set(session.questions.map((question) => question.id)).size).toBe(2);
-    expect(session.questions.map((question) => question.displayIndex).sort()).toEqual([
-      0, 1,
-    ]);
+    for (const question of source.questions) {
+      const snapshot = session.questions.find(({ id }) => id === question.id);
+      expect(snapshot).toBeDefined();
+      expect(
+        ((snapshot?.content as { choices: Array<{ id: string }> }).choices ?? []).map(
+          ({ id }) => id,
+        ),
+      ).toEqual(question.choices.map(({ id }) => id));
+    }
     const insufficient: FullCatalogGenerationSource = {
       ...source,
       questions: source.questions.filter((question) => question.domainId === "left"),
@@ -603,7 +609,14 @@ function generationSource(): FullCatalogGenerationSource {
       domainName: domainId,
       stem: { en: null, ko: domainId },
       explanation: { en: null, ko: "왜냐하면" },
-      choices: [{ id: ids[index]!, externalId: "a", text: { en: null, ko: "가" } }],
+      choices: [
+        { id: ids[index * 2]!, externalId: "a", text: { en: null, ko: "가" } },
+        {
+          id: ids[index * 2 + 1]!,
+          externalId: "b",
+          text: { en: null, ko: "나" },
+        },
+      ],
       correctChoiceIndexes: [0],
       requiredChoiceCount: 1,
       translationStatus: "ko_only" as const,

@@ -84,9 +84,7 @@ export function sampleSession(
   const ordered = fullShuffle(selected, random);
   return {
     certificationKey: source.certification.externalKey,
-    questions: ordered.map((question, displayIndex) =>
-      snapshot(question, displayIndex, random, source),
-    ),
+    questions: ordered.map((question, displayIndex) => snapshot(question, displayIndex, source)),
   };
 }
 
@@ -170,10 +168,11 @@ export class SessionFactory {
 function snapshot(
   question: GenerationQuestion,
   displayIndex: number,
-  random: RandomSource,
   source: FullCatalogGenerationSource,
 ): PersistedQuestionSnapshot {
-  const choices = fullSnapshotChoices(fullShuffle(question.choices, random));
+  // Explanations can refer to source choice labels (for example, A/B/C/D), so
+  // choice order must remain aligned with the imported catalog order.
+  const choices = fullSnapshotChoices(question.choices);
   const correctChoiceIds = question.correctChoiceIndexes
     .map((index) => question.choices[index]?.id)
     .filter((id): id is string => id !== undefined);
