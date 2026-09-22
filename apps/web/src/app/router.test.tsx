@@ -213,6 +213,14 @@ describe("application route hierarchy", () => {
     renderRoute("/app/history?period=recent#trend", { actor: "unauthenticated" });
     expect(await screen.findByRole("heading", { name: "CertForge" })).toBeVisible();
     expect(screen.getByText("Google 계정으로 로그인")).toBeVisible();
+    expect(
+      screen.getByText(/문제은행부터 실전 모의고사까지/),
+    ).toBeVisible();
+    expect(
+      screen.queryByText(
+        "승인된 사용자는 개인 연습 세션과 모의고사 이력을 이용할 수 있습니다.",
+      ),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Google 로그인 계속하기" })).toBeVisible();
     expect(screen.getByTestId("location")).toHaveTextContent(
       "/login?returnTo=%2Fapp%2Fhistory%3Fperiod%3Drecent%23trend",
@@ -257,9 +265,13 @@ describe("application route hierarchy", () => {
     renderRoute("/app/history", { actor: "pending" });
     expect(
       await screen.findByRole("heading", {
-        name: "관리자 승인을 기다리고 있습니다.",
+        name: "관리자에게 승인을 요청해 주세요.",
       }),
     ).toBeVisible();
+    expect(
+      screen.getByText(/승인이 완료되면 문제은행, 연습 모드, 모의고사를 사용할 수 있습니다/),
+    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "승인 상태 확인하기" })).toBeVisible();
     expect(screen.getByTestId("location")).toHaveTextContent(
       "/pending?returnTo=%2Fapp%2Fhistory",
     );
@@ -282,7 +294,7 @@ describe("application route hierarchy", () => {
     );
     expect(
       await screen.findByRole("heading", {
-        name: "관리자 승인을 기다리고 있습니다.",
+        name: "관리자에게 승인을 요청해 주세요.",
       }),
     ).toBeVisible();
     expect(screen.getByTestId("location")).toHaveTextContent(
@@ -291,7 +303,7 @@ describe("application route hierarchy", () => {
     expect(getCurrentUser).not.toHaveBeenCalled();
 
     authController.approve();
-    await user.click(screen.getByRole("button", { name: "승인 상태 새로고침" }));
+    await user.click(screen.getByRole("button", { name: "승인 상태 확인하기" }));
 
     expect(await screen.findByRole("heading", { name: "모의고사 이력" })).toBeVisible();
     await waitFor(() => {

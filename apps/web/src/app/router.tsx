@@ -140,26 +140,67 @@ function LoginRoute() {
     void browserAuthSession.beginLogin(returnUrl).catch(() => setLoginError(true));
   };
   return (
-    <main className="app-shell">
-      <section className="route-card" aria-labelledby="login-title" data-screen="S1">
-        <h1 id="login-title" className="text-4xl font-extrabold tracking-tight">
-          CertForge
-        </h1>
-        <p className="mt-2 text-sm font-semibold italic text-muted-foreground">
-          Forge. Sharpen. Certify.
-        </p>
-        <p className="mt-4 text-lg font-semibold">Google 계정으로 로그인</p>
-        <p className="description">
-          승인된 사용자는 개인 연습 세션과 모의고사 이력을 이용할 수 있습니다.
-        </p>
-        <Button className="mt-6" onClick={beginLogin}>
-          Google 로그인 계속하기
-        </Button>
-        {loginError ? (
-          <p className="description" role="alert">
-            로그인 시작에 실패했습니다. 다시 시도하세요.
-          </p>
-        ) : null}
+    <main className="grid min-h-screen place-items-center bg-background px-4 py-8 sm:px-8 lg:px-12">
+      <section
+        className="grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border bg-card shadow-[0_24px_80px_rgb(15_23_42_/_0.12)] lg:min-h-[34rem] lg:grid-cols-[1.15fr_0.85fr]"
+        aria-labelledby="login-title"
+        data-screen="S1"
+      >
+        <div className="relative flex flex-col justify-between overflow-hidden bg-slate-950 p-8 text-white sm:p-12 lg:p-16">
+          <div
+            aria-hidden="true"
+            className="absolute -right-24 -top-24 size-72 rounded-full bg-indigo-500/20 blur-3xl"
+          />
+          <div className="relative">
+            <div className="mb-12 grid size-12 place-items-center rounded-xl bg-primary text-base font-black text-primary-foreground shadow-lg shadow-indigo-950/30">
+              CF
+            </div>
+            <h1
+              id="login-title"
+              className="text-5xl font-extrabold tracking-tight sm:text-6xl"
+            >
+              CertForge
+            </h1>
+            <p className="mt-4 text-lg font-semibold italic text-indigo-200">
+              Forge. Sharpen. Certify.
+            </p>
+          </div>
+          <div className="relative mt-16 max-w-md border-l-2 border-indigo-400 pl-5">
+            <p className="text-lg font-medium leading-8 text-slate-200">
+              문제은행부터 실전 모의고사까지,
+              <br />
+              합격을 위한 훈련을 한곳에서.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center p-8 sm:p-12 lg:p-16">
+          <div className="w-full">
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-primary">
+              Welcome
+            </p>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground">
+              Google 계정으로 로그인
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              학습을 계속하려면 Google 계정으로 시작하세요.
+            </p>
+            <Button className="mt-8 min-h-12 w-full gap-3 text-base" onClick={beginLogin}>
+              <span
+                aria-hidden="true"
+                className="grid size-6 place-items-center rounded-full bg-white text-sm font-black text-primary"
+              >
+                G
+              </span>
+              Google 로그인 계속하기
+            </Button>
+            {loginError ? (
+              <p className="mt-4 text-sm font-medium text-danger" role="alert">
+                로그인 시작에 실패했습니다. 다시 시도하세요.
+              </p>
+            ) : null}
+          </div>
+        </div>
       </section>
     </main>
   );
@@ -292,16 +333,27 @@ function PendingRoute() {
     return <CanonicalError error={state.error} onRetry={() => void refresh()} />;
   }
   return (
-    <main className="app-shell">
-      <section className="route-card" aria-labelledby="pending-title">
-        <p className="eyebrow">APPROVAL PENDING</p>
-        <h1 id="pending-title">관리자 승인을 기다리고 있습니다.</h1>
-        <p className="description">
-          승인 전에는 승인 상태 조회 외의 보호된 기능을 사용할 수 없습니다.
+    <main className="grid min-h-screen place-items-center bg-background px-4 py-8 sm:px-8">
+      <section
+        className="w-full max-w-xl rounded-2xl border border-border bg-card p-8 shadow-card sm:p-10"
+        aria-labelledby="pending-title"
+      >
+        <div className="mb-6 grid size-11 place-items-center rounded-xl bg-warning-soft text-lg font-black text-warning">
+          !
+        </div>
+        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-warning">
+          Approval required
         </p>
-        <button className="primary-button" type="button" onClick={() => void refresh()}>
-          승인 상태 새로고침
-        </button>
+        <h1 id="pending-title" className="mt-3 text-3xl font-bold tracking-tight">
+          관리자에게 승인을 요청해 주세요.
+        </h1>
+        <p className="mt-4 leading-7 text-muted-foreground">
+          승인이 완료되면 문제은행, 연습 모드, 모의고사를 사용할 수 있습니다.
+          관리자에게 승인을 요청한 뒤 아래 버튼으로 상태를 확인하세요.
+        </p>
+        <Button className="mt-8" onClick={() => void refresh()}>
+          승인 상태 확인하기
+        </Button>
       </section>
     </main>
   );
