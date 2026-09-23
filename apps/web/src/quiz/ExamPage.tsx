@@ -16,12 +16,11 @@ import {
   useExamSubmissionPreview,
   useExamSubmit,
 } from "./quiz-queries";
+import { quizErrorMessage } from "./quiz-error-messages";
 import { QuizQuestionPresenter } from "./QuizQuestionPresenter";
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "모의고사 상태를 저장하지 못했습니다.";
+  return quizErrorMessage(error, "모의고사 상태를 저장하지 못했습니다.");
 }
 
 function ExamInteraction({
@@ -78,14 +77,14 @@ function ExamInteraction({
           {requestError}
         </section>
       ) : null}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-card">
-        <div>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-card sm:p-5">
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-muted-foreground">
             {session.certificationCode}
           </p>
-          <h2 className="text-xl font-bold">{session.certificationName}</h2>
+          <h2 className="text-lg font-bold sm:text-xl">{session.certificationName}</h2>
         </div>
-        <div className="text-right">
+        <div className="sm:text-right">
           <p className="text-sm text-muted-foreground">서버 기준 남은 시간</p>
           <ServerTimer
             expiresAt={session.expiresAt}

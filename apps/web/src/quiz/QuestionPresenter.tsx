@@ -77,8 +77,8 @@ export function QuestionPresenter({
       aria-label={`Q${question.displayNumber} / ${totalQuestions} · ${question.domainName}`}
       className="grid gap-6"
     >
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-card">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-card sm:p-5">
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-muted-foreground">
             도메인 · {question.domainName}
           </p>
@@ -88,7 +88,7 @@ export function QuestionPresenter({
             </p>
           ) : null}
         </div>
-        <div className="flex items-center gap-2" aria-label="문항 표시 언어">
+        <div className="flex flex-wrap items-center gap-2" aria-label="문항 표시 언어">
           <Button
             aria-pressed={language === "en"}
             disabled={interactionDisabled || onLanguageChange === undefined}
@@ -122,7 +122,7 @@ export function QuestionPresenter({
         </div>
       </div>
 
-      <article className="rounded-xl border border-border bg-card p-6 shadow-card">
+      <article className="rounded-xl border border-border bg-card p-4 shadow-card sm:p-6">
         <p className="whitespace-pre-wrap text-base font-medium leading-7 text-foreground">
           <span className="mr-2 font-bold text-primary">Q{question.displayNumber}.</span>
           {localizedQuestionText(question.stem, language)}

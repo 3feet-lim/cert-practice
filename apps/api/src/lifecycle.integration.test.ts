@@ -73,14 +73,14 @@ function generationSource(): FullCatalogGenerationSource {
         certificationId: CERTIFICATION_ID,
         domainId: id(4),
         domainName: "Domain",
-        stem: { en: "Question", ko: null },
-        explanation: { en: "Explanation", ko: null },
+        stem: { en: null, ko: "Question" },
+        explanation: { en: null, ko: "Explanation" },
         choices: [
-          { id: CHOICE_ID, externalId: "choice", text: { en: "Choice", ko: null } },
+          { id: CHOICE_ID, externalId: "choice", text: { en: null, ko: "Choice" } },
         ],
         correctChoiceIndexes: [0],
         requiredChoiceCount: 1,
-        translationStatus: "en_only",
+        translationStatus: "ko_only",
       },
     ],
   };

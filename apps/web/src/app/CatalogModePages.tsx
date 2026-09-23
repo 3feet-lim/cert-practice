@@ -128,9 +128,9 @@ function CatalogContent() {
                   {provider.name}
                 </h2>
               </div>
-              <div className="flex flex-wrap gap-4">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {provider.certifications.map((certification) => (
-                  <Card key={certification.id} className="w-80 flex flex-col">
+                  <Card key={certification.id} className="flex w-full flex-col">
                     <CardHeader>
                       <p className="eyebrow">{certification.code}</p>
                       <CardTitle>{certification.name}</CardTitle>
@@ -165,7 +165,7 @@ export function CatalogHomePage() {
   return (
     <section className="content-card" aria-labelledby="welcome-title" data-screen="S2">
       <div>
-        <h1 id="welcome-title" className="text-3xl font-bold tracking-tight">
+        <h1 id="welcome-title" className="text-2xl font-bold tracking-tight">
           학습 홈
         </h1>
         <p className="mt-2 text-base text-muted-foreground">
@@ -320,36 +320,66 @@ export function ModeSelectPage() {
 
   return (
     <section
-      className="route-card"
+      className="content-card"
       aria-labelledby="mode-select-title"
       data-screen="S3"
     >
-      <p className="eyebrow">{certification.code}</p>
-      <h1 id="mode-select-title">학습 모드 선택</h1>
-      <p className="description">{certification.name}</p>
-      <dl className="description">
-        <div>
-          <dt>문항 수</dt>
-          <dd>{certification.totalQuestions}문항</dd>
-        </div>
-        <div>
-          <dt>제한 시간</dt>
-          <dd>{certification.timeLimitMinutes}분</dd>
-        </div>
-        <div>
-          <dt>합격 기준</dt>
-          <dd>{certification.passThreshold}%</dd>
-        </div>
-        <div>
-          <dt>채점 방식</dt>
-          <dd>{certification.scoringMode}</dd>
-        </div>
-      </dl>
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
+      <div className="rounded-xl border border-border bg-muted/40 p-4 sm:p-6">
+        <span className="inline-flex items-center rounded-md bg-primary px-2.5 py-1 text-xs font-bold tracking-wide text-primary-foreground">
+          {certification.code}
+        </span>
+        <h1
+          id="mode-select-title"
+          className="mt-3 text-2xl font-bold tracking-tight text-foreground"
+        >
+          {certification.name}
+        </h1>
+        <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 sm:gap-x-6 sm:grid-cols-4">
+          <div>
+            <dt className="text-xs font-semibold text-muted-foreground">문항 수</dt>
+            <dd className="mt-1 text-base font-bold text-foreground">
+              {certification.totalQuestions}문항
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold text-muted-foreground">제한 시간</dt>
+            <dd className="mt-1 text-base font-bold text-foreground">
+              {certification.timeLimitMinutes}분
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold text-muted-foreground">합격 기준</dt>
+            <dd className="mt-1 text-base font-bold text-foreground">
+              {certification.passThreshold}%
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold text-muted-foreground">채점 방식</dt>
+            <dd className="mt-1 text-base font-bold text-foreground">
+              {certification.scoringMode === "all_or_nothing"
+                ? "전체 정답"
+                : certification.scoringMode}
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <h2
+        id="mode-select-options"
+        className="mt-8 text-lg font-bold tracking-tight text-foreground"
+      >
+        학습 모드 선택
+      </h2>
+      <div
+        className="mt-4 grid gap-4 md:grid-cols-2"
+        role="group"
+        aria-labelledby="mode-select-options"
+      >
         <Card>
           <CardHeader>
-            <CardTitle>연습 모드</CardTitle>
-            <CardDescription>제출 뒤 정답과 해설을 바로 확인합니다.</CardDescription>
+            <CardTitle className="text-base">연습 모드</CardTitle>
+            <CardDescription className="text-foreground/70">
+              제출 뒤 정답과 해설을 바로 확인합니다.
+            </CardDescription>
           </CardHeader>
           <CardFooter>
             <Button disabled={commandsPending} onClick={() => startPractice.mutate()}>
@@ -359,8 +389,8 @@ export function ModeSelectPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>모의고사</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-base">모의고사</CardTitle>
+            <CardDescription className="text-foreground/70">
               확인한 시점부터 서버 기준 제한 시간이 시작됩니다.
             </CardDescription>
           </CardHeader>
@@ -372,7 +402,10 @@ export function ModeSelectPage() {
         </Card>
       </div>
       {commandError ? (
-        <p className="description" role="alert">
+        <p
+          className="mt-4 rounded-lg border border-danger/30 bg-danger-soft p-4 text-sm font-medium text-danger"
+          role="alert"
+        >
           {commandError}
         </p>
       ) : null}

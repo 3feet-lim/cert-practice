@@ -637,8 +637,11 @@ function applyPracticePatch(
         { id: string; selected?: readonly string[]; flagged?: boolean } | undefined
       >((merged, candidate) => ({ ...(merged ?? candidate), ...candidate }), undefined);
     if (!change) return question;
-    if (question.finalChoiceIds) throw domainFailure("conflict");
-    if (change.selected) validateSelected(question, change.selected);
+    // A submitted answer stays locked, but flagging remains a review aid.
+    if (change.selected) {
+      if (question.finalChoiceIds) throw domainFailure("conflict");
+      validateSelected(question, change.selected);
+    }
     return {
       ...question,
       ...(change.selected ? { selectedChoiceIds: [...change.selected] } : {}),

@@ -239,9 +239,9 @@ function expectExactPracticeResult(
     correctChoiceIds: [CHOICE_A],
     isCorrect: correct,
     earnedScore: correct ? "1" : "0",
-    // Snapshot content is ko-only (en absent); toLocalizedText falls back to
-    // the Korean text for display and clears the other locale slot.
-    explanation: { en: "Explanation", ko: null },
+    // Korean is the canonical content language; English stays absent when the
+    // imported snapshot is ko-only.
+    explanation: { en: null, ko: "Explanation" },
   });
 }
 
@@ -516,6 +516,58 @@ describe("offline lifecycle properties", () => {
       }),
       { numRuns: 200 },
     );
+  });
+
+  it("keeps flagging available on a submitted practice question while the answer stays locked", async () => {
+    const database = new InMemoryUnitOfWork();
+    const catalog = twoDomainSource();
+    seedCatalog(database, catalog);
+    database.seedUser(profile(USER_A, true));
+    const clock = new FixedClock(base);
+    let next = 200;
+    const service = new LifecycleServices({
+      unitOfWork: database,
+      sessionFactory: new SessionFactory({
+        ids: new SequenceUuidFactory(Array.from({ length: 200 }, () => id(next++))),
+        random: new SequenceRandomSource([0]),
+        now: () => clock.now(),
+      }),
+      now: () => clock.now(),
+      createId: () => id(next++),
+    });
+
+    const sessionId = await createdPractice(service);
+    const started = await service.resumePractice(USER_A, sessionId);
+    const target = started.questions[0];
+    if (!target) throw new Error("expected a practice question");
+
+    const submitted = await service.submitPractice(
+      USER_A,
+      sessionId,
+      target.id,
+      [target.choices[0]!.id],
+      started.stateVersion,
+    );
+
+    // Flagging is a review aid, so it must stay available after submitting.
+    const flagged = await service.patchPractice(USER_A, sessionId, {
+      expectedVersion: submitted.stateVersion,
+      flag: { questionId: target.id, flagged: true },
+    });
+    expect(flagged.stateVersion).toBe(submitted.stateVersion + 1);
+    const resumed = await service.resumePractice(USER_A, sessionId);
+    expect(resumed.questions.find(({ id: questionId }) => questionId === target.id))
+      .toMatchObject({ flagged: true });
+
+    await expect(
+      service.patchPractice(USER_A, sessionId, {
+        expectedVersion: flagged.stateVersion,
+        answer: {
+          questionId: target.id,
+          selectedChoiceIds: [target.choices[1]!.id],
+        },
+      }),
+    ).rejects.toMatchObject({ error: { code: "conflict" } });
   });
 
   it("P13 projects reveal only after submit and commits one completed result", async () => {

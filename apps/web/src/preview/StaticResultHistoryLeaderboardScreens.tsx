@@ -319,6 +319,7 @@ export function StaticHistoryScreen({
       <PageHeader
         eyebrow={screenMarker ?? undefined}
         title="모의고사 이력"
+        titleClassName="text-2xl"
         description="연습 결과는 응시 횟수와 점수 추이에서 제외됩니다."
       />
       <DataTable

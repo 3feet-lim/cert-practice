@@ -124,12 +124,12 @@ select {
   display: grid;
   min-height: 100vh;
   place-items: center;
-  padding: 48px;
+  padding: clamp(16px, 5vw, 48px);
 }
 
 .welcome-card {
   width: min(720px, 100%);
-  padding: 56px;
+  padding: clamp(24px, 5vw, 56px);
   border: 1px solid #dce2ec;
   border-radius: 20px;
   background: #ffffff;
@@ -138,7 +138,17 @@ select {
 
 .content-card {
   width: 100%;
-  padding: 56px;
+  padding: clamp(20px, 4vw, 56px);
+  border: 1px solid #dce2ec;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgb(38 51 77 / 8%);
+}
+
+/* Shared card for loading, empty, and error routes rendered inside .app-shell. */
+.route-card {
+  width: min(720px, 100%);
+  padding: clamp(20px, 4vw, 48px);
   border: 1px solid #dce2ec;
   border-radius: 20px;
   background: #ffffff;

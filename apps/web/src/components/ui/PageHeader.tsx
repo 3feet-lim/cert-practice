@@ -10,6 +10,7 @@ export interface PageHeaderProps {
   metadata?: ReactNode;
   className?: string;
   headingId?: string;
+  titleClassName?: string;
 }
 
 export function PageHeader({
@@ -20,6 +21,7 @@ export function PageHeader({
   metadata,
   className,
   headingId,
+  titleClassName,
 }: PageHeaderProps) {
   return (
     <header className={cn("flex items-start justify-between gap-8", className)}>
@@ -31,7 +33,10 @@ export function PageHeader({
         ) : null}
         <h1
           id={headingId}
-          className="text-3xl font-extrabold tracking-tight text-foreground"
+          className={cn(
+            "font-extrabold tracking-tight text-foreground",
+            titleClassName ?? "text-3xl",
+          )}
         >
           {title}
         </h1>

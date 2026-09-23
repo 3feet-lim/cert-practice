@@ -120,9 +120,11 @@ describe("ExamPage", () => {
         nextAction: "Refresh and retry.",
       },
     });
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Refresh the latest exam state and try again.",
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "다른 곳에서 변경된 내용이 있습니다. 새로 고친 뒤 다시 시도하세요.",
     );
+    expect(alert).not.toHaveTextContent("Refresh the latest exam state and try again.");
     expect(screen.getByRole("button", { name: "Flag 없음" })).toHaveAttribute(
       "aria-pressed",
       "false",

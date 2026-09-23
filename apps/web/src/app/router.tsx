@@ -408,7 +408,7 @@ function ApprovedLayout() {
         본문으로 건너뛰기
       </a>
       <header className="border-b border-border bg-card shadow-sm" role="banner">
-        <div className="mx-auto flex min-h-18 max-w-screen-2xl items-center gap-8 px-8">
+        <div className="mx-auto flex min-h-18 max-w-screen-2xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6 lg:gap-x-8 lg:px-8">
           <Link
             className="inline-flex items-center gap-3 rounded-md text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30"
             to="/app"
@@ -426,7 +426,10 @@ function ApprovedLayout() {
               </span>
             </span>
           </Link>
-          <nav aria-label="주요 메뉴" className="flex items-center gap-1">
+          <nav
+            aria-label="주요 메뉴"
+            className="order-3 flex w-full flex-wrap items-center gap-1 lg:order-none lg:w-auto"
+          >
             <NavLink className={navigationLinkClass} end to="/app">
               홈
             </NavLink>
@@ -442,19 +445,19 @@ function ApprovedLayout() {
               </NavLink>
             ) : null}
           </nav>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
             <div
               aria-label={`현재 사용자: ${state.user.displayName}`}
-              className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2 shadow-sm"
+              className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-muted px-2 py-1.5 shadow-sm sm:gap-3 sm:px-3 sm:py-2"
               role="group"
             >
               <span
                 aria-hidden="true"
-                className="grid size-7 place-items-center rounded-full bg-primary text-xs font-black text-primary-foreground"
+                className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-black text-primary-foreground"
               >
                 {state.user.displayName.slice(0, 1)}
               </span>
-              <span className="text-sm font-bold text-foreground">
+              <span className="truncate text-sm font-bold text-foreground">
                 {state.user.displayName}
               </span>
             </div>
@@ -467,7 +470,7 @@ function ApprovedLayout() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto w-full max-w-screen-2xl px-8 py-10 focus:outline-none"
+        className="mx-auto w-full max-w-screen-2xl px-4 py-6 focus:outline-none sm:px-6 sm:py-8 lg:px-8 lg:py-10"
       >
         <Outlet />
       </main>
@@ -478,10 +481,7 @@ function AdminLayout() {
   return (
     <section aria-labelledby="admin-layout-title" className="grid gap-6">
       <div>
-        <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
-          Admin
-        </p>
-        <h1 id="admin-layout-title" className="text-3xl">
+        <h1 id="admin-layout-title" className="text-2xl font-bold tracking-tight">
           관리자 콘솔
         </h1>
       </div>

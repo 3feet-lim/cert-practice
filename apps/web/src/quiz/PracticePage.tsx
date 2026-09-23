@@ -10,10 +10,11 @@ import {
   usePracticeSessionQuery,
   usePracticeStatePatchMutation,
 } from "./quiz-queries";
+import { quizErrorMessage } from "./quiz-error-messages";
 import { QuizQuestionPresenter } from "./QuizQuestionPresenter";
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "연습 상태를 저장하지 못했습니다.";
+  return quizErrorMessage(error, "연습 상태를 저장하지 못했습니다.");
 }
 
 function PracticeInteraction({
