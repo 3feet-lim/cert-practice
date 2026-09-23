@@ -385,9 +385,11 @@ async function listFiles(directory) {
 }
 
 function cacheControl(key) {
-  return key.endsWith(".html")
-    ? "no-cache, no-store, must-revalidate"
-    : "public, max-age=31536000, immutable";
+  if (key.endsWith(".html")) return "no-cache, no-store, must-revalidate";
+  // Only hashed build output is immutable; unhashed public/ files must stay refreshable.
+  return key.startsWith("assets/")
+    ? "public, max-age=31536000, immutable"
+    : "public, max-age=3600";
 }
 
 function latestObjectVersion(bucket, key, region) {
@@ -616,7 +618,20 @@ async function release(options) {
 
   // Expand-only migrations run before new code; this command never executes down migrations.
   runMigrations(endpoint, region);
-  run("pnpm", ["build"]);
+  run("pnpm", ["build"], {
+    env: {
+      VITE_CERTQUIZ_RUNTIME_MODE: "http",
+      VITE_CERTQUIZ_API_BASE_URL: api.origin,
+      VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL: ssmParameter(
+        options.stage,
+        "cognito-hosted-ui-base-url",
+      ),
+      VITE_CERTQUIZ_COGNITO_CLIENT_ID: ssmParameter(options.stage, "cognito-client-id"),
+      VITE_CERTQUIZ_AUTH_REDIRECT_PATH: "/auth/callback",
+      VITE_CERTQUIZ_AUTH_LOGOUT_PATH: "/login",
+    },
+  });
+  run("node", ["scripts/verify-web-bundle.mjs"]);
   deployLambda(options.stage, region, roleArn, endpoint);
   const unpublishedVersion = latestPublishedVersion(options.stage, region);
   invokeUnpublishedVersion(options.stage, region, unpublishedVersion, webOrigin);

@@ -16,6 +16,7 @@
     "build": "pnpm run typecheck && pnpm --filter @cert-quiz/contracts build && pnpm --filter @cert-quiz/domain build && pnpm --filter @cert-quiz/db build && pnpm --filter @cert-quiz/api build && pnpm --filter @cert-quiz/web build",
     "ui:preview:export": "node scripts/export-ui-preview.mjs",
     "ui:preview:check": "node scripts/check-ui-preview.mjs",
+    "web:bundle:check": "node scripts/verify-web-bundle.mjs",
     "ci": "pnpm run quality:web",
     "ci:pr": "pnpm run lint && pnpm run format && pnpm run typecheck && pnpm run test:ci && pnpm run ui:preview:check && pnpm run test:e2e",
     "ci:db-adapter": "RUN_DSQL_REPOSITORY_CONTRACTS=true RUN_DSQL_APPLICATION_TABLE_SUITE=true pnpm --filter @cert-quiz/db test:repository && RUN_DSQL_API_ACCEPTANCE_SUITE=true pnpm --filter @cert-quiz/api test:integration && pnpm db:spike:live && node scripts/verify-dsql-spike-evidence.mjs",

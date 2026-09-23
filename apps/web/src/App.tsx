@@ -6,11 +6,16 @@ import { AuthSessionProvider } from "./app/auth-session";
 const AppRoutes = lazy(() =>
   import("./app/router").then(({ AppRoutes: Routes }) => ({ default: Routes })),
 );
-const StaticPreviewRoutes = lazy(() =>
-  import("./preview/StaticPreviewRoutes").then(({ StaticPreviewRoutes: Routes }) => ({
-    default: Routes,
-  })),
-);
+// Static review previews are a development aid; production builds drop them entirely.
+const StaticPreviewRoutes = import.meta.env.PROD
+  ? null
+  : lazy(() =>
+      import("./preview/StaticPreviewRoutes").then(
+        ({ StaticPreviewRoutes: Routes }) => ({
+          default: Routes,
+        }),
+      ),
+    );
 
 function LoadingApp() {
   return (
@@ -24,11 +29,13 @@ function LoadingApp() {
 
 export function App() {
   const [searchParams] = useSearchParams();
-  const preview = searchParams.has("preview") || searchParams.has("fixture");
+  const preview =
+    StaticPreviewRoutes !== null &&
+    (searchParams.has("preview") || searchParams.has("fixture"));
 
   return (
     <Suspense fallback={<LoadingApp />}>
-      {preview ? (
+      {preview && StaticPreviewRoutes ? (
         <StaticPreviewRoutes />
       ) : (
         <AuthSessionProvider>

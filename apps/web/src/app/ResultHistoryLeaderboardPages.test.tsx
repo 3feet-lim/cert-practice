@@ -117,6 +117,11 @@ describe("result, history, and leaderboard runtime pages", () => {
     renderPage("/app/history", api, <HistoryPage />);
 
     expect(await screen.findByText("모의고사 응시 이력이 없습니다")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "모의고사 이력" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "모의고사 시작하기" })).toHaveAttribute(
+      "href",
+      "/app",
+    );
     expect(fixtures.history.empty.attempts).toHaveLength(0);
     expect(getHistory).toHaveBeenCalledWith({});
     expect(

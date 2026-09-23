@@ -47,7 +47,7 @@ describe("QuizQuestionPresenter", () => {
     expect(choices[2]).not.toBeChecked();
     expect(screen.getByText(/\(2\/2 선택\)/)).toBeVisible();
 
-    await user.click(screen.getByRole("button", { name: /Flag/ }));
+    await user.click(screen.getByRole("button", { name: /^(나중에 보기|표시됨)$/ }));
     expect(onFlagChange).toHaveBeenCalledWith(multiChoice.id, !multiChoice.flagged);
 
     expect(screen.getByRole("button", { name: "한국어" })).toHaveAttribute(

@@ -29,9 +29,9 @@ export function useAuthSession(): AuthSessionContextValue {
 export function createAdminRequiredError(): CertQuizApiError {
   return {
     code: "admin-required",
-    message: "Administrator access is required.",
+    message: "관리자만 볼 수 있는 페이지입니다.",
     requestId: "frontend-route-guard",
     retryable: false,
-    nextAction: "Return to the learner application.",
+    nextAction: "학습 홈으로 돌아가 학습을 계속하세요.",
   };
 }

@@ -7,7 +7,11 @@ import { resolveCertQuizResult } from "../api/query-result";
 import { useCertQuizApi } from "../api/useCertQuizApi";
 import { certQuizQueryKeys } from "./query-keys";
 import { providerLogoSrc } from "./provider-logos";
-import { useActivePracticeSessionsQuery, useCatalogQuery } from "../api/queries";
+import {
+  useActivePracticeSessionsQuery,
+  useCatalogQuery,
+  useHistoryQuery,
+} from "../api/queries";
 import { AccessibleDialog } from "../components/AccessibleDialog";
 import { AsyncBoundary } from "../components/AsyncBoundary";
 import { toQueryAsyncBoundaryState } from "../components/async-boundary-state";
@@ -20,6 +24,12 @@ import {
   CardTitle,
 } from "../components/ui/Card";
 import { cn } from "../lib/cn";
+import { useDocumentTitle } from "../lib/use-document-title";
+
+const scoringModeLabels: Record<string, string> = {
+  all_or_nothing: "완전 일치 시 정답",
+  partial: "부분 점수",
+};
 
 /** Mirrors Button's primary-variant classes so a router `Link` can look identical to a `<Button>`. */
 const linkButtonClassName = cn(
@@ -51,7 +61,7 @@ function ActivePracticeBanner() {
 
   return (
     <section aria-label="이어 풀 수 있는 연습">
-      <Card tone="highlight" className="max-w-2xl">
+      <Card tone="highlight">
         <p className="eyebrow mb-2">ACTIVE PRACTICE</p>
         <h2 className="text-xl font-bold tracking-tight text-foreground">이어 풀기</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -77,6 +87,73 @@ function ActivePracticeBanner() {
             </li>
           ))}
         </ul>
+      </Card>
+    </section>
+  );
+}
+
+function RecentExamSummary() {
+  const history = useHistoryQuery();
+  const attempts = history.data?.attempts.slice(0, 3) ?? [];
+
+  return (
+    <section aria-labelledby="recent-exams-heading">
+      <Card>
+        <h2 id="recent-exams-heading" className="text-lg font-bold tracking-tight">
+          최근 모의고사
+        </h2>
+        {history.isPending ? (
+          <p className="mt-3 text-sm text-muted-foreground" role="status">
+            최근 성적을 불러오는 중입니다.
+          </p>
+        ) : attempts.length === 0 ? (
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            아직 응시한 모의고사가 없습니다. 자격증을 골라 첫 모의고사에 도전해 보세요.
+          </p>
+        ) : (
+          <ul className="mt-4 grid gap-2">
+            {attempts.map((attempt) => (
+              <li key={attempt.attemptId}>
+                <Link
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border p-3 text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30"
+                  to={`/app/attempts/${attempt.attemptId}`}
+                >
+                  <span className="min-w-0">
+                    <span className="block font-semibold text-foreground">
+                      {attempt.certificationCode}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      {new Date(attempt.submittedAt).toLocaleDateString("ko-KR")}
+                    </span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-2">
+                    <span className="font-bold tabular-nums">
+                      {Number(attempt.accuracyRate).toFixed(0)}%
+                    </span>
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-xs font-bold",
+                        attempt.passed
+                          ? "bg-success-soft text-success"
+                          : "bg-danger-soft text-danger",
+                      )}
+                    >
+                      {attempt.passed ? "합격" : "불합격"}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        {attempts.length > 0 ? (
+          <Link
+            className="mt-4 inline-block text-sm font-semibold text-primary hover:underline"
+            to="/app/history"
+          >
+            전체 이력 보기
+          </Link>
+        ) : null}
       </Card>
     </section>
   );
@@ -108,7 +185,9 @@ function CatalogContent() {
                 {providerLogoSrc(provider.name) || provider.logoUrl ? (
                   <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-white p-1 shadow-sm">
                     <img
-                      src={providerLogoSrc(provider.name) ?? provider.logoUrl ?? undefined}
+                      src={
+                        providerLogoSrc(provider.name) ?? provider.logoUrl ?? undefined
+                      }
                       alt={provider.name}
                       className="size-full object-contain"
                     />
@@ -128,7 +207,7 @@ function CatalogContent() {
                   {provider.name}
                 </h2>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                 {provider.certifications.map((certification) => (
                   <Card key={certification.id} className="flex w-full flex-col">
                     <CardHeader>
@@ -162,6 +241,7 @@ function CatalogContent() {
 }
 
 export function CatalogHomePage() {
+  useDocumentTitle("학습 홈");
   return (
     <section className="content-card" aria-labelledby="welcome-title" data-screen="S2">
       <div>
@@ -172,9 +252,8 @@ export function CatalogHomePage() {
           이어 풀던 연습을 계속하거나, 새 자격증을 선택해 시작하세요.
         </p>
       </div>
-      <div className="mt-10 grid gap-10">
-        <ActivePracticeBanner />
-        <section aria-labelledby="catalog-heading">
+      <div className="mt-10 grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
+        <section aria-labelledby="catalog-heading" className="min-w-0">
           <div className="mb-5">
             <h2 id="catalog-heading" className="text-xl font-bold tracking-tight">
               자격증 찾아보기
@@ -185,6 +264,10 @@ export function CatalogHomePage() {
           </div>
           <CatalogContent />
         </section>
+        <div className="order-first grid gap-6 xl:order-none">
+          <ActivePracticeBanner />
+          <RecentExamSummary />
+        </div>
       </div>
     </section>
   );
@@ -207,6 +290,9 @@ export function ModeSelectPage() {
   const certification = catalog.data?.providers
     .flatMap((provider) => provider.certifications)
     .find((candidate) => candidate.id === certificationId);
+  useDocumentTitle(
+    certification ? `학습 모드 선택 · ${certification.code}` : "학습 모드 선택",
+  );
 
   const startPractice = useMutation({
     mutationFn: () => {
@@ -317,6 +403,15 @@ export function ModeSelectPage() {
 
   const commandsPending =
     startPractice.isPending || resumePractice.isPending || replacePractice.isPending;
+  const certificationFacts = [
+    { label: "문항 수", value: `${certification.totalQuestions}문항` },
+    { label: "제한 시간", value: `${certification.timeLimitMinutes}분` },
+    { label: "합격 기준", value: `${certification.passThreshold}%` },
+    {
+      label: "채점 방식",
+      value: scoringModeLabels[certification.scoringMode] ?? certification.scoringMode,
+    },
+  ];
 
   return (
     <section
@@ -324,6 +419,22 @@ export function ModeSelectPage() {
       aria-labelledby="mode-select-title"
       data-screen="S3"
     >
+      <nav aria-label="이동 경로" className="mb-4 text-sm">
+        <ol className="flex flex-wrap items-center gap-1 text-muted-foreground">
+          <li>
+            <Link
+              className="rounded font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30"
+              to="/app"
+            >
+              학습 홈
+            </Link>
+          </li>
+          <li aria-hidden="true">›</li>
+          <li aria-current="page" className="font-semibold text-foreground">
+            {certification.code}
+          </li>
+        </ol>
+      </nav>
       <div className="rounded-xl border border-border bg-muted/40 p-4 sm:p-6">
         <span className="inline-flex items-center rounded-md bg-primary px-2.5 py-1 text-xs font-bold tracking-wide text-primary-foreground">
           {certification.code}
@@ -334,33 +445,18 @@ export function ModeSelectPage() {
         >
           {certification.name}
         </h1>
-        <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 sm:gap-x-6 sm:grid-cols-4">
-          <div>
-            <dt className="text-xs font-semibold text-muted-foreground">문항 수</dt>
-            <dd className="mt-1 text-base font-bold text-foreground">
-              {certification.totalQuestions}문항
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold text-muted-foreground">제한 시간</dt>
-            <dd className="mt-1 text-base font-bold text-foreground">
-              {certification.timeLimitMinutes}분
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold text-muted-foreground">합격 기준</dt>
-            <dd className="mt-1 text-base font-bold text-foreground">
-              {certification.passThreshold}%
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-semibold text-muted-foreground">채점 방식</dt>
-            <dd className="mt-1 text-base font-bold text-foreground">
-              {certification.scoringMode === "all_or_nothing"
-                ? "전체 정답"
-                : certification.scoringMode}
-            </dd>
-          </div>
+        <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {certificationFacts.map((fact) => (
+            <div
+              key={fact.label}
+              className="rounded-lg border border-border bg-card px-4 py-3 shadow-sm"
+            >
+              <dt className="text-xs font-semibold text-muted-foreground">
+                {fact.label}
+              </dt>
+              <dd className="mt-1 text-lg font-bold text-foreground">{fact.value}</dd>
+            </div>
+          ))}
         </dl>
       </div>
       <h2

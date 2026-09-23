@@ -1,5 +1,5 @@
 import type { Uuid } from "@cert-quiz/contracts";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
   useAttemptQuery,
@@ -12,12 +12,24 @@ import {
   useScoreVisibilityMutation,
 } from "../api/queries";
 import { AsyncBoundary, StatePanel, StatusBanner } from "../components";
+import { useDocumentTitle } from "../lib/use-document-title";
 import {
   StaticExamResultScreen,
   StaticHistoryScreen,
   StaticLeaderboardScreen,
   StaticPracticeResultScreen,
 } from "../preview/StaticResultHistoryLeaderboardScreens";
+
+const startExamLinkClassName =
+  "inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30";
+
+function StartExamLink() {
+  return (
+    <Link className={startExamLinkClassName} to="/app">
+      모의고사 시작하기
+    </Link>
+  );
+}
 
 type QuerySnapshot<Data> = {
   isPending: boolean;
@@ -58,6 +70,7 @@ function requestState<Data>(
 }
 
 export function PracticeResultPage() {
+  useDocumentTitle("연습 결과");
   const { id } = useParams();
   const query = usePracticeResultQuery(id as Uuid);
   return (
@@ -70,6 +83,7 @@ export function PracticeResultPage() {
     >
       {(practice) => (
         <StaticPracticeResultScreen
+          screenMarker={null}
           fixture={{ state: "success", data: { practice } }}
         />
       )}
@@ -78,6 +92,7 @@ export function PracticeResultPage() {
 }
 
 export function AttemptResultPage() {
+  useDocumentTitle("모의고사 결과");
   const { id } = useParams();
   const query = useAttemptQuery(id as Uuid);
   return (
@@ -89,13 +104,17 @@ export function AttemptResultPage() {
       )}
     >
       {(exam) => (
-        <StaticExamResultScreen fixture={{ state: "success", data: { exam } }} />
+        <StaticExamResultScreen
+          screenMarker={null}
+          fixture={{ state: "success", data: { exam } }}
+        />
       )}
     </AsyncBoundary>
   );
 }
 
 export function HistoryPage() {
+  useDocumentTitle("모의고사 이력");
   const history = useHistoryQuery();
   const trends = useHistoryTrendsQuery();
   const historyState = requestState(
@@ -116,6 +135,7 @@ export function HistoryPage() {
           {(trendData) => (
             <StaticHistoryScreen
               screenMarker={null}
+              emptyAction={<StartExamLink />}
               fixture={
                 page.attempts.length === 0
                   ? {
@@ -136,10 +156,13 @@ export function HistoryPage() {
 }
 
 export function LeaderboardPage() {
+  useDocumentTitle("리더보드");
   const { certId } = useParams();
+  const navigate = useNavigate();
   const catalog = useCatalogQuery();
-  const certificationId =
-    (certId as Uuid | undefined) ?? catalog.data?.providers[0]?.certifications[0]?.id;
+  const certifications =
+    catalog.data?.providers.flatMap((provider) => provider.certifications) ?? [];
+  const certificationId = (certId as Uuid | undefined) ?? certifications[0]?.id;
   const leaderboard = useLeaderboardQuery(certificationId);
   const currentUser = useCurrentUserQuery();
   const visibility = useScoreVisibilityMutation();
@@ -183,6 +206,28 @@ export function LeaderboardPage() {
           {(data) => (
             <div className="grid gap-4">
               <StaticLeaderboardScreen
+                screenMarker={null}
+                emptyAction={<StartExamLink />}
+                certificationPicker={
+                  certifications.length > 1 ? (
+                    <label className="grid gap-1 text-sm font-semibold">
+                      자격증
+                      <select
+                        className="min-h-10 rounded-md border border-border bg-card px-3 text-sm"
+                        value={certificationId}
+                        onChange={(event) =>
+                          navigate(`/app/leaderboards/${event.target.value}`)
+                        }
+                      >
+                        {certifications.map((certification) => (
+                          <option key={certification.id} value={certification.id}>
+                            {certification.code} · {certification.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : null
+                }
                 fixture={
                   data.entries.length === 0
                     ? {

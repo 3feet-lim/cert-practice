@@ -3,11 +3,6 @@ import {
   createCognitoPkceSession,
   type BrowserAuthSession,
 } from "./auth/cognito-pkce-session";
-import {
-  createMockAuthController,
-  createMockCertQuizApi,
-  type MockAuthActor,
-} from "./api/mock-adapter";
 import type { CertQuizApi } from "./api/port";
 import type { MockAuthCallbackCapability } from "./app/mock-auth-capability";
 export type WebRuntimeMode = "http" | "mock";
@@ -169,53 +164,24 @@ export interface WebRuntime {
   readonly browserAuthSession?: BrowserAuthSession;
   readonly authCallbackCapability?: MockAuthCallbackCapability;
 }
-export interface CreateWebRuntimeOptions {
-  readonly mockActor?: string | null;
-  readonly mockScenario?: string | null;
-}
-function isMockActor(value: string | null | undefined): value is MockAuthActor {
-  return (
-    value === "approved" ||
-    value === "admin" ||
-    value === "pending" ||
-    value === "unauthenticated"
-  );
-}
-/** Creates mock dependencies only for an explicitly resolved non-production mock mode. */
+/**
+ * Creates production HTTP dependencies. Mock dependencies live in runtime-mock.ts,
+ * which main.tsx loads only in non-production builds so they never ship.
+ */
 export function createWebRuntime(
-  configuration: WebRuntimeConfiguration,
-  options: CreateWebRuntimeOptions = {},
+  configuration: HttpWebRuntimeConfiguration,
 ): WebRuntime {
-  if (configuration.mode === "http") {
-    const browserAuthSession = createCognitoPkceSession({
-      hostedUiBaseUrl: configuration.cognitoHostedUiBaseUrl,
-      clientId: configuration.cognitoClientId,
-      redirectUri: configuration.redirectUri,
-      logoutUri: configuration.logoutUri,
-    });
-    return {
-      api: createHttpCertQuizApi({
-        baseUrl: configuration.apiBaseUrl,
-        getBearerToken: () => browserAuthSession.getIdToken(),
-      }),
-      browserAuthSession,
-    };
-  }
-  const authController = createMockAuthController(
-    isMockActor(options.mockActor) ? options.mockActor : "unauthenticated",
-  );
-  const mockScenario = options.mockScenario;
+  const browserAuthSession = createCognitoPkceSession({
+    hostedUiBaseUrl: configuration.cognitoHostedUiBaseUrl,
+    clientId: configuration.cognitoClientId,
+    redirectUri: configuration.redirectUri,
+    logoutUri: configuration.logoutUri,
+  });
   return {
-    api: createMockCertQuizApi({
-      authController,
-      e2eScenario:
-        mockScenario === "completed-results" ||
-        mockScenario === "catalog-loading" ||
-        mockScenario === "catalog-empty" ||
-        mockScenario === "catalog-retry-once"
-          ? mockScenario
-          : undefined,
+    api: createHttpCertQuizApi({
+      baseUrl: configuration.apiBaseUrl,
+      getBearerToken: () => browserAuthSession.getIdToken(),
     }),
-    authCallbackCapability: authController,
+    browserAuthSession,
   };
 }

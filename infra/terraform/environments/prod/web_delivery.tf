@@ -101,6 +101,25 @@ resource "aws_cloudfront_response_headers_policy" "web_security" {
   }
 }
 
+# Rewrites extensionless SPA routes (/app/..., /auth/callback) to index.html at the
+# edge, so missing files such as /assets/x.js or /sitemap.xml return a real 404.
+resource "aws_cloudfront_function" "spa_routing" {
+  name    = "${var.service_name}-${local.runtime_environment}-spa-routing"
+  runtime = "cloudfront-js-2.0"
+  comment = "Serve index.html for extensionless SPA routes"
+  publish = true
+  code    = <<-EOT
+    function handler(event) {
+      var request = event.request;
+      var lastSegment = request.uri.split("/").pop();
+      if (lastSegment.indexOf(".") === -1) {
+        request.uri = "/index.html";
+      }
+      return request;
+    }
+  EOT
+}
+
 resource "aws_cloudfront_distribution" "web" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -123,6 +142,11 @@ resource "aws_cloudfront_distribution" "web" {
     compress                   = true
     response_headers_policy_id = aws_cloudfront_response_headers_policy.web_security.id
 
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa_routing.arn
+    }
+
     forwarded_values {
       query_string = false
 
@@ -132,18 +156,20 @@ resource "aws_cloudfront_distribution" "web" {
     }
   }
 
+  # SPA routes are rewritten by the viewer-request function. A private OAC bucket
+  # answers missing keys with 403, so both map to a real 404 page.
   custom_error_response {
     error_code            = 403
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 0
+    response_code         = 404
+    response_page_path    = "/404.html"
+    error_caching_min_ttl = 60
   }
 
   custom_error_response {
     error_code            = 404
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 0
+    response_code         = 404
+    response_page_path    = "/404.html"
+    error_caching_min_ttl = 60
   }
 
   restrictions {

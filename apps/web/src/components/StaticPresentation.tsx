@@ -286,43 +286,73 @@ export interface QuestionNavigatorItem {
   number: number;
   href: string;
   state?: "current" | "answered" | "unanswered";
+  /** Answer progress independent of focus, so the current question keeps its status. */
+  progress?: "unanswered" | "answered" | "submitted";
   flagged?: boolean;
 }
 export interface QuestionNavigatorProps {
   items: QuestionNavigatorItem[];
   label?: string;
   onNavigate?: (item: QuestionNavigatorItem, index: number) => void;
+  className?: string;
 }
+
+const progressLabels = {
+  unanswered: "미응답",
+  answered: "답 선택함",
+  submitted: "제출함",
+} as const;
+
+function navigatorProgress(item: QuestionNavigatorItem) {
+  if (item.progress) return item.progress;
+  return item.state === "answered" ? "answered" : "unanswered";
+}
+
 export function QuestionNavigator({
   items,
   label = "문항 탐색",
   onNavigate,
+  className,
 }: QuestionNavigatorProps) {
+  const showsSubmitted = items.some((item) => item.progress === "submitted");
   return (
-    <nav aria-label={label} className="rounded-xl border border-border bg-card p-4">
+    <nav
+      aria-label={label}
+      className={cn("rounded-xl border border-border bg-card p-4", className)}
+    >
       <ol className="flex flex-wrap gap-2">
         {items.map((item, index) => {
+          const current = item.state === "current";
+          const progress = navigatorProgress(item);
           const className = cn(
-            "inline-flex size-10 items-center justify-center rounded-md border text-sm font-bold focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
-            item.state === "current"
+            "relative inline-flex size-10 items-center justify-center rounded-md border text-sm font-bold focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
+            current && item.progress === undefined
               ? "border-primary bg-primary text-primary-foreground"
-              : item.state === "answered"
-                ? "border-success/30 bg-success-soft text-success"
-                : "border-border bg-card",
-            item.flagged && "ring-2 ring-warning",
+              : progress === "submitted"
+                ? "border-success/40 bg-success-soft text-success"
+                : progress === "answered"
+                  ? "border-primary/40 bg-primary-soft text-primary"
+                  : "border-border bg-card text-foreground",
+            current &&
+              item.progress !== undefined &&
+              "ring-2 ring-primary ring-offset-2 ring-offset-card",
           );
           const itemLabel = (
             <>
               <span className="sr-only">
-                {item.number}번 문항,{" "}
-                {item.state === "answered"
-                  ? "응답 완료"
-                  : item.state === "current"
-                    ? "현재 문항"
-                    : "미응답"}
-                {item.flagged ? ", 플래그됨" : ""}
+                {item.number}번 문항, {current ? "현재 문항, " : ""}
+                {progressLabels[progress]}
+                {item.flagged ? ", 나중에 보기 표시됨" : ""}
               </span>
               <span aria-hidden="true">{item.number}</span>
+              {item.flagged ? (
+                <span
+                  aria-hidden="true"
+                  className="absolute -right-1.5 -top-1.5 grid size-4 place-items-center rounded-full bg-warning text-[0.6rem] leading-none text-white"
+                >
+                  ★
+                </span>
+              ) : null}
             </>
           );
 
@@ -330,7 +360,7 @@ export function QuestionNavigator({
             <li key={item.number}>
               {onNavigate ? (
                 <button
-                  aria-current={item.state === "current" ? "page" : undefined}
+                  aria-current={current ? "page" : undefined}
                   className={className}
                   onClick={() => onNavigate(item, index)}
                   type="button"
@@ -339,7 +369,7 @@ export function QuestionNavigator({
                 </button>
               ) : (
                 <a
-                  aria-current={item.state === "current" ? "page" : undefined}
+                  aria-current={current ? "page" : undefined}
                   className={className}
                   href={item.href}
                 >
@@ -350,6 +380,29 @@ export function QuestionNavigator({
           );
         })}
       </ol>
+      <ul
+        aria-hidden="true"
+        className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground"
+      >
+        <li className="inline-flex items-center gap-1.5">
+          <span className="size-3 rounded-sm border border-border bg-card" />
+          미응답
+        </li>
+        <li className="inline-flex items-center gap-1.5">
+          <span className="size-3 rounded-sm border border-primary/40 bg-primary-soft" />
+          답 선택함
+        </li>
+        {showsSubmitted ? (
+          <li className="inline-flex items-center gap-1.5">
+            <span className="size-3 rounded-sm border border-success/40 bg-success-soft" />
+            제출함
+          </li>
+        ) : null}
+        <li className="inline-flex items-center gap-1.5">
+          <span className="text-warning">★</span>
+          나중에 보기
+        </li>
+      </ul>
     </nav>
   );
 }

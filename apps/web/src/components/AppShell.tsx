@@ -81,7 +81,7 @@ export function PublicShell({
         tabIndex={-1}
         className={cn(
           "mx-auto grid min-h-[calc(100vh-4.5rem)] max-w-7xl items-center gap-12 px-8 py-12",
-          aside ? "grid-cols-[minmax(0,1fr)_minmax(22rem,0.8fr)]" : "max-w-3xl",
+          aside ? "lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.8fr)]" : "max-w-3xl",
         )}
       >
         <div className="min-w-0">{children}</div>
@@ -187,11 +187,11 @@ export function AppShell({
       <div
         className={cn(
           "mx-auto grid max-w-screen-2xl",
-          hasSidebar && "grid-cols-[16rem_minmax(0,1fr)]",
+          hasSidebar && "lg:grid-cols-[16rem_minmax(0,1fr)]",
         )}
       >
         {hasSidebar ? (
-          <aside className="flex min-h-[calc(100vh-4.5rem)] flex-col border-r border-border bg-card px-4 py-8">
+          <aside className="flex flex-col border-b border-border lg:min-h-[calc(100vh-4.5rem)] lg:border-b-0 lg:border-r bg-card px-4 py-8">
             {navigation.length > 0 ? (
               <Navigation items={navigation} label={navigationLabel} />
             ) : null}
@@ -203,7 +203,11 @@ export function AppShell({
             {sidebarFooter ? <div className="mt-5">{sidebarFooter}</div> : null}
           </aside>
         ) : null}
-        <main id="main-content" tabIndex={-1} className="min-w-0 px-10 py-10">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-10"
+        >
           {children}
         </main>
       </div>
@@ -242,7 +246,7 @@ export function AdminShell({
       productHref={productHref}
       productEyebrow="Administration"
     >
-      <div className="grid grid-cols-[14rem_minmax(0,1fr)] gap-10">
+      <div className="grid gap-10 lg:grid-cols-[14rem_minmax(0,1fr)]">
         <aside className="rounded-xl border border-border bg-card p-4 shadow-card">
           <p className="mb-3 px-3 text-xs font-extrabold uppercase tracking-[0.14em] text-muted-foreground">
             Admin

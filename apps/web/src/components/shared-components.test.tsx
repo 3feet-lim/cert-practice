@@ -349,7 +349,7 @@ describe("static presentational components", () => {
     expect(screen.getByRole("status")).toHaveTextContent("변경 사항이 저장되었습니다.");
     expect(screen.getByRole("navigation", { name: "문항 탐색" })).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /1번 문항, 현재 문항, 플래그됨/ }),
+      screen.getByRole("link", { name: /1번 문항, 현재 문항, .*나중에 보기 표시됨/ }),
     ).toHaveAttribute("aria-current", "page");
     expect(screen.getByLabelText("남은 시간")).toHaveTextContent("02:59:30");
     expect(screen.getByLabelText("선택한 파일 요약")).toHaveTextContent(
@@ -411,7 +411,7 @@ describe("QuestionPresenter", () => {
       "aria-pressed",
       "true",
     );
-    expect(screen.getByText("Flag")).toBeVisible();
+    expect(screen.getByText("★ 나중에 보기")).toBeVisible();
     expect(screen.getByRole("navigation", { name: "문항 탐색" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "제출 결과" })).toBeVisible();
     expect(screen.getByText("배포를 사용합니다.")).toBeVisible();

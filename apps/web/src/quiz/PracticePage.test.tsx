@@ -233,8 +233,8 @@ describe("PracticePage", () => {
 
     await userEvent
       .setup()
-      .click(await screen.findByRole("button", { name: "Flag 없음" }));
-    expect(screen.getByRole("button", { name: "Flag" })).toHaveAttribute(
+      .click(await screen.findByRole("button", { name: "나중에 보기" }));
+    expect(screen.getByRole("button", { name: "표시됨" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -260,7 +260,7 @@ describe("PracticePage", () => {
     expect(alert).not.toHaveTextContent(
       "Refresh the latest practice state and try again.",
     );
-    expect(screen.getByRole("button", { name: "Flag 없음" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "나중에 보기" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );

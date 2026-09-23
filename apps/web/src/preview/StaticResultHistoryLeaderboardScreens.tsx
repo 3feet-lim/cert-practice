@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type {
   ExamResultDto,
   HistoryPageDto,
@@ -106,7 +107,13 @@ function ResultMetadata({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function StaticPracticeResultScreen({ fixture }: { fixture: ResultFixtures }) {
+export function StaticPracticeResultScreen({
+  fixture,
+  screenMarker = "S6 · PRACTICE RESULT",
+}: {
+  fixture: ResultFixtures;
+  screenMarker?: string | null;
+}) {
   if (fixture.state === "empty") {
     return (
       <StatePanel status="empty" title={fixture.title} message={fixture.message} />
@@ -135,7 +142,7 @@ export function StaticPracticeResultScreen({ fixture }: { fixture: ResultFixture
   return (
     <div className="grid max-w-6xl gap-8">
       <PageHeader
-        eyebrow="S6 · PRACTICE RESULT"
+        eyebrow={screenMarker ?? undefined}
         title="연습 결과"
         description={`${result.certification.code} · ${result.certification.name}`}
         metadata={<Badge tone="info">168시간 다시보기</Badge>}
@@ -173,7 +180,13 @@ export function StaticPracticeResultScreen({ fixture }: { fixture: ResultFixture
   );
 }
 
-export function StaticExamResultScreen({ fixture }: { fixture: ResultFixtures }) {
+export function StaticExamResultScreen({
+  fixture,
+  screenMarker = "S7 · EXAM RESULT",
+}: {
+  fixture: ResultFixtures;
+  screenMarker?: string | null;
+}) {
   if (fixture.state === "empty") {
     return (
       <StatePanel status="empty" title={fixture.title} message={fixture.message} />
@@ -202,7 +215,7 @@ export function StaticExamResultScreen({ fixture }: { fixture: ResultFixtures })
   return (
     <div className="grid max-w-6xl gap-8">
       <PageHeader
-        eyebrow="S7 · EXAM RESULT"
+        eyebrow={screenMarker ?? undefined}
         title="모의고사 결과"
         description={`${result.certification.code} · ${result.certification.name}`}
         metadata={
@@ -286,12 +299,16 @@ function TrendGraphic({ points }: { points: readonly { accuracyRate: string }[] 
   );
 }
 
+const historyHeaderDescription = "연습 결과는 응시 횟수와 점수 추이에서 제외됩니다.";
+
 export function StaticHistoryScreen({
   fixture,
   screenMarker = "S8 · HISTORY",
+  emptyAction,
 }: {
   fixture: HistoryFixtures;
   screenMarker?: string | null;
+  emptyAction?: ReactNode;
 }) {
   if (fixture.state === "error") {
     return (
@@ -304,11 +321,20 @@ export function StaticHistoryScreen({
   }
   if (fixture.state === "empty") {
     return (
-      <StatePanel
-        status="empty"
-        title={fixture.title}
-        message={`${fixture.message} ${fixture.nextAction}`}
-      />
+      <div className="grid max-w-6xl gap-8">
+        <PageHeader
+          eyebrow={screenMarker ?? undefined}
+          title="모의고사 이력"
+          titleClassName="text-2xl"
+          description={historyHeaderDescription}
+        />
+        <StatePanel
+          status="empty"
+          title={fixture.title}
+          message={`${fixture.message} ${fixture.nextAction}`}
+          action={emptyAction}
+        />
+      </div>
     );
   }
 
@@ -320,7 +346,7 @@ export function StaticHistoryScreen({
         eyebrow={screenMarker ?? undefined}
         title="모의고사 이력"
         titleClassName="text-2xl"
-        description="연습 결과는 응시 횟수와 점수 추이에서 제외됩니다."
+        description={historyHeaderDescription}
       />
       <DataTable
         caption="모의고사 응시 이력"
@@ -376,12 +402,18 @@ export function StaticLeaderboardScreen({
   scorePublic,
   onScorePublicChange,
   visibilityPending = false,
+  screenMarker = "S9 · LEADERBOARD",
+  certificationPicker,
+  emptyAction,
 }: {
   fixture: LeaderboardFixtures;
   privateVisibility?: boolean;
   scorePublic?: boolean;
   onScorePublicChange?: (scorePublic: boolean) => void;
   visibilityPending?: boolean;
+  screenMarker?: string | null;
+  certificationPicker?: ReactNode;
+  emptyAction?: ReactNode;
 }) {
   if (fixture.state === "error") {
     return (
@@ -392,24 +424,22 @@ export function StaticLeaderboardScreen({
       />
     );
   }
-  if (fixture.state === "empty") {
-    return (
-      <StatePanel
-        status="empty"
-        title={fixture.title}
-        message={`${fixture.message} ${fixture.nextAction}`}
-      />
-    );
-  }
 
   const isScorePublic = scorePublic ?? !privateVisibility;
+  const certificationCode = fixture.data?.certificationCode;
 
   return (
     <div className="grid max-w-6xl gap-8">
       <PageHeader
-        eyebrow="S9 · LEADERBOARD"
+        eyebrow={screenMarker ?? undefined}
         title="리더보드"
-        description={`${fixture.data.certificationCode} · 공개 사용자의 최고 정답률 순위`}
+        titleClassName="text-2xl"
+        description={
+          certificationCode
+            ? `${certificationCode} · 공개 사용자의 최고 정답률 순위`
+            : "공개 사용자의 최고 정답률 순위"
+        }
+        actions={certificationPicker}
       />
       <StatusBanner
         title="점수 공개 설정"
@@ -439,6 +469,23 @@ export function StaticLeaderboardScreen({
           tone="info"
         />
       ) : null}
+      {fixture.state === "empty" ? (
+        <StatePanel
+          status="empty"
+          title={fixture.title}
+          message={`${fixture.message} ${fixture.nextAction}`}
+          action={emptyAction}
+        />
+      ) : (
+        <LeaderboardTable entries={fixture.data.entries} />
+      )}
+    </div>
+  );
+}
+
+function LeaderboardTable({ entries }: { entries: LeaderboardDto["entries"] }) {
+  return (
+    <>
       <DataTable
         caption="공개 최고 성과 리더보드"
         columns={[
@@ -465,11 +512,11 @@ export function StaticLeaderboardScreen({
             cell: (item) => dateTime(item.submittedAt),
           },
         ]}
-        rows={fixture.data.entries.map((entry) => ({ ...entry, id: entry.attemptId }))}
+        rows={entries.map((entry) => ({ ...entry, id: entry.attemptId }))}
       />
       <p className="text-sm text-muted-foreground">
         동점 사용자는 같은 순위를 공유하며 다음 순위는 건너뜁니다.
       </p>
-    </div>
+    </>
   );
 }

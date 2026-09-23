@@ -8,7 +8,10 @@ import {
   RuntimeConfigurationError,
   createWebRuntime,
   resolveWebRuntimeConfiguration,
+  type WebRuntime,
+  type WebRuntimeConfiguration,
 } from "./runtime-config";
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./styles.css";
 
 function RuntimeConfigurationErrorScreen({ message }: { message: string }) {
@@ -39,16 +42,30 @@ if (!rootElement) {
 
 const root = createRoot(rootElement);
 
-try {
+async function loadRuntime(
+  configuration: WebRuntimeConfiguration,
+): Promise<WebRuntime> {
+  if (configuration.mode === "http") return createWebRuntime(configuration);
+  // Statically false in production builds, so the mock adapter and fixtures are dropped.
+  if (import.meta.env.PROD) {
+    throw new RuntimeConfigurationError(
+      "Mock runtime mode is unavailable in a production build.",
+    );
+  }
+  const { createMockWebRuntime } = await import("./runtime-mock");
+  const searchParams = new URLSearchParams(window.location.search);
+  return createMockWebRuntime({
+    mockActor: searchParams.get("mockActor"),
+    mockScenario: searchParams.get("mockScenario"),
+  });
+}
+
+async function bootstrap() {
   const configuration = resolveWebRuntimeConfiguration(
     import.meta.env,
     window.location.origin,
   );
-  const searchParams = new URLSearchParams(window.location.search);
-  const runtime = createWebRuntime(configuration, {
-    mockActor: searchParams.get("mockActor"),
-    mockScenario: searchParams.get("mockScenario"),
-  });
+  const runtime = await loadRuntime(configuration);
 
   root.render(
     <StrictMode>
@@ -64,10 +81,12 @@ try {
       </BrowserRouter>
     </StrictMode>,
   );
-} catch (error) {
+}
+
+bootstrap().catch((error: unknown) => {
   if (error instanceof RuntimeConfigurationError) {
     root.render(<RuntimeConfigurationErrorScreen message={error.message} />);
   } else {
     throw error;
   }
-}
+});

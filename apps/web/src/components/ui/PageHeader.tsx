@@ -24,7 +24,12 @@ export function PageHeader({
   titleClassName,
 }: PageHeaderProps) {
   return (
-    <header className={cn("flex items-start justify-between gap-8", className)}>
+    <header
+      className={cn(
+        "flex flex-wrap items-start justify-between gap-x-8 gap-y-4",
+        className,
+      )}
+    >
       <div className="min-w-0 max-w-3xl">
         {eyebrow ? (
           <p className="mb-2 text-xs font-extrabold uppercase tracking-[0.16em] text-primary">

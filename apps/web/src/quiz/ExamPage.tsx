@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { CertQuizRequestError } from "../api/query-result";
+import { useDocumentTitle } from "../lib/use-document-title";
 import { AsyncBoundary } from "../components/AsyncBoundary";
 import { AccessibleDialog } from "../components/AccessibleDialog";
 import { toQueryAsyncBoundaryState } from "../components/async-boundary-state";
@@ -156,7 +157,7 @@ function ExamInteraction({
                 </dd>
               </div>
               <div>
-                <dt className="text-sm text-muted-foreground">Flag</dt>
+                <dt className="text-sm text-muted-foreground">나중에 보기</dt>
                 <dd className="text-2xl font-bold">
                   {previewMutation.data.flaggedQuestionCount}
                 </dd>
@@ -176,6 +177,11 @@ export function ExamPage() {
   const navigate = useNavigate();
   const examSessionId = sessionId as Uuid;
   const sessionQuery = useExamSessionQuery(examSessionId);
+  const certificationCode =
+    sessionQuery.data && isActiveExam(sessionQuery.data)
+      ? sessionQuery.data.certificationCode
+      : undefined;
+  useDocumentTitle(certificationCode ? `모의고사 · ${certificationCode}` : "모의고사");
 
   useEffect(() => {
     if (sessionQuery.data && !isActiveExam(sessionQuery.data)) {
@@ -190,9 +196,12 @@ export function ExamPage() {
 
   return (
     <section className="content-card" aria-labelledby="exam-title" data-screen="S5">
-      <p className="eyebrow">S5 · EXAM</p>
-      <h1 id="exam-title">모의고사</h1>
-      <p className="description">남은 시간과 제출 결과는 서버 기준으로 처리됩니다.</p>
+      <h1 id="exam-title" className="text-2xl font-bold tracking-tight">
+        모의고사
+      </h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        남은 시간과 제출 결과는 서버 기준으로 처리됩니다.
+      </p>
       <div className="mt-6">
         <AsyncBoundary state={state}>
           {(session) =>

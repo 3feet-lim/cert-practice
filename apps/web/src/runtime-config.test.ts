@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createWebRuntime, resolveWebRuntimeConfiguration } from "./runtime-config";
+import { createMockWebRuntime } from "./runtime-mock";
 
 const browserOrigin = "https://quiz.dev.example.com";
 const httpEnvironment = {
@@ -62,14 +63,17 @@ describe("web runtime configuration", () => {
   });
 
   it("selects the HTTP adapter without creating a mock callback capability", () => {
-    const runtime = createWebRuntime(
-      resolveWebRuntimeConfiguration(httpEnvironment, browserOrigin),
+    const configuration = resolveWebRuntimeConfiguration(
+      httpEnvironment,
+      browserOrigin,
     );
+    if (configuration.mode !== "http") throw new Error("Expected HTTP configuration.");
+    const runtime = createWebRuntime(configuration);
     expect(runtime.authCallbackCapability).toBeUndefined();
   });
 
   it("selects a mock callback capability only for explicit mock configuration", () => {
-    const runtime = createWebRuntime({ mode: "mock" });
+    const runtime = createMockWebRuntime();
     expect(runtime.authCallbackCapability).toBeDefined();
     expect(runtime.authCallbackCapability?.completeMockLogin).toBeTypeOf("function");
   });

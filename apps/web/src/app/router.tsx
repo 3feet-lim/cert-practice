@@ -13,6 +13,7 @@ import {
 
 import type { CertQuizApiError } from "../api/port";
 import { Button } from "../components/ui/Button";
+import { useDocumentTitle } from "../lib/use-document-title";
 import { createAdminRequiredError, useAuthSession } from "./auth-session-context";
 import { useBrowserAuthSession } from "./browser-auth-session";
 import { useMockAuthCallback } from "./mock-auth-capability";
@@ -71,6 +72,15 @@ function LoadingRoute() {
     </main>
   );
 }
+const errorTitles: Partial<Record<CertQuizApiError["code"], string>> = {
+  "admin-required": "접근 권한이 없습니다.",
+  "authentication-invalid": "로그인을 완료하지 못했습니다.",
+  "google-identity-missing": "로그인을 완료하지 못했습니다.",
+};
+const reLoginCodes: ReadonlySet<CertQuizApiError["code"]> = new Set([
+  "authentication-invalid",
+  "google-identity-missing",
+]);
 function CanonicalError({
   error,
   onRetry,
@@ -78,11 +88,16 @@ function CanonicalError({
   error: CertQuizApiError;
   onRetry?: () => void;
 }) {
+  const title = errorTitles[error.code] ?? "요청을 계속할 수 없습니다.";
+  useDocumentTitle(title.replace(/\.$/, ""));
   return (
     <main className="app-shell">
-      <section className="route-card" aria-labelledby="route-error-title">
-        <p className="eyebrow">{error.code}</p>
-        <h1 id="route-error-title">요청을 계속할 수 없습니다.</h1>
+      <section
+        className="route-card"
+        aria-labelledby="route-error-title"
+        data-error-code={error.code}
+      >
+        <h1 id="route-error-title">{title}</h1>
         <div className="bootstrap-status bootstrap-status--error" role="alert">
           <strong>{error.message}</strong>
           {error.nextAction === undefined ? null : <span>{error.nextAction}</span>}
@@ -90,6 +105,8 @@ function CanonicalError({
             <button type="button" onClick={onRetry}>
               다시 시도
             </button>
+          ) : reLoginCodes.has(error.code) ? (
+            <Link to="/login">다시 로그인</Link>
           ) : (
             <Link to="/app">학습 홈으로 돌아가기</Link>
           )}
@@ -111,6 +128,7 @@ function RootRedirect() {
   return <Navigate replace to="/app" />;
 }
 function LoginRoute() {
+  useDocumentTitle("로그인");
   const { state, refresh } = useAuthSession();
   const runtimeMode = useRuntimeMode();
   const browserAuthSession = useBrowserAuthSession();
@@ -185,7 +203,10 @@ function LoginRoute() {
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
               학습을 계속하려면 Google 계정으로 시작하세요.
             </p>
-            <Button className="mt-8 min-h-12 w-full gap-3 text-base" onClick={beginLogin}>
+            <Button
+              className="mt-8 min-h-12 w-full gap-3 text-base"
+              onClick={beginLogin}
+            >
               <span
                 aria-hidden="true"
                 className="grid size-6 place-items-center rounded-full bg-white text-sm font-black text-primary"
@@ -232,7 +253,8 @@ function CallbackRoute() {
   }, [hasCallbackError, mockAuthCallback, refresh, runtimeMode, state.status]);
 
   useEffect(() => {
-    if (runtimeMode !== "http" || !browserAuthSession || callbackStarted.current) return;
+    if (runtimeMode !== "http" || !browserAuthSession || callbackStarted.current)
+      return;
     callbackStarted.current = true;
     const callbackSearch = location.search;
     window.history.replaceState(null, "", location.pathname);
@@ -285,7 +307,8 @@ function CallbackRoute() {
     );
   }
 
-  if (callbackResult === "processing" || state.status === "loading") return <LoadingRoute />;
+  if (callbackResult === "processing" || state.status === "loading")
+    return <LoadingRoute />;
   if (callbackResult === "failed" || !browserAuthSession) {
     return (
       <CanonicalError
@@ -321,6 +344,7 @@ function CallbackRoute() {
   );
 }
 function PendingRoute() {
+  useDocumentTitle("승인 대기");
   const { state, refresh } = useAuthSession();
   const location = useLocation();
   const returnUrl = getSafeReturnUrl(location.search);
@@ -348,8 +372,8 @@ function PendingRoute() {
           관리자에게 승인을 요청해 주세요.
         </h1>
         <p className="mt-4 leading-7 text-muted-foreground">
-          승인이 완료되면 문제은행, 연습 모드, 모의고사를 사용할 수 있습니다.
-          관리자에게 승인을 요청한 뒤 아래 버튼으로 상태를 확인하세요.
+          승인이 완료되면 문제은행, 연습 모드, 모의고사를 사용할 수 있습니다. 관리자에게
+          승인을 요청한 뒤 아래 버튼으로 상태를 확인하세요.
         </p>
         <Button className="mt-8" onClick={() => void refresh()}>
           승인 상태 확인하기
@@ -448,7 +472,7 @@ function ApprovedLayout() {
           <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
             <div
               aria-label={`현재 사용자: ${state.user.displayName}`}
-              className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-muted px-2 py-1.5 shadow-sm sm:gap-3 sm:px-3 sm:py-2"
+              className="flex min-w-0 items-center gap-2"
               role="group"
             >
               <span
@@ -457,11 +481,15 @@ function ApprovedLayout() {
               >
                 {state.user.displayName.slice(0, 1)}
               </span>
-              <span className="truncate text-sm font-bold text-foreground">
+              <span className="max-w-[10rem] truncate text-sm font-semibold text-muted-foreground">
                 {state.user.displayName}
               </span>
             </div>
-            <Button className="font-bold" variant="secondary" onClick={() => void logout()}>
+            <Button
+              className="font-bold"
+              variant="secondary"
+              onClick={() => void logout()}
+            >
               로그아웃
             </Button>
           </div>
@@ -478,6 +506,7 @@ function ApprovedLayout() {
   );
 }
 function AdminLayout() {
+  useDocumentTitle("관리자 콘솔");
   return (
     <section aria-labelledby="admin-layout-title" className="grid gap-6">
       <div>
@@ -501,6 +530,7 @@ function AdminLayout() {
   );
 }
 function NotFoundRoute() {
+  useDocumentTitle("페이지를 찾을 수 없음");
   return (
     <main className="app-shell">
       <section className="route-card">

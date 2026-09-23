@@ -44,13 +44,15 @@ export function createQuestionNavigatorItems(
   return questions.map((question, index) => {
     const selectedChoiceIds =
       drafts[questionTarget(sessionTarget, question.id)] ?? question.selectedChoiceIds;
+    const answered = selectedChoiceIds.length === question.requiredChoiceCount;
     return {
       number: question.displayNumber,
       href: `#question-${question.displayNumber}`,
-      state:
-        index === currentIndex
-          ? "current"
-          : selectedChoiceIds.length === question.requiredChoiceCount
+      state: index === currentIndex ? "current" : answered ? "answered" : "unanswered",
+      progress:
+        question.kind === "practice-submitted"
+          ? "submitted"
+          : answered
             ? "answered"
             : "unanswered",
       flagged: question.flagged,

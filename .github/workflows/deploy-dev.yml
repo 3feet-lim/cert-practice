@@ -80,7 +80,9 @@ jobs:
           VITE_CERTQUIZ_COGNITO_CLIENT_ID: ${{ steps.web-runtime.outputs.cognito_client_id }}
           VITE_CERTQUIZ_AUTH_REDIRECT_PATH: /auth/callback
           VITE_CERTQUIZ_AUTH_LOGOUT_PATH: /login
-        run: pnpm --filter @cert-quiz/web build
+        run: |
+          pnpm --filter @cert-quiz/web build
+          pnpm web:bundle:check
       - name: Resolve DEV SPA delivery targets
         id: web-targets
         run: |
@@ -90,11 +92,14 @@ jobs:
         env:
           WEB_BUCKET: ${{ steps.web-targets.outputs.bucket }}
         run: |
-          aws s3 sync apps/web/dist "s3://$WEB_BUCKET" --delete --exclude "index.html" --cache-control "public,max-age=31536000,immutable"
+          aws s3 sync apps/web/dist "s3://$WEB_BUCKET" --delete --exclude "index.html" --exclude "404.html" --exclude "favicon.svg" --exclude "robots.txt" --cache-control "public,max-age=31536000,immutable"
+          aws s3 cp apps/web/dist/favicon.svg "s3://$WEB_BUCKET/favicon.svg" --cache-control "public,max-age=3600" --content-type "image/svg+xml"
+          aws s3 cp apps/web/dist/robots.txt "s3://$WEB_BUCKET/robots.txt" --cache-control "public,max-age=3600" --content-type "text/plain"
+          aws s3 cp apps/web/dist/404.html "s3://$WEB_BUCKET/404.html" --cache-control "no-cache, no-store, must-revalidate" --content-type "text/html"
           aws s3 cp apps/web/dist/index.html "s3://$WEB_BUCKET/index.html" --cache-control "no-cache, no-store, must-revalidate" --content-type "text/html"
       - name: Invalidate DEV SPA distribution
         env:
           CLOUDFRONT_DISTRIBUTION_ID: ${{ steps.web-targets.outputs.distribution }}
         run: |
-          invalidation_id="$(aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths / /index.html '/assets/*' --query 'Invalidation.Id' --output text)"
+          invalidation_id="$(aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths / /index.html /404.html /favicon.svg /robots.txt '/assets/*' --query 'Invalidation.Id' --output text)"
           aws cloudfront wait invalidation-completed --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --id "$invalidation_id"

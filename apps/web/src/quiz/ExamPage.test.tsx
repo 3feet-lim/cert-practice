@@ -50,7 +50,7 @@ describe("ExamPage", () => {
         answer.getAttribute("value"),
       ]);
     });
-    await userEvent.setup().click(screen.getByRole("button", { name: "Flag 없음" }));
+    await userEvent.setup().click(screen.getByRole("button", { name: "나중에 보기" }));
     await userEvent
       .setup()
       .click(screen.getByRole("button", { name: "제출 미리보기" }));
@@ -59,7 +59,7 @@ describe("ExamPage", () => {
         examSessionId: MOCK_IDS.exam,
       }),
     );
-    expect(await screen.findByText("미응답")).toBeVisible();
+    expect(await screen.findByText("미응답", { selector: "dt" })).toBeVisible();
     expect(screen.getByText("1", { selector: "dd" })).toBeVisible();
     expect(screen.getByText("2", { selector: "dd" })).toBeVisible();
     await userEvent.setup().click(screen.getByRole("button", { name: "제출 확정" }));
@@ -102,10 +102,12 @@ describe("ExamPage", () => {
     renderExam(api);
     await userEvent
       .setup()
-      .click(await screen.findByRole("button", { name: "Flag 없음" }));
-    expect(screen.getByText("Flag")).toBeVisible();
+      .click(await screen.findByRole("button", { name: "나중에 보기" }));
+    expect(screen.getByText("★ 나중에 보기")).toBeVisible();
     expect(
-      screen.getByRole("link", { name: "1번 문항, 현재 문항, 플래그됨" }),
+      screen.getByRole("link", {
+        name: "1번 문항, 현재 문항, 미응답, 나중에 보기 표시됨",
+      }),
     ).toBeVisible();
     expect(patchExamState).toHaveBeenCalledWith(
       expect.objectContaining({ expectedVersion: 0 }),
@@ -125,7 +127,7 @@ describe("ExamPage", () => {
       "다른 곳에서 변경된 내용이 있습니다. 새로 고친 뒤 다시 시도하세요.",
     );
     expect(alert).not.toHaveTextContent("Refresh the latest exam state and try again.");
-    expect(screen.getByRole("button", { name: "Flag 없음" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "나중에 보기" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );

@@ -89,6 +89,7 @@ describe("application route hierarchy", () => {
 
     expect(await screen.findByRole("heading", { name: "모의고사 이력" })).toBeVisible();
     expect(screen.queryByText("S8 · HISTORY")).not.toBeInTheDocument();
+    expect(document.title).toBe("모의고사 이력 — CertForge");
   });
 
   it("renders the runtime populated pending-user page for an admin actor", async () => {
@@ -220,15 +221,15 @@ describe("application route hierarchy", () => {
     renderRoute("/app/history?period=recent#trend", { actor: "unauthenticated" });
     expect(await screen.findByRole("heading", { name: "CertForge" })).toBeVisible();
     expect(screen.getByText("Google 계정으로 로그인")).toBeVisible();
-    expect(
-      screen.getByText(/문제은행부터 실전 모의고사까지/),
-    ).toBeVisible();
+    expect(screen.getByText(/문제은행부터 실전 모의고사까지/)).toBeVisible();
     expect(
       screen.queryByText(
         "승인된 사용자는 개인 연습 세션과 모의고사 이력을 이용할 수 있습니다.",
       ),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Google 로그인 계속하기" })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Google 로그인 계속하기" }),
+    ).toBeVisible();
     expect(screen.getByTestId("location")).toHaveTextContent(
       "/login?returnTo=%2Fapp%2Fhistory%3Fperiod%3Drecent%23trend",
     );
@@ -253,7 +254,9 @@ describe("application route hierarchy", () => {
       browserAuthSession,
       authCallbackCapability: authController,
     });
-    await user.click(await screen.findByRole("button", { name: "Google 로그인 계속하기" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Google 로그인 계속하기" }),
+    );
     expect(beginLogin).toHaveBeenCalledWith("/app/history");
     expect(authController.getActor()).toBe("unauthenticated");
     loginView.unmount();
@@ -264,8 +267,12 @@ describe("application route hierarchy", () => {
       browserAuthSession,
       authCallbackCapability: authController,
     });
-    expect(await screen.findByRole("alert")).toHaveTextContent("로그인을 완료하지 못했습니다.");
-    expect(completeCallback).toHaveBeenCalledWith("?code=one-time-code&state=opaque-state");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "로그인을 완료하지 못했습니다.",
+    );
+    expect(completeCallback).toHaveBeenCalledWith(
+      "?code=one-time-code&state=opaque-state",
+    );
     expect(authController.getActor()).toBe("unauthenticated");
   });
   it("limits pending users to the approval status screen", async () => {
@@ -276,7 +283,9 @@ describe("application route hierarchy", () => {
       }),
     ).toBeVisible();
     expect(
-      screen.getByText(/승인이 완료되면 문제은행, 연습 모드, 모의고사를 사용할 수 있습니다/),
+      screen.getByText(
+        /승인이 완료되면 문제은행, 연습 모드, 모의고사를 사용할 수 있습니다/,
+      ),
     ).toBeVisible();
     expect(screen.getByRole("button", { name: "승인 상태 확인하기" })).toBeVisible();
     expect(screen.getByTestId("location")).toHaveTextContent(
@@ -324,9 +333,12 @@ describe("application route hierarchy", () => {
   it("renders canonical admin-required state instead of treating the UX guard as security", async () => {
     renderRoute("/app/admin/import", { actor: "approved" });
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Administrator access is required.",
+      "관리자만 볼 수 있는 페이지입니다.",
     );
-    expect(screen.getByText("admin-required")).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "접근 권한이 없습니다." }),
+    ).toBeVisible();
+    expect(screen.queryByText("admin-required")).not.toBeInTheDocument();
   });
   it("restores an allowlisted callback destination for an approved user", async () => {
     renderRoute("/auth/callback?returnTo=%2Fapp%2Fhistory", { actor: "approved" });
@@ -359,6 +371,11 @@ describe("application route hierarchy", () => {
     expect(alert).not.toHaveTextContent("oauth-code-secret");
     expect(alert).not.toHaveTextContent("opaque-state");
     expect(alert).not.toHaveTextContent("token-secret");
+    expect(screen.getByRole("link", { name: "다시 로그인" })).toHaveAttribute(
+      "href",
+      "/login",
+    );
+    expect(screen.queryByText("authentication-invalid")).not.toBeInTheDocument();
   });
   it("purges authenticated query data and transient quiz state before returning to login", async () => {
     const user = userEvent.setup();
@@ -388,9 +405,7 @@ describe("application route hierarchy", () => {
     ).toBeVisible();
     expect(screen.getByRole("button", { name: "로그아웃" })).toHaveClass("border");
     await user.click(screen.getByRole("button", { name: "로그아웃" }));
-    expect(
-      await screen.findByRole("heading", { name: "CertForge" }),
-    ).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "CertForge" })).toBeVisible();
     expect(
       queryClient.getQueryCache().findAll({ queryKey: certQuizQueryKeys.all }),
     ).toEqual([]);
@@ -406,7 +421,8 @@ describe("application route hierarchy", () => {
     expect(await screen.findByRole("heading", { name: "AWS" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "이어 풀기" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "자격증 찾아보기" })).toBeVisible();
-    expect(screen.getByText("DOP-C02")).toBeVisible();
+    expect(screen.getByText("DOP-C02", { selector: "p.eyebrow" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "최근 모의고사" })).toBeVisible();
     expect(screen.getByRole("link", { name: "학습 모드 선택" })).toHaveAttribute(
       "href",
       `/app/certifications/${defaultCertificationId}`,
