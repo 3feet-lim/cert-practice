@@ -42,3 +42,38 @@ describe("ServerTimer", () => {
     expect(screen.getByLabelText("서버 기준 남은 시간")).toHaveTextContent("00:00:00");
   });
 });
+
+describe("ServerTimer warning levels", () => {
+  it("escalates from normal to warning (≤10분) to critical (≤5분) and announces thresholds", () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <ServerTimer
+        expiresAt="2026-03-23T12:20:00.000Z"
+        onExpire={vi.fn()}
+        serverNow="2026-03-23T12:00:00.000Z"
+      />,
+    );
+    const timer = () => screen.getByLabelText("서버 기준 남은 시간");
+    expect(timer()).toHaveAttribute("data-timer-level", "normal");
+
+    rerender(
+      <ServerTimer
+        expiresAt="2026-03-23T12:20:00.000Z"
+        onExpire={vi.fn()}
+        serverNow="2026-03-23T12:11:00.000Z"
+      />,
+    );
+    expect(timer()).toHaveAttribute("data-timer-level", "warning");
+    expect(screen.getByText("남은 시간이 10분 이하입니다.")).toBeInTheDocument();
+
+    rerender(
+      <ServerTimer
+        expiresAt="2026-03-23T12:20:00.000Z"
+        onExpire={vi.fn()}
+        serverNow="2026-03-23T12:16:00.000Z"
+      />,
+    );
+    expect(timer()).toHaveAttribute("data-timer-level", "critical");
+    expect(screen.getByText("남은 시간이 5분 이하입니다.")).toBeInTheDocument();
+  });
+});

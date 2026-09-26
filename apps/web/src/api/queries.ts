@@ -54,11 +54,12 @@ export function usePracticeResultQuery(resultId: Uuid) {
   });
 }
 
-export function useAttemptQuery(attemptId: Uuid) {
+export function useAttemptQuery(attemptId: Uuid, options: { enabled?: boolean } = {}) {
   const api = useCertQuizApi();
   return useQuery<ExamResultDto>({
     queryKey: certQuizQueryKeys.attempt(attemptId),
     queryFn: () => resolveCertQuizResult(api.getAttempt({ attemptId })),
+    enabled: options.enabled ?? true,
   });
 }
 

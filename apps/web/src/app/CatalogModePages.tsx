@@ -1,4 +1,4 @@
-import type { StartPracticeResponse } from "@cert-quiz/contracts";
+import type { StartPracticeResponse, Uuid } from "@cert-quiz/contracts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import { certQuizQueryKeys } from "./query-keys";
 import { providerLogoSrc } from "./provider-logos";
 import {
   useActivePracticeSessionsQuery,
+  useAttemptQuery,
   useCatalogQuery,
   useHistoryQuery,
 } from "../api/queries";
@@ -16,6 +17,8 @@ import { AccessibleDialog } from "../components/AccessibleDialog";
 import { AsyncBoundary } from "../components/AsyncBoundary";
 import { toQueryAsyncBoundaryState } from "../components/async-boundary-state";
 import { Button } from "../components/ui/Button";
+import { buttonClassName } from "../components/ui/button-styles";
+import { StatePanel } from "../components/ui/StatePanel";
 import {
   Card,
   CardDescription,
@@ -24,6 +27,12 @@ import {
   CardTitle,
 } from "../components/ui/Card";
 import { cn } from "../lib/cn";
+import {
+  clampPercent,
+  formatDateTime,
+  formatPercent,
+  formatPointGap,
+} from "../lib/format";
 import { useDocumentTitle } from "../lib/use-document-title";
 
 const scoringModeLabels: Record<string, string> = {
@@ -31,12 +40,7 @@ const scoringModeLabels: Record<string, string> = {
   partial: "부분 점수",
 };
 
-/** Mirrors Button's primary-variant classes so a router `Link` can look identical to a `<Button>`. */
-const linkButtonClassName = cn(
-  "inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold transition-colors",
-  "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
-  "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover",
-);
+const linkButtonClassName = buttonClassName("primary");
 
 type PracticeDecision = Extract<
   StartPracticeResponse,
@@ -45,11 +49,14 @@ type PracticeDecision = Extract<
 
 function RequestError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <section className="route-card" role="alert">
-      <h1>요청을 완료하지 못했습니다.</h1>
-      <p className="description">{message}</p>
-      <Button onClick={onRetry}>다시 시도</Button>
-    </section>
+    <div className="content-card">
+      <StatePanel
+        status="error"
+        title="요청을 완료하지 못했습니다."
+        message={message}
+        action={<Button onClick={onRetry}>다시 시도</Button>}
+      />
+    </div>
   );
 }
 
@@ -123,12 +130,12 @@ function RecentExamSummary() {
                       {attempt.certificationCode}
                     </span>
                     <span className="block text-xs text-muted-foreground">
-                      {new Date(attempt.submittedAt).toLocaleDateString("ko-KR")}
+                      {formatDateTime(attempt.submittedAt)}
                     </span>
                   </span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="font-bold tabular-nums">
-                      {Number(attempt.accuracyRate).toFixed(0)}%
+                      {formatPercent(attempt.accuracyRate)}
                     </span>
                     <span
                       className={cn(
@@ -156,6 +163,186 @@ function RecentExamSummary() {
         ) : null}
       </Card>
     </section>
+  );
+}
+
+function useAttemptsByCertification() {
+  const history = useHistoryQuery();
+  const attempts = history.data?.attempts ?? [];
+  const byCode = new Map<string, typeof attempts>();
+  for (const attempt of attempts) {
+    const list = byCode.get(attempt.certificationCode) ?? [];
+    list.push(attempt);
+    byCode.set(attempt.certificationCode, list);
+  }
+  return { history, attempts, byCode };
+}
+
+/** Readiness = mean accuracy of the latest three exam attempts vs. the pass line. */
+function ReadinessSummary() {
+  const catalog = useCatalogQuery();
+  const { history, attempts } = useAttemptsByCertification();
+  const latest = attempts[0];
+  const attemptQuery = useAttemptQuery((latest?.attemptId ?? "") as Uuid, {
+    enabled: latest !== undefined,
+  });
+
+  if (history.isPending || !latest) return null;
+  const certification = catalog.data?.providers
+    .flatMap((provider) => provider.certifications)
+    .find((candidate) => candidate.code === latest.certificationCode);
+  const threshold = certification ? Number(certification.passThreshold) : undefined;
+  const recent = attempts
+    .filter((attempt) => attempt.certificationCode === latest.certificationCode)
+    .slice(0, 3);
+  const average =
+    recent.reduce((sum, attempt) => sum + Number(attempt.accuracyRate), 0) /
+    recent.length;
+  const gap = threshold === undefined ? undefined : average - threshold;
+  const ready = gap !== undefined && gap >= 0;
+  const weakDomains = (attemptQuery.data?.domains ?? [])
+    .filter(
+      (domain) => threshold === undefined || Number(domain.accuracyRate) < threshold,
+    )
+    .sort((left, right) => Number(left.accuracyRate) - Number(right.accuracyRate))
+    .slice(0, 3);
+
+  return (
+    <section aria-labelledby="readiness-heading">
+      <Card className={cn(ready ? "border-success/30" : "border-warning/30")}>
+        <p className="eyebrow mb-2">READINESS · {latest.certificationCode}</p>
+        <h2 id="readiness-heading" className="text-lg font-bold tracking-tight">
+          합격 준비도
+        </h2>
+        <div className="mt-3 flex items-baseline gap-2">
+          <p className="text-4xl font-extrabold tabular-nums">
+            {formatPercent(average)}
+          </p>
+          <p className="text-sm text-muted-foreground">최근 {recent.length}회 평균</p>
+        </div>
+        {gap !== undefined ? (
+          <>
+            <div
+              role="meter"
+              aria-label="합격 준비도"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(average)}
+              aria-valuetext={`최근 평균 ${formatPercent(average)}, 합격선 ${threshold}%`}
+              className="relative mt-3 h-2 rounded-full bg-border"
+            >
+              <div
+                className={cn(
+                  "h-full rounded-full",
+                  ready ? "bg-success" : "bg-warning",
+                )}
+                style={{ width: `${clampPercent(average)}%` }}
+              />
+              <div
+                aria-hidden="true"
+                className="absolute -top-1 h-4 w-0.5 bg-foreground"
+                style={{ left: `${clampPercent(threshold ?? 0)}%` }}
+              />
+            </div>
+            <p
+              className={cn(
+                "mt-2 text-sm font-semibold",
+                ready ? "text-success" : "text-warning",
+              )}
+            >
+              {ready
+                ? `합격선(${threshold}%)보다 ${formatPointGap(gap)} 높습니다`
+                : `합격선(${threshold}%)까지 ${formatPointGap(gap).replace("−", "")} 남았습니다`}
+            </p>
+          </>
+        ) : null}
+        {weakDomains.length > 0 ? (
+          <div className="mt-5 border-t border-border pt-4">
+            <h3 className="text-sm font-bold">최근 응시 약점 도메인</h3>
+            <ul className="mt-2 grid gap-2">
+              {weakDomains.map((domain) => (
+                <li
+                  key={domain.domainName}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <span className="min-w-0 truncate">{domain.domainName}</span>
+                  <span className="shrink-0 font-bold tabular-nums text-danger">
+                    {formatPercent(domain.accuracyRate)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {certification ? (
+            <Link
+              className={buttonClassName("primary")}
+              to={`/app/certifications/${certification.id}`}
+            >
+              {weakDomains.length > 0 ? "약점 보완 연습하기" : "연습 이어가기"}
+            </Link>
+          ) : null}
+          <Link
+            className={buttonClassName("ghost")}
+            to={`/app/attempts/${latest.attemptId}`}
+          >
+            최근 결과 보기
+          </Link>
+        </div>
+      </Card>
+    </section>
+  );
+}
+
+function CertificationStats({
+  code,
+  passThreshold,
+}: {
+  code: string;
+  passThreshold: string;
+}) {
+  const { byCode } = useAttemptsByCertification();
+  const attempts = byCode.get(code) ?? [];
+  if (attempts.length === 0) {
+    return (
+      <p className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+        아직 응시 기록이 없습니다.
+      </p>
+    );
+  }
+  const best = Math.max(...attempts.map((attempt) => Number(attempt.accuracyRate)));
+  const latestRate = Number(attempts[0]!.accuracyRate);
+  const threshold = Number(passThreshold);
+  return (
+    <dl className="grid grid-cols-3 gap-2 rounded-lg bg-muted px-3 py-2 text-sm">
+      <div>
+        <dt className="text-xs text-muted-foreground">응시</dt>
+        <dd className="font-bold tabular-nums">{attempts.length}회</dd>
+      </div>
+      <div>
+        <dt className="text-xs text-muted-foreground">최고</dt>
+        <dd
+          className={cn(
+            "font-bold tabular-nums",
+            best >= threshold ? "text-success" : "text-foreground",
+          )}
+        >
+          {formatPercent(best)}
+        </dd>
+      </div>
+      <div>
+        <dt className="text-xs text-muted-foreground">최근</dt>
+        <dd
+          className={cn(
+            "font-bold tabular-nums",
+            latestRate >= threshold ? "text-success" : "text-danger",
+          )}
+        >
+          {formatPercent(latestRate)}
+        </dd>
+      </div>
+    </dl>
   );
 }
 
@@ -215,6 +402,10 @@ function CatalogContent() {
                       <CardTitle>{certification.name}</CardTitle>
                     </CardHeader>
                     <div className="mt-auto flex flex-col gap-4">
+                      <CertificationStats
+                        code={certification.code}
+                        passThreshold={certification.passThreshold}
+                      />
                       <CardDescription>
                         {certification.totalQuestions}문항 ·{" "}
                         {certification.timeLimitMinutes}분 · 합격 기준{" "}
@@ -266,6 +457,7 @@ export function CatalogHomePage() {
         </section>
         <div className="order-first grid gap-6 xl:order-none">
           <ActivePracticeBanner />
+          <ReadinessSummary />
           <RecentExamSummary />
         </div>
       </div>
@@ -377,9 +569,13 @@ export function ModeSelectPage() {
 
   if (catalog.isPending) {
     return (
-      <section className="route-card" role="status">
-        학습 모드를 불러오는 중입니다.
-      </section>
+      <div className="content-card">
+        <StatePanel
+          status="loading"
+          title="학습 모드"
+          message="학습 모드를 불러오는 중입니다."
+        />
+      </div>
     );
   }
   if (catalog.isError) {
@@ -392,12 +588,18 @@ export function ModeSelectPage() {
   }
   if (!certification) {
     return (
-      <section className="route-card" role="alert">
-        <h1>자격증을 찾을 수 없습니다.</h1>
-        <Link className="primary-link" to="/app">
-          학습 홈으로 돌아가기
-        </Link>
-      </section>
+      <div className="content-card">
+        <StatePanel
+          status="error"
+          title="자격증을 찾을 수 없습니다."
+          message="주소가 올바른지 확인하거나 학습 홈에서 자격증을 다시 선택하세요."
+          action={
+            <Link className={buttonClassName("primary")} to="/app">
+              학습 홈으로 돌아가기
+            </Link>
+          }
+        />
+      </div>
     );
   }
 

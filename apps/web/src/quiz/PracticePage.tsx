@@ -45,6 +45,10 @@ function PracticeProgress({
     if (selected.length === question.requiredChoiceCount) answered += 1;
   }
   const percent = Math.round((submitted / total) * 100);
+  const answeredPercent = Math.round((answered / total) * 100);
+  const correct = session.questions.filter(
+    (question) => question.kind === "practice-submitted" && question.isCorrect,
+  ).length;
 
   return (
     <div className="mb-6 rounded-xl border border-border bg-muted/40 p-4 sm:p-5">
@@ -60,6 +64,15 @@ function PracticeProgress({
             {currentNumber} / {total}
           </strong>{" "}
           · 제출 {submitted}개 · 답 선택 {answered}개
+          {submitted > 0 ? (
+            <>
+              {" "}
+              · 정답률{" "}
+              <strong className="text-foreground">
+                {Math.round((correct / submitted) * 100)}%
+              </strong>
+            </>
+          ) : null}
         </p>
       </div>
       <div
@@ -67,12 +80,14 @@ function PracticeProgress({
         aria-valuemax={total}
         aria-valuemin={0}
         aria-valuenow={submitted}
-        className="mt-3 h-2 overflow-hidden rounded-full bg-border"
+        aria-valuetext={`${total}문항 중 ${submitted}개 제출, ${answered}개 답 선택`}
+        className="mt-3 flex h-2 overflow-hidden rounded-full bg-border"
         role="progressbar"
       >
+        <div className="h-full bg-success" style={{ width: `${percent}%` }} />
         <div
-          className="h-full rounded-full bg-success"
-          style={{ width: `${percent}%` }}
+          className="h-full bg-primary/40"
+          style={{ width: `${answeredPercent}%` }}
         />
       </div>
     </div>

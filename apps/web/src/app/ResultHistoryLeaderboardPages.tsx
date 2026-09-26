@@ -31,6 +31,19 @@ function StartExamLink() {
   );
 }
 
+/** Results carry only a certification snapshot, so resolve its id through the catalog. */
+function useCertificationIdByCode() {
+  const catalog = useCatalogQuery();
+  return (code: string) =>
+    catalog.data?.providers
+      .flatMap((provider) => provider.certifications)
+      .find((certification) => certification.code === code)?.id;
+}
+
+function certificationHref(certificationId: string | undefined) {
+  return certificationId ? `/app/certifications/${certificationId}` : undefined;
+}
+
 type QuerySnapshot<Data> = {
   isPending: boolean;
   isError: boolean;
@@ -73,6 +86,7 @@ export function PracticeResultPage() {
   useDocumentTitle("연습 결과");
   const { id } = useParams();
   const query = usePracticeResultQuery(id as Uuid);
+  const certificationIdForCode = useCertificationIdByCode();
   return (
     <AsyncBoundary
       state={requestState(
@@ -85,6 +99,9 @@ export function PracticeResultPage() {
         <StaticPracticeResultScreen
           screenMarker={null}
           fixture={{ state: "success", data: { practice } }}
+          practiceHref={certificationHref(
+            certificationIdForCode(practice.certification.code),
+          )}
         />
       )}
     </AsyncBoundary>
@@ -95,6 +112,7 @@ export function AttemptResultPage() {
   useDocumentTitle("모의고사 결과");
   const { id } = useParams();
   const query = useAttemptQuery(id as Uuid);
+  const certificationIdForCode = useCertificationIdByCode();
   return (
     <AsyncBoundary
       state={requestState(
@@ -107,6 +125,10 @@ export function AttemptResultPage() {
         <StaticExamResultScreen
           screenMarker={null}
           fixture={{ state: "success", data: { exam } }}
+          practiceHref={certificationHref(
+            certificationIdForCode(exam.certification.code),
+          )}
+          historyHref="/app/history"
         />
       )}
     </AsyncBoundary>
@@ -117,6 +139,12 @@ export function HistoryPage() {
   useDocumentTitle("모의고사 이력");
   const history = useHistoryQuery();
   const trends = useHistoryTrendsQuery();
+  const catalog = useCatalogQuery();
+  const passThresholds = Object.fromEntries(
+    (catalog.data?.providers ?? [])
+      .flatMap((provider) => provider.certifications)
+      .map((certification) => [certification.id, certification.passThreshold]),
+  );
   const historyState = requestState(
     history,
     "모의고사 이력을 불러오는 중입니다.",
@@ -136,6 +164,8 @@ export function HistoryPage() {
             <StaticHistoryScreen
               screenMarker={null}
               emptyAction={<StartExamLink />}
+              attemptHref={(attemptId) => `/app/attempts/${attemptId}`}
+              passThresholds={passThresholds}
               fixture={
                 page.attempts.length === 0
                   ? {

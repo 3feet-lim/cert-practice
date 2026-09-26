@@ -12,7 +12,7 @@ function SafeImage({ src, alt = "", title }: ImgHTMLAttributes<HTMLImageElement>
       <span
         role="img"
         aria-label={alt || "차단된 이미지"}
-        className="my-3 block rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+        className="my-3 block rounded-md border border-warning/30 bg-warning-soft p-3 text-sm text-warning"
       >
         {alt || "이미지"} — 안전하지 않은 이미지 주소가 차단되었습니다.
       </span>
@@ -24,7 +24,7 @@ function SafeImage({ src, alt = "", title }: ImgHTMLAttributes<HTMLImageElement>
       <span
         role="img"
         aria-label={`${alt || "이미지"} 로드 실패`}
-        className="my-3 block rounded-md border border-slate-300 bg-slate-50 p-3 text-sm text-slate-700"
+        className="my-3 block rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground"
       >
         {alt || "이미지"} — 이미지를 불러오지 못했습니다.
       </span>
@@ -38,7 +38,7 @@ function SafeImage({ src, alt = "", title }: ImgHTMLAttributes<HTMLImageElement>
       title={title}
       loading="lazy"
       referrerPolicy="no-referrer"
-      className="my-4 max-w-full rounded-lg border border-slate-200"
+      className="my-4 max-w-full rounded-lg border border-border"
       onError={() => setFailed(true)}
     />
   );
@@ -55,7 +55,7 @@ export interface SafeMarkdownProps {
  */
 export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
   return (
-    <div className={cn("safe-markdown text-slate-800", className)}>
+    <div className={cn("safe-markdown text-foreground", className)}>
       <ReactMarkdown
         skipHtml={false}
         urlTransform={(url) => url}
@@ -64,7 +64,7 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
             if (!isSafeUrl(href)) {
               return (
                 <span
-                  className="text-slate-700 underline decoration-dotted"
+                  className="text-muted-foreground underline decoration-dotted"
                   title="안전하지 않은 링크 주소가 차단되었습니다."
                 >
                   {children}
@@ -80,7 +80,7 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
                 {...(isExternal
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
-                className="font-medium text-indigo-700 underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="font-medium text-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
               >
                 {children}
               </a>
@@ -93,7 +93,7 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
             return (
               <code
                 className={cn(
-                  "rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.9em]",
+                  "rounded bg-muted px-1 py-0.5 font-mono text-[0.9em]",
                   codeClassName,
                 )}
               >

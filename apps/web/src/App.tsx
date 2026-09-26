@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { AuthSessionProvider } from "./app/auth-session";
+import { FullPageState, LoadingMessage } from "./components/FullPageState";
 
 const AppRoutes = lazy(() =>
   import("./app/router").then(({ AppRoutes: Routes }) => ({ default: Routes })),
@@ -19,11 +20,9 @@ const StaticPreviewRoutes = import.meta.env.PROD
 
 function LoadingApp() {
   return (
-    <main className="app-shell">
-      <section className="route-card" aria-busy="true">
-        <p role="status">화면을 불러오는 중입니다.</p>
-      </section>
-    </main>
+    <FullPageState busy>
+      <LoadingMessage>화면을 불러오는 중입니다.</LoadingMessage>
+    </FullPageState>
   );
 }
 

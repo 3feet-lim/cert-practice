@@ -1,7 +1,8 @@
 import type { ActiveQuestion, Uuid } from "@cert-quiz/contracts";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { QuestionPresenter } from "./QuestionPresenter";
+import { type QuizShortcutHandlers, useQuizShortcuts } from "./use-quiz-shortcuts";
 import {
   clampQuestionIndex,
   createQuestionNavigatorItems,
@@ -87,36 +88,80 @@ export function QuizQuestionPresenter({
     onNavigate?.(boundedIndex);
   };
 
+  const submitted = "kind" in question && question.kind === "practice-submitted";
+  const canSubmit =
+    !interactionDisabled &&
+    onSubmit !== undefined &&
+    !submitted &&
+    !submitPending &&
+    selectedChoiceIds.length === question.requiredChoiceCount;
+
+  // Shortcuts live in a child component because this one returns early for empty sessions.
   return (
-    <QuestionPresenter
-      language={language}
-      navigatorItems={items}
-      nextDisabled={currentIndex === questions.length - 1}
-      interactionDisabled={interactionDisabled}
-      onChoiceChange={interactionDisabled ? undefined : selectChoice}
-      onFlagChange={
-        !interactionDisabled && onFlagChange
-          ? (flagged) => onFlagChange(question.id, flagged)
-          : undefined
-      }
-      onLanguageChange={
-        interactionDisabled
+    <QuizShortcutBinding
+      enabled={!interactionDisabled}
+      handlers={{
+        previous: currentIndex > 0 ? () => navigate(currentIndex - 1) : undefined,
+        next:
+          currentIndex < questions.length - 1
+            ? () => navigate(currentIndex + 1)
+            : undefined,
+        choose: submitted
           ? undefined
-          : (nextLanguage) =>
-              quizStore.getState().setLanguage(sessionTarget, nextLanguage)
-      }
-      onNavigate={interactionDisabled ? undefined : navigate}
-      onSubmit={
-        !interactionDisabled &&
-        onSubmit &&
-        !("kind" in question && question.kind === "practice-submitted")
-          ? () => onSubmit(question.id, selectedChoiceIds)
-          : undefined
-      }
-      previousDisabled={interactionDisabled || currentIndex === 0}
-      submitPending={submitPending || interactionDisabled}
-      question={presentedQuestion}
-      totalQuestions={questions.length}
-    />
+          : (index) => {
+              const choice = question.choices[index];
+              if (choice) selectChoice(choice.id);
+            },
+        toggleFlag: onFlagChange
+          ? () => onFlagChange(question.id, !question.flagged)
+          : undefined,
+        submit: canSubmit ? () => onSubmit(question.id, selectedChoiceIds) : undefined,
+      }}
+    >
+      <QuestionPresenter
+        language={language}
+        navigatorItems={items}
+        nextDisabled={currentIndex === questions.length - 1}
+        interactionDisabled={interactionDisabled}
+        onChoiceChange={interactionDisabled ? undefined : selectChoice}
+        onFlagChange={
+          !interactionDisabled && onFlagChange
+            ? (flagged) => onFlagChange(question.id, flagged)
+            : undefined
+        }
+        onLanguageChange={
+          interactionDisabled
+            ? undefined
+            : (nextLanguage) =>
+                quizStore.getState().setLanguage(sessionTarget, nextLanguage)
+        }
+        onNavigate={interactionDisabled ? undefined : navigate}
+        onSubmit={
+          !interactionDisabled &&
+          onSubmit &&
+          !("kind" in question && question.kind === "practice-submitted")
+            ? () => onSubmit(question.id, selectedChoiceIds)
+            : undefined
+        }
+        previousDisabled={interactionDisabled || currentIndex === 0}
+        submitPending={submitPending || interactionDisabled}
+        question={presentedQuestion}
+        totalQuestions={questions.length}
+        showShortcutHint={!interactionDisabled}
+      />
+    </QuizShortcutBinding>
   );
+}
+
+function QuizShortcutBinding({
+  enabled,
+  handlers,
+  children,
+}: {
+  enabled: boolean;
+  handlers: QuizShortcutHandlers;
+  children: ReactNode;
+}) {
+  useQuizShortcuts(handlers, enabled);
+  return <>{children}</>;
 }

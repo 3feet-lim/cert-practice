@@ -22,15 +22,7 @@ export function TableCaption({
   className,
   ...props
 }: HTMLAttributes<HTMLTableCaptionElement>) {
-  return (
-    <caption
-      className={cn(
-        "caption-bottom px-4 py-3 text-left text-xs text-muted-foreground",
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <caption className={cn("sr-only", className)} {...props} />;
 }
 
 export function TableHeader({

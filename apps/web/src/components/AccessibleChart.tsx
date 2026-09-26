@@ -22,16 +22,16 @@ export function AccessibleChart({
   children,
 }: AccessibleChartProps) {
   return (
-    <figure className="grid gap-4 rounded-xl border border-slate-200 bg-white p-6">
+    <figure className="grid gap-4 rounded-xl border border-border bg-card p-6">
       <figcaption>
-        <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
-        <p className="mt-1 text-sm text-slate-600">{description}</p>
+        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       </figcaption>
       <div role="img" aria-label={`${title}: ${description}`} className="min-h-48">
         {children}
       </div>
       <details>
-        <summary className="cursor-pointer text-sm font-semibold text-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        <summary className="cursor-pointer text-sm font-semibold text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus">
           표로 데이터 보기
         </summary>
         <div className="mt-3 overflow-x-auto">
@@ -43,7 +43,7 @@ export function AccessibleChart({
                   <th
                     key={column}
                     scope="col"
-                    className="border-b border-slate-300 px-3 py-2 font-semibold"
+                    className="border-b border-border px-3 py-2 font-semibold"
                   >
                     {column}
                   </th>
@@ -58,14 +58,14 @@ export function AccessibleChart({
                       <th
                         key={columns[index]}
                         scope="row"
-                        className="border-b border-slate-200 px-3 py-2 font-medium"
+                        className="border-b border-border px-3 py-2 font-medium"
                       >
                         {cell}
                       </th>
                     ) : (
                       <td
                         key={columns[index]}
-                        className="border-b border-slate-200 px-3 py-2"
+                        className="border-b border-border px-3 py-2"
                       >
                         {cell}
                       </td>

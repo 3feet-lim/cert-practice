@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it } from "vitest";
@@ -270,11 +270,12 @@ describe("S6-S9 static result, history, and leaderboard previews", () => {
       "60.00",
     );
     expect(screen.getByRole("table", { name: "도메인별 성과 표" })).toBeVisible();
-    expect(screen.getByRole("table", { name: "문항 검토" })).toBeVisible();
+    expect(screen.getByRole("list", { name: "문항 검토" })).toBeVisible();
     unmount();
 
     renderPreview("/app/attempts/attempt-preview?preview=success");
-    expect(screen.getAllByText("합격")).toHaveLength(2);
+    expect(screen.getByText("합격")).toBeVisible();
+    expect(screen.getByRole("meter", { name: "정답률과 합격선" })).toBeVisible();
     expect(screen.getByText("참고 환산값")).toBeVisible();
     expect(screen.getByText("시간 만료 자동 제출")).toBeVisible();
   });
@@ -306,7 +307,12 @@ describe("S6-S9 static result, history, and leaderboard previews", () => {
     expect(screen.getByRole("checkbox", { name: "점수 공개" })).not.toBeChecked();
     expect(screen.getByText("비공개 상태")).toBeVisible();
     expect(screen.queryByText("나")).not.toBeInTheDocument();
-    expect(screen.getByText("Tie Breaker")).toBeVisible();
+    const leaderboard = screen.getByRole("table", { name: "공개 최고 성과 리더보드" });
+    expect(within(leaderboard).getByText("Tie Breaker")).toBeVisible();
+    expect(screen.getByRole("list", { name: "상위 3위" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "내 순위" })).toHaveTextContent(
+      "점수가 비공개라",
+    );
   });
 });
 

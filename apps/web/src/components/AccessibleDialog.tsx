@@ -29,14 +29,14 @@ export function AccessibleDialog({
     <DialogPrimitive.Root modal open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-slate-950/45 data-[state=open]:animate-in" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 grid max-h-[85vh] w-[min(32rem,calc(100vw-3rem))] -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 shadow-2xl focus:outline-none">
+        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-foreground/45 data-[state=open]:animate-in" />
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 grid max-h-[85vh] w-[min(32rem,calc(100vw-3rem))] -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-2xl focus:outline-none">
           <header>
-            <DialogPrimitive.Title className="text-xl font-semibold tracking-tight text-slate-950">
+            <DialogPrimitive.Title className="text-xl font-semibold tracking-tight text-foreground">
               {title}
             </DialogPrimitive.Title>
             {description ? (
-              <DialogPrimitive.Description className="mt-2 text-sm leading-6 text-slate-600">
+              <DialogPrimitive.Description className="mt-2 text-sm leading-6 text-muted-foreground">
                 {description}
               </DialogPrimitive.Description>
             ) : null}

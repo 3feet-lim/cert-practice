@@ -12,7 +12,9 @@ import {
 } from "react-router-dom";
 
 import type { CertQuizApiError } from "../api/port";
+import { FullPageState, LoadingMessage } from "../components/FullPageState";
 import { Button } from "../components/ui/Button";
+import { buttonClassName } from "../components/ui/button-styles";
 import { useDocumentTitle } from "../lib/use-document-title";
 import { createAdminRequiredError, useAuthSession } from "./auth-session-context";
 import { useBrowserAuthSession } from "./browser-auth-session";
@@ -65,11 +67,9 @@ const LeaderboardPage = lazy(() =>
 
 function LoadingRoute() {
   return (
-    <main className="app-shell">
-      <section className="route-card" aria-busy="true">
-        <p role="status">계정 상태를 확인하는 중입니다.</p>
-      </section>
-    </main>
+    <FullPageState busy>
+      <LoadingMessage>계정 상태를 확인하는 중입니다.</LoadingMessage>
+    </FullPageState>
   );
 }
 const errorTitles: Partial<Record<CertQuizApiError["code"], string>> = {
@@ -91,28 +91,34 @@ function CanonicalError({
   const title = errorTitles[error.code] ?? "요청을 계속할 수 없습니다.";
   useDocumentTitle(title.replace(/\.$/, ""));
   return (
-    <main className="app-shell">
-      <section
-        className="route-card"
-        aria-labelledby="route-error-title"
-        data-error-code={error.code}
+    <FullPageState
+      title={title}
+      titleId="route-error-title"
+      cardProps={{ "data-error-code": error.code }}
+    >
+      <div
+        className="grid gap-1 rounded-xl border border-danger/20 bg-danger-soft p-4 text-sm"
+        role="alert"
       >
-        <h1 id="route-error-title">{title}</h1>
-        <div className="bootstrap-status bootstrap-status--error" role="alert">
-          <strong>{error.message}</strong>
-          {error.nextAction === undefined ? null : <span>{error.nextAction}</span>}
-          {error.retryable && onRetry !== undefined ? (
-            <button type="button" onClick={onRetry}>
-              다시 시도
-            </button>
-          ) : reLoginCodes.has(error.code) ? (
-            <Link to="/login">다시 로그인</Link>
-          ) : (
-            <Link to="/app">학습 홈으로 돌아가기</Link>
-          )}
-        </div>
-      </section>
-    </main>
+        <strong className="text-danger">{error.message}</strong>
+        {error.nextAction === undefined ? null : (
+          <span className="text-foreground">{error.nextAction}</span>
+        )}
+      </div>
+      <div className="mt-6 flex flex-wrap gap-3">
+        {error.retryable && onRetry !== undefined ? (
+          <Button onClick={onRetry}>다시 시도</Button>
+        ) : reLoginCodes.has(error.code) ? (
+          <Link className={buttonClassName("primary")} to="/login">
+            다시 로그인
+          </Link>
+        ) : (
+          <Link className={buttonClassName("primary")} to="/app">
+            학습 홈으로 돌아가기
+          </Link>
+        )}
+      </div>
+    </FullPageState>
   );
 }
 function RootRedirect() {
@@ -421,7 +427,22 @@ const navigationLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 function ApprovedLayout() {
   const { state, logout } = useAuthSession();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPath, setMenuPath] = useState(location.pathname);
+  // Close the mobile menu after navigation without an effect.
+  if (menuPath !== location.pathname) {
+    setMenuPath(location.pathname);
+    setMenuOpen(false);
+  }
   if (state.status !== "approved") return null;
+
+  const links: { to: string; label: string; end?: boolean }[] = [
+    { to: "/app", label: "홈", end: true },
+    { to: "/app/history", label: "이력" },
+    { to: "/app/leaderboards", label: "리더보드" },
+    ...(state.user.role === "admin" ? [{ to: "/app/admin/users", label: "관리" }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -431,8 +452,11 @@ function ApprovedLayout() {
       >
         본문으로 건너뛰기
       </a>
-      <header className="border-b border-border bg-card shadow-sm" role="banner">
-        <div className="mx-auto flex min-h-18 max-w-screen-2xl flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6 lg:gap-x-8 lg:px-8">
+      <header
+        className="sticky top-0 z-30 border-b border-border bg-card/95 shadow-sm backdrop-blur"
+        role="banner"
+      >
+        <div className="mx-auto flex min-h-16 max-w-screen-2xl items-center gap-x-6 px-4 sm:px-6 lg:min-h-18 lg:gap-x-8 lg:px-8">
           <Link
             className="inline-flex items-center gap-3 rounded-md text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30"
             to="/app"
@@ -445,29 +469,22 @@ function ApprovedLayout() {
             </span>
             <span className="grid leading-tight">
               <span className="text-base font-extrabold tracking-tight">CertForge</span>
-              <span className="text-[0.65rem] font-semibold italic text-muted-foreground">
+              <span className="hidden text-[0.65rem] font-semibold italic text-muted-foreground sm:block">
                 Forge. Sharpen. Certify.
               </span>
             </span>
           </Link>
-          <nav
-            aria-label="주요 메뉴"
-            className="order-3 flex w-full flex-wrap items-center gap-1 lg:order-none lg:w-auto"
-          >
-            <NavLink className={navigationLinkClass} end to="/app">
-              홈
-            </NavLink>
-            <NavLink className={navigationLinkClass} to="/app/history">
-              이력
-            </NavLink>
-            <NavLink className={navigationLinkClass} to="/app/leaderboards">
-              리더보드
-            </NavLink>
-            {state.user.role === "admin" ? (
-              <NavLink className={navigationLinkClass} to="/app/admin/users">
-                관리
+          <nav aria-label="주요 메뉴" className="hidden items-center gap-1 md:flex">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                className={navigationLinkClass}
+                end={link.end}
+                to={link.to}
+              >
+                {link.label}
               </NavLink>
-            ) : null}
+            ))}
           </nav>
           <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
             <div
@@ -477,23 +494,63 @@ function ApprovedLayout() {
             >
               <span
                 aria-hidden="true"
-                className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-black text-primary-foreground"
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-xs font-black text-primary-foreground"
               >
                 {state.user.displayName.slice(0, 1)}
               </span>
-              <span className="max-w-[10rem] truncate text-sm font-semibold text-muted-foreground">
+              <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-muted-foreground sm:inline">
                 {state.user.displayName}
               </span>
             </div>
+            <div className="hidden md:block">
+              <Button
+                className="font-bold"
+                variant="secondary"
+                onClick={() => void logout()}
+              >
+                로그아웃
+              </Button>
+            </div>
+            <button
+              type="button"
+              className="grid size-10 place-items-center rounded-md border border-border bg-card text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30 md:hidden"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <span aria-hidden="true" className="text-lg leading-none">
+                {menuOpen ? "✕" : "☰"}
+              </span>
+            </button>
+          </div>
+        </div>
+        {menuOpen ? (
+          <div
+            id="mobile-menu"
+            className="border-t border-border px-4 pb-4 pt-2 md:hidden"
+          >
+            <nav aria-label="모바일 메뉴" className="grid gap-1">
+              {links.map((link) => (
+                <NavLink
+                  key={link.to}
+                  className={navigationLinkClass}
+                  end={link.end}
+                  to={link.to}
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </nav>
             <Button
-              className="font-bold"
+              className="mt-3 w-full font-bold"
               variant="secondary"
               onClick={() => void logout()}
             >
               로그아웃
             </Button>
           </div>
-        </div>
+        ) : null}
       </header>
       <main
         id="main-content"
@@ -532,12 +589,20 @@ function AdminLayout() {
 function NotFoundRoute() {
   useDocumentTitle("페이지를 찾을 수 없음");
   return (
-    <main className="app-shell">
-      <section className="route-card">
-        <h1>페이지를 찾을 수 없습니다.</h1>
-        <Link to="/">시작 화면으로 이동</Link>
-      </section>
-    </main>
+    <FullPageState
+      eyebrow="404"
+      title="페이지를 찾을 수 없습니다."
+      titleId="not-found-title"
+    >
+      <p className="leading-7 text-muted-foreground">
+        주소가 바뀌었거나 삭제된 페이지입니다. 학습 홈에서 다시 시작하세요.
+      </p>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link className={buttonClassName("primary")} to="/">
+          시작 화면으로 이동
+        </Link>
+      </div>
+    </FullPageState>
   );
 }
 export function AppRoutes() {

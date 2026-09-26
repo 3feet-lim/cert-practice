@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import { cn } from "../lib/cn";
+
 export interface ServerTimerProps {
   /** Server-clock samples from the active exam response. */
   serverNow: string;
@@ -67,9 +69,31 @@ export function ServerTimer({ serverNow, expiresAt, onExpire }: ServerTimerProps
     }
   }, [onExpire, seconds]);
 
+  const level = seconds <= 300 ? "critical" : seconds <= 600 ? "warning" : "normal";
+  // Announce only when crossing a threshold, not every tick.
+  const announcement =
+    level === "critical"
+      ? "남은 시간이 5분 이하입니다."
+      : level === "warning"
+        ? "남은 시간이 10분 이하입니다."
+        : "";
+
   return (
-    <output aria-label="서버 기준 남은 시간" className="font-mono text-2xl font-bold">
-      {formatRemaining(seconds)}
-    </output>
+    <>
+      <output
+        aria-label="서버 기준 남은 시간"
+        data-timer-level={level}
+        className={cn(
+          "font-mono text-2xl font-bold tabular-nums",
+          level === "warning" && "text-warning",
+          level === "critical" && "text-danger motion-safe:animate-pulse",
+        )}
+      >
+        {formatRemaining(seconds)}
+      </output>
+      <span className="sr-only" aria-live="assertive">
+        {announcement}
+      </span>
+    </>
   );
 }

@@ -64,10 +64,48 @@ describe("result, history, and leaderboard runtime pages", () => {
       "80.00%",
     );
     expect(screen.getByRole("heading", { name: "불변 응시 검토" })).toBeVisible();
-    expect(screen.getByRole("table", { name: "문항 검토" })).toBeVisible();
+    const review = screen.getByRole("list", { name: "문항 검토" });
     expect(
       screen.getByText("이 응시 당시의 문항 순서, 응답과 채점 결과를 표시합니다."),
     ).toBeVisible();
+
+    const immutable = fixtures.exam.immutableResult;
+    const wrong = immutable.questions.filter((question) => !question.isCorrect);
+    const user = userEvent.setup();
+
+    // Wrong answers are shown first, and every question is reachable via "전체".
+    expect(within(review).getAllByRole("listitem")).toHaveLength(wrong.length);
+    const filters = screen.getByRole("group", { name: "결과 필터" });
+    await user.click(within(filters).getByRole("button", { name: /^전체/ }));
+    expect(
+      within(screen.getByRole("list", { name: "문항 검토" })).getAllByRole("listitem"),
+    ).toHaveLength(immutable.questions.length);
+
+    // Expanding a question reveals its explanation.
+    await user.click(within(filters).getByRole("button", { name: /^오답/ }));
+    const firstWrong = wrong[0]!;
+    await user.click(
+      screen.getByRole("button", {
+        name: new RegExp(`^Q${firstWrong.displayNumber}\\b`),
+      }),
+    );
+    expect(screen.getByRole("region", { name: "해설" })).toBeVisible();
+
+    // The retry mode hides verdicts until the learner checks an answer.
+    await user.click(screen.getByRole("button", { name: /^오답 다시 풀기/ }));
+    expect(screen.queryByRole("region", { name: "해설" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "정답 확인" })[0]).toBeDisabled();
+  });
+
+  it("links history rows to their attempt result", async () => {
+    renderPage("/app/history", createMockCertQuizApi(), <HistoryPage />);
+    const table = await screen.findByRole("table", { name: "모의고사 응시 이력" });
+    const links = within(table).getAllByRole("link", { name: /응시 결과 보기/ });
+    expect(links.length).toBeGreaterThan(0);
+    expect(links[0]).toHaveAttribute(
+      "href",
+      expect.stringMatching(/^\/app\/attempts\//),
+    );
   });
 
   it("renders the canonical expired practice-result state", async () => {

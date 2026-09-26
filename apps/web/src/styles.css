@@ -121,47 +121,23 @@ select {
   font: inherit;
 }
 
-.app-shell {
-  display: grid;
-  min-height: 100vh;
-  place-items: center;
-  padding: clamp(16px, 5vw, 48px);
-}
-
-.welcome-card {
-  width: min(720px, 100%);
-  padding: clamp(24px, 5vw, 56px);
-  border: 1px solid #dce2ec;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 20px 60px rgb(38 51 77 / 8%);
-}
-
+/*
+ * Authenticated page container. Every in-app screen (home, quiz, results, history,
+ * leaderboard) uses the same width so layouts line up when navigating.
+ */
 .content-card {
   width: 100%;
-  padding: clamp(20px, 4vw, 56px);
-  border: 1px solid #dce2ec;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 20px 60px rgb(38 51 77 / 8%);
-}
-
-/* Shared card for loading, empty, and error routes rendered inside .app-shell. */
-.route-card {
-  width: min(720px, 100%);
-  padding: clamp(20px, 4vw, 48px);
-  border: 1px solid #dce2ec;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 20px 60px rgb(38 51 77 / 8%);
+  max-width: 72rem;
+  margin-inline: auto;
 }
 
 .eyebrow {
   margin: 0 0 16px;
-  color: #4f46e5;
+  color: var(--cq-color-primary);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 /* Base layer so Tailwind text-* utilities on page headings take precedence. */
@@ -172,48 +148,6 @@ select {
     line-height: 1.15;
     letter-spacing: -0.04em;
   }
-}
-
-.bootstrap-status {
-  display: grid;
-  gap: 6px;
-  margin: 28px 0 0;
-  padding: 16px 18px;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  color: #475569;
-  background: #f8fafc;
-}
-
-.bootstrap-status--ready {
-  border-color: #a7f3d0;
-  color: #065f46;
-  background: #ecfdf5;
-}
-
-.bootstrap-status--error {
-  border-color: #fecaca;
-  color: #991b1b;
-  background: #fef2f2;
-}
-
-.bootstrap-status button {
-  justify-self: start;
-  margin-top: 6px;
-  padding: 8px 12px;
-  border: 0;
-  border-radius: 8px;
-  color: #ffffff;
-  background: #991b1b;
-  cursor: pointer;
-}
-
-.description {
-  max-width: 48rem;
-  margin: 24px 0 0;
-  color: #5f6b7f;
-  font-size: 1.05rem;
-  line-height: 1.7;
 }
 
 :focus-visible {
@@ -250,7 +184,7 @@ select {
 }
 
 .safe-markdown blockquote {
-  border-left: 3px solid #cbd5e1;
+  border-left: 3px solid var(--cq-color-border);
   padding-left: 1rem;
-  color: #475569;
+  color: var(--cq-color-muted-foreground);
 }

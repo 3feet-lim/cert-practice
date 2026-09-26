@@ -27,10 +27,7 @@ export function ChoiceField({
 
   return (
     <div
-      className={cn(
-        "relative rounded-lg border border-slate-200 bg-white p-4",
-        className,
-      )}
+      className={cn("relative rounded-lg border border-border bg-card p-4", className)}
     >
       <div className="flex items-start gap-3">
         <input
@@ -39,20 +36,23 @@ export function ChoiceField({
           type={type}
           disabled={disabled}
           aria-describedby={descriptionId}
-          className="mt-1 size-4 shrink-0 accent-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed"
+          className="mt-1 size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-not-allowed"
         />
         <div className="min-w-0">
           <label
             htmlFor={inputId}
             className={cn(
-              "block font-medium text-slate-900",
-              disabled ? "cursor-not-allowed text-slate-500" : "cursor-pointer",
+              "block font-medium text-foreground",
+              disabled ? "cursor-not-allowed text-muted-foreground" : "cursor-pointer",
             )}
           >
             {label}
           </label>
           {description ? (
-            <p id={descriptionId} className="mt-1 text-sm leading-6 text-slate-600">
+            <p
+              id={descriptionId}
+              className="mt-1 text-sm leading-6 text-muted-foreground"
+            >
               {description}
             </p>
           ) : null}

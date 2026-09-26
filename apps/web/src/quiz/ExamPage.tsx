@@ -18,7 +18,10 @@ import {
   useExamSubmit,
 } from "./quiz-queries";
 import { quizErrorMessage } from "./quiz-error-messages";
+import { questionTarget } from "./quiz-presentation";
 import { QuizQuestionPresenter } from "./QuizQuestionPresenter";
+import { useQuizStore } from "./quiz-store";
+import { useLeaveWarning } from "./use-quiz-shortcuts";
 
 function errorMessage(error: unknown): string {
   return quizErrorMessage(error, "모의고사 상태를 저장하지 못했습니다.");
@@ -41,6 +44,16 @@ function ExamInteraction({
   const [requestError, setRequestError] = useState<string | null>(null);
   const interactionPending =
     expired || stateMutation.isPending || flagMutation.isPending || submitPending;
+  const sessionTarget = `exam:${examSessionId}` as const;
+  const drafts = useQuizStore((state) => state.draftChoiceIdsByQuestion);
+  const answeredCount = session.questions.filter((question) => {
+    const selected =
+      drafts[questionTarget(sessionTarget, question.id)] ?? question.selectedChoiceIds;
+    return selected.length === question.requiredChoiceCount;
+  }).length;
+  const flaggedCount = session.questions.filter((question) => question.flagged).length;
+  const totalCount = session.questions.length;
+  useLeaveWarning(!expired && !submitPending);
 
   const submitAndNavigate = async () => {
     try {
@@ -78,14 +91,52 @@ function ExamInteraction({
           {requestError}
         </section>
       ) : null}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-card sm:p-5">
+      <div className="mb-6 grid gap-4 rounded-xl border border-border bg-card p-4 shadow-card sm:p-5 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-muted-foreground">
             {session.certificationCode}
           </p>
-          <h2 className="text-lg font-bold sm:text-xl">{session.certificationName}</h2>
+          <h2 className="truncate text-lg font-bold sm:text-xl">
+            {session.certificationName}
+          </h2>
+          <dl
+            aria-label="진행 현황"
+            className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm tabular-nums text-muted-foreground"
+          >
+            <div className="flex gap-1">
+              <dt>응답</dt>
+              <dd className="font-bold text-foreground">
+                {answeredCount}/{totalCount}
+              </dd>
+            </div>
+            <div className="flex gap-1">
+              <dt>미응답</dt>
+              <dd
+                className={
+                  totalCount - answeredCount > 0
+                    ? "font-bold text-danger"
+                    : "font-bold text-foreground"
+                }
+              >
+                {totalCount - answeredCount}
+              </dd>
+            </div>
+            <div className="flex gap-1">
+              <dt>나중에 보기</dt>
+              <dd className="font-bold text-warning">{flaggedCount}</dd>
+            </div>
+          </dl>
+          <div
+            aria-hidden="true"
+            className="mt-2 h-1.5 max-w-md overflow-hidden rounded-full bg-border"
+          >
+            <div
+              className="h-full rounded-full bg-primary"
+              style={{ width: `${Math.round((answeredCount / totalCount) * 100)}%` }}
+            />
+          </div>
         </div>
-        <div className="sm:text-right">
+        <div className="md:text-right">
           <p className="text-sm text-muted-foreground">서버 기준 남은 시간</p>
           <ServerTimer
             expiresAt={session.expiresAt}
@@ -95,6 +146,44 @@ function ExamInteraction({
             }}
             serverNow={session.serverNow}
           />
+        </div>
+        <div>
+          <AccessibleDialog
+            confirmAction={{
+              label: submitPending ? "제출 중..." : "제출 확정",
+              disabled:
+                previewMutation.isPending ||
+                previewMutation.data === undefined ||
+                submitPending,
+              onConfirm: () => void submitAndNavigate(),
+            }}
+            description="제출 후 정답과 해설은 결과 화면에서만 확인할 수 있습니다."
+            onOpenChange={openPreview}
+            open={dialogOpen}
+            title="모의고사를 제출하시겠습니까?"
+            trigger={<Button disabled={interactionPending}>제출 미리보기</Button>}
+          >
+            {previewMutation.isPending ? (
+              <p role="status">제출 현황을 확인하는 중입니다.</p>
+            ) : previewMutation.data ? (
+              <dl className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm text-muted-foreground">미응답</dt>
+                  <dd className="text-2xl font-bold">
+                    {previewMutation.data.unansweredQuestionCount}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm text-muted-foreground">나중에 보기</dt>
+                  <dd className="text-2xl font-bold">
+                    {previewMutation.data.flaggedQuestionCount}
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p>제출 현황을 불러오지 못했습니다.</p>
+            )}
+          </AccessibleDialog>
         </div>
       </div>
       {expired ? (
@@ -127,47 +216,9 @@ function ExamInteraction({
           stateMutation.mutate({ currentIndex }, { onError: handleMutationError });
         }}
         questions={session.questions}
-        sessionTarget={`exam:${examSessionId}`}
+        sessionTarget={sessionTarget}
         submitPending={interactionPending}
       />
-      <div className="mt-6 flex justify-end">
-        <AccessibleDialog
-          confirmAction={{
-            label: submitPending ? "제출 중..." : "제출 확정",
-            disabled:
-              previewMutation.isPending ||
-              previewMutation.data === undefined ||
-              submitPending,
-            onConfirm: () => void submitAndNavigate(),
-          }}
-          description="제출 후 정답과 해설은 결과 화면에서만 확인할 수 있습니다."
-          onOpenChange={openPreview}
-          open={dialogOpen}
-          title="모의고사를 제출하시겠습니까?"
-          trigger={<Button disabled={interactionPending}>제출 미리보기</Button>}
-        >
-          {previewMutation.isPending ? (
-            <p role="status">제출 현황을 확인하는 중입니다.</p>
-          ) : previewMutation.data ? (
-            <dl className="grid grid-cols-2 gap-4">
-              <div>
-                <dt className="text-sm text-muted-foreground">미응답</dt>
-                <dd className="text-2xl font-bold">
-                  {previewMutation.data.unansweredQuestionCount}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm text-muted-foreground">나중에 보기</dt>
-                <dd className="text-2xl font-bold">
-                  {previewMutation.data.flaggedQuestionCount}
-                </dd>
-              </div>
-            </dl>
-          ) : (
-            <p>제출 현황을 불러오지 못했습니다.</p>
-          )}
-        </AccessibleDialog>
-      </div>
     </>
   );
 }

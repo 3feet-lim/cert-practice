@@ -430,6 +430,37 @@ describe("application route hierarchy", () => {
     expect(screen.getByRole("region", { name: "이어 풀 수 있는 연습" })).toBeVisible();
   });
 
+  it("summarizes pass readiness, weak domains, and per-certification stats on the home dashboard", async () => {
+    const fixtures = createCertQuizFixtures();
+    const exam = fixtures.exam.immutableResult;
+    const mockApi = createMockCertQuizApi();
+    const api: CertQuizApi = {
+      ...mockApi,
+      getAttempt: async () => ({
+        ok: true,
+        data: {
+          ...exam,
+          domains: [
+            { ...exam.domains[0]!, domainName: "Weak Domain", accuracyRate: "50" },
+            ...exam.domains.slice(1),
+          ],
+        },
+        meta: { requestId: "test:readiness-attempt" },
+      }),
+    };
+    renderRoute("/app", { api });
+
+    expect(await screen.findByRole("heading", { name: "합격 준비도" })).toBeVisible();
+    expect(screen.getByRole("meter", { name: "합격 준비도" })).toBeVisible();
+    expect(await screen.findByText("최근 응시 약점 도메인")).toBeVisible();
+    expect(screen.getByText("Weak Domain")).toBeVisible();
+    expect(screen.getByRole("link", { name: "최근 결과 보기" })).toHaveAttribute(
+      "href",
+      expect.stringMatching(/^\/app\/attempts\//),
+    );
+    expect(await screen.findByText("최고")).toBeVisible();
+  });
+
   it("renders a safe catalog error without treating an active session as catalog data", async () => {
     const api: CertQuizApi = {
       ...createMockCertQuizApi(),

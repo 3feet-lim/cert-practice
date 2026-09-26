@@ -1,11 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createCertQuizFixtures } from "../mocks/fixtures";
 import { QuizStoreProvider } from "./quiz-store-provider";
 import { createQuizStore } from "./quiz-store";
 import { QuizQuestionPresenter } from "./QuizQuestionPresenter";
+
+afterEach(cleanup);
 
 describe("QuizQuestionPresenter", () => {
   it("keeps capped draft selections, language, flags, and reveal state while navigating", async () => {
@@ -87,5 +89,46 @@ describe("QuizQuestionPresenter", () => {
       }),
     );
     expect(screen.getByRole("heading", { name: "제출 결과" })).toBeVisible();
+  });
+});
+
+describe("QuizQuestionPresenter keyboard shortcuts", () => {
+  it("navigates with arrows, selects with number keys, flags with F, and submits with Enter", async () => {
+    const fixtures = createCertQuizFixtures();
+    const singles = fixtures.practice.active.questions
+      .filter(
+        (question) =>
+          question.kind === "practice-unsubmitted" &&
+          question.requiredChoiceCount === 1,
+      )
+      .slice(0, 2);
+    if (singles.length < 2) throw new Error("Expected two single-choice questions.");
+    const onFlagChange = vi.fn();
+    const onSubmit = vi.fn();
+    const onNavigate = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <QuizStoreProvider store={createQuizStore()}>
+        <QuizQuestionPresenter
+          initialIndex={0}
+          onFlagChange={onFlagChange}
+          onNavigate={onNavigate}
+          onSubmit={onSubmit}
+          questions={singles}
+          sessionTarget={`practice:${fixtures.ids.practiceSessionId}`}
+        />
+      </QuizStoreProvider>,
+    );
+
+    await user.keyboard("2");
+    expect(screen.getAllByRole("radio")[1]).toBeChecked();
+    await user.keyboard("f");
+    expect(onFlagChange).toHaveBeenCalledWith(singles[0]!.id, !singles[0]!.flagged);
+    await user.keyboard("{Enter}");
+    expect(onSubmit).toHaveBeenCalledWith(singles[0]!.id, [singles[0]!.choices[1]!.id]);
+    await user.keyboard("{ArrowRight}");
+    expect(onNavigate).toHaveBeenLastCalledWith(1);
+    await user.keyboard("{ArrowLeft}");
+    expect(onNavigate).toHaveBeenLastCalledWith(0);
   });
 });

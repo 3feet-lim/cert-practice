@@ -88,51 +88,146 @@ export interface ScoreSummaryProps {
   totalQuestions: number;
   passed?: boolean;
   reference1000?: string;
+  /** Pass threshold percentage; enables the gauge and the gap-to-threshold copy. */
+  passThreshold?: string;
+  /** Raw numeric accuracy (0-100) used for the gauge; defaults to parsing accuracyRate. */
+  accuracyValue?: number;
+  actions?: ReactNode;
 }
 
+function gapCopy(gap: number) {
+  const rounded = Math.round(gap * 10) / 10;
+  if (rounded >= 0) return `합격선보다 ${Math.abs(rounded)}%p 높습니다`;
+  return `합격선까지 ${Math.abs(rounded)}%p 남았습니다`;
+}
+
+/** Result hero: large accuracy, pass/fail verdict, and a gauge with the pass line. */
 export function ScoreSummary({
   rawScore,
   accuracyRate,
   totalQuestions,
   passed,
   reference1000,
+  passThreshold,
+  accuracyValue,
+  actions,
 }: ScoreSummaryProps) {
+  const accuracy = accuracyValue ?? Number.parseFloat(accuracyRate);
+  const threshold = passThreshold === undefined ? undefined : Number(passThreshold);
+  const hasGauge = Number.isFinite(accuracy) && threshold !== undefined;
+  const gap = hasGauge ? accuracy - threshold : 0;
+  const verdictTone = passed === undefined ? "neutral" : passed ? "success" : "danger";
+
   return (
     <section
       aria-labelledby="score-summary-title"
-      className="rounded-xl border border-border bg-card p-6 shadow-card"
+      className={cn(
+        "overflow-hidden rounded-2xl border bg-card shadow-card",
+        verdictTone === "success" && "border-success/30",
+        verdictTone === "danger" && "border-danger/30",
+        verdictTone === "neutral" && "border-border",
+      )}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 id="score-summary-title" className="text-lg font-bold">
+      <div
+        className={cn(
+          "grid gap-6 p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center",
+          verdictTone === "success" && "bg-success-soft/60",
+          verdictTone === "danger" && "bg-danger-soft/60",
+        )}
+      >
+        <div className="min-w-0">
+          <h2
+            id="score-summary-title"
+            className="text-sm font-bold uppercase tracking-wide text-muted-foreground"
+          >
             점수 요약
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            원점수와 정답률을 우선 표시합니다.
-          </p>
+          <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <p className="text-5xl font-extrabold tracking-tight tabular-nums text-foreground sm:text-6xl">
+              {accuracyRate}
+            </p>
+            {passed === undefined ? null : (
+              <p
+                className={cn(
+                  "text-2xl font-extrabold",
+                  passed ? "text-success" : "text-danger",
+                )}
+              >
+                {passed ? "합격" : "불합격"}
+              </p>
+            )}
+          </div>
+          {hasGauge ? (
+            <p
+              className={cn(
+                "mt-2 text-sm font-semibold",
+                gap >= 0 ? "text-success" : "text-danger",
+              )}
+            >
+              {gapCopy(gap)}
+            </p>
+          ) : null}
+          {hasGauge ? (
+            <div className="mt-5 max-w-xl">
+              <div
+                role="meter"
+                aria-label="정답률과 합격선"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(accuracy)}
+                aria-valuetext={`정답률 ${accuracyRate}, 합격선 ${threshold}%`}
+                className="relative h-3 rounded-full bg-border"
+              >
+                <div
+                  className={cn(
+                    "h-full rounded-full",
+                    gap >= 0 ? "bg-success" : "bg-danger",
+                  )}
+                  style={{ width: `${Math.min(100, Math.max(0, accuracy))}%` }}
+                />
+                <div
+                  aria-hidden="true"
+                  className="absolute -top-1 h-5 w-0.5 bg-foreground"
+                  style={{ left: `${Math.min(100, Math.max(0, threshold))}%` }}
+                />
+              </div>
+              <div
+                aria-hidden="true"
+                className="relative mt-1 h-4 text-xs font-semibold text-muted-foreground"
+              >
+                <span
+                  className="absolute -translate-x-1/2 whitespace-nowrap"
+                  style={{ left: `${Math.min(100, Math.max(0, threshold))}%` }}
+                >
+                  합격선 {threshold}%
+                </span>
+              </div>
+            </div>
+          ) : null}
         </div>
-        {passed === undefined ? null : (
-          <Badge tone={passed ? "success" : "danger"}>
-            {passed ? "합격" : "불합격"}
-          </Badge>
-        )}
+        {actions ? (
+          <div className="flex flex-wrap gap-2 md:flex-col">{actions}</div>
+        ) : null}
       </div>
-      <dl className="mt-5 grid gap-4 sm:grid-cols-3">
+      <dl className="grid gap-4 border-t border-border p-6 sm:grid-cols-3 sm:px-8">
         <div>
           <dt className="text-sm text-muted-foreground">원점수</dt>
-          <dd className="mt-1 text-2xl font-bold">
+          <dd className="mt-1 text-2xl font-bold tabular-nums">
             {rawScore}
             <span className="ml-1 text-base font-medium">/ {totalQuestions}</span>
           </dd>
         </div>
         <div>
           <dt className="text-sm text-muted-foreground">정답률</dt>
-          <dd className="mt-1 text-2xl font-bold">{accuracyRate}</dd>
+          <dd className="mt-1 text-2xl font-bold tabular-nums">{accuracyRate}</dd>
         </div>
         {reference1000 ? (
           <div>
             <dt className="text-sm text-muted-foreground">참고 환산값</dt>
-            <dd className="mt-1 text-2xl font-bold">{reference1000}</dd>
+            <dd className="mt-1 text-2xl font-bold tabular-nums">
+              {reference1000}
+              <span className="ml-1 text-base font-medium">/ 1000</span>
+            </dd>
           </div>
         ) : null}
       </dl>
@@ -146,46 +241,107 @@ export interface DomainBreakdownItem {
   questionCount: number;
   earnedScore: string;
   accuracyRate: string;
+  /** Numeric accuracy (0-100) for the bar; defaults to parsing accuracyRate. */
+  accuracyValue?: number;
 }
 
 export interface DomainBreakdownProps {
   items: DomainBreakdownItem[];
   title?: string;
+  /** Pass threshold percentage; domains below it are highlighted as weak. */
+  passThreshold?: string;
 }
 
 export function DomainBreakdown({
   items,
   title = "도메인별 성과",
+  passThreshold,
 }: DomainBreakdownProps) {
+  const threshold = passThreshold === undefined ? undefined : Number(passThreshold);
+  const valueOf = (item: DomainBreakdownItem) =>
+    item.accuracyValue ?? Number.parseFloat(item.accuracyRate);
+  const weakCount =
+    threshold === undefined
+      ? 0
+      : items.filter((item) => valueOf(item) < threshold).length;
+  const sorted = [...items].sort((left, right) => valueOf(left) - valueOf(right));
+
   return (
     <section
       aria-labelledby="domain-breakdown-title"
       className="rounded-xl border border-border bg-card p-6 shadow-card"
     >
-      <h2 id="domain-breakdown-title" className="text-lg font-bold">
-        {title}
-      </h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="domain-breakdown-title" className="text-lg font-bold">
+          {title}
+        </h2>
+        {threshold !== undefined ? (
+          <p className="text-sm text-muted-foreground">
+            {weakCount > 0
+              ? `합격선(${threshold}%) 미만 도메인 ${weakCount}개 · 낮은 순으로 정렬`
+              : `모든 도메인이 합격선(${threshold}%) 이상입니다`}
+          </p>
+        ) : null}
+      </div>
       <Table className="mt-4">
         <TableCaption>{title} 표</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>도메인</TableHead>
-            <TableHead>문항 수</TableHead>
-            <TableHead>획득 점수</TableHead>
-            <TableHead>정답률</TableHead>
+            <TableHead className="w-2/5">정답률</TableHead>
+            <TableHead>획득 / 문항</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
-              <th scope="row" className="px-4 py-3 font-medium">
-                {item.name}
-              </th>
-              <TableCell>{item.questionCount}</TableCell>
-              <TableCell>{item.earnedScore}</TableCell>
-              <TableCell>{item.accuracyRate}</TableCell>
-            </TableRow>
-          ))}
+          {sorted.map((item) => {
+            const value = valueOf(item);
+            const weak = threshold !== undefined && value < threshold;
+            return (
+              <TableRow key={item.id} className={cn(weak && "bg-danger-soft/40")}>
+                <th scope="row" className="px-4 py-3 text-left font-medium">
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    {item.name}
+                    {weak ? <Badge tone="danger">약점</Badge> : null}
+                  </span>
+                </th>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div
+                      aria-hidden="true"
+                      className="relative h-2 min-w-24 flex-1 rounded-full bg-border"
+                    >
+                      <div
+                        className={cn(
+                          "h-full rounded-full",
+                          weak ? "bg-danger" : "bg-success",
+                        )}
+                        style={{
+                          width: `${Math.min(100, Math.max(0, Number.isFinite(value) ? value : 0))}%`,
+                        }}
+                      />
+                      {threshold !== undefined ? (
+                        <div
+                          className="absolute -top-1 h-4 w-0.5 bg-foreground/60"
+                          style={{ left: `${threshold}%` }}
+                        />
+                      ) : null}
+                    </div>
+                    <span
+                      className={cn(
+                        "w-16 shrink-0 text-right font-semibold tabular-nums",
+                        weak && "text-danger",
+                      )}
+                    >
+                      {item.accuracyRate}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="whitespace-nowrap tabular-nums">
+                  {item.earnedScore} / {item.questionCount}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </section>
@@ -196,6 +352,7 @@ export interface DataTableColumn<Row> {
   id: string;
   header: string;
   cell: (row: Row) => ReactNode;
+  className?: string;
 }
 export interface DataTableProps<Row extends { id: string }> {
   caption: string;
@@ -216,7 +373,9 @@ export function DataTable<Row extends { id: string }>({
       <TableHeader>
         <TableRow>
           {columns.map((column) => (
-            <TableHead key={column.id}>{column.header}</TableHead>
+            <TableHead key={column.id} className={column.className}>
+              {column.header}
+            </TableHead>
           ))}
         </TableRow>
       </TableHeader>
@@ -235,11 +394,17 @@ export function DataTable<Row extends { id: string }>({
             <TableRow key={row.id}>
               {columns.map((column, index) =>
                 index === 0 ? (
-                  <th key={column.id} scope="row" className="px-4 py-3 font-medium">
+                  <th
+                    key={column.id}
+                    scope="row"
+                    className={cn("px-4 py-3 text-left font-medium", column.className)}
+                  >
                     {column.cell(row)}
                   </th>
                 ) : (
-                  <TableCell key={column.id}>{column.cell(row)}</TableCell>
+                  <TableCell key={column.id} className={column.className}>
+                    {column.cell(row)}
+                  </TableCell>
                 ),
               )}
             </TableRow>

@@ -1,5 +1,12 @@
 import type { ExamStateResponse, SubmitExamResponse } from "@cert-quiz/contracts";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -59,9 +66,10 @@ describe("ExamPage", () => {
         examSessionId: MOCK_IDS.exam,
       }),
     );
-    expect(await screen.findByText("미응답", { selector: "dt" })).toBeVisible();
-    expect(screen.getByText("1", { selector: "dd" })).toBeVisible();
-    expect(screen.getByText("2", { selector: "dd" })).toBeVisible();
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByText("미응답", { selector: "dt" })).toBeVisible();
+    expect(within(dialog).getByText("1", { selector: "dd" })).toBeVisible();
+    expect(within(dialog).getByText("2", { selector: "dd" })).toBeVisible();
     await userEvent.setup().click(screen.getByRole("button", { name: "제출 확정" }));
     expect(await screen.findByRole("heading", { name: "모의고사 결과" })).toBeVisible();
   });

@@ -5,6 +5,8 @@ import type {
   Uuid,
 } from "@cert-quiz/contracts";
 
+import { useState } from "react";
+
 import { ChoiceField } from "../components/ChoiceField";
 import { SafeMarkdown } from "../components/SafeMarkdown";
 import {
@@ -31,6 +33,8 @@ export interface QuestionPresenterProps {
   onSubmit?: () => void;
   submitPending?: boolean;
   interactionDisabled?: boolean;
+  /** Shows the keyboard shortcut legend (interactive sessions only). */
+  showShortcutHint?: boolean;
 }
 
 function isSubmittedQuestion(
@@ -58,7 +62,10 @@ export function QuestionPresenter({
   onSubmit,
   submitPending = false,
   interactionDisabled = false,
+  showShortcutHint = false,
 }: QuestionPresenterProps) {
+  const [flaggedOnly, setFlaggedOnly] = useState(false);
+  const flaggedCount = navigatorItems.filter((item) => item.flagged).length;
   const isMultipleChoice = question.requiredChoiceCount > 1;
   const submitted = isSubmittedQuestion(question);
   const showReveal = reveal && submitted;
@@ -90,26 +97,35 @@ export function QuestionPresenter({
               </p>
             ) : null}
           </div>
-          <div
-            className="flex flex-wrap items-center gap-2"
-            aria-label="문항 표시 언어"
-          >
-            <Button
-              aria-pressed={language === "en"}
-              disabled={interactionDisabled || onLanguageChange === undefined}
-              onClick={() => onLanguageChange?.("en")}
-              variant={language === "en" ? "primary" : "secondary"}
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              role="group"
+              aria-label="문항 표시 언어"
+              className="inline-flex rounded-lg bg-muted p-1"
             >
-              English
-            </Button>
-            <Button
-              aria-pressed={language === "ko"}
-              disabled={interactionDisabled || onLanguageChange === undefined}
-              onClick={() => onLanguageChange?.("ko")}
-              variant={language === "ko" ? "primary" : "secondary"}
-            >
-              한국어
-            </Button>
+              {(
+                [
+                  ["ko", "한국어"],
+                  ["en", "English"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={language === value}
+                  disabled={interactionDisabled || onLanguageChange === undefined}
+                  onClick={() => onLanguageChange?.(value)}
+                  className={cn(
+                    "min-h-8 rounded-md px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30 disabled:cursor-not-allowed disabled:opacity-70",
+                    language === value
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             {onFlagChange ? (
               <button
                 aria-pressed={question.flagged}
@@ -197,7 +213,12 @@ export function QuestionPresenter({
           {showReveal ? (
             <section
               aria-labelledby="question-feedback-title"
-              className="mt-6 rounded-lg border border-success/30 bg-success-soft p-5"
+              className={cn(
+                "mt-6 rounded-lg border p-5",
+                question.isCorrect
+                  ? "border-success/30 bg-success-soft"
+                  : "border-danger/30 bg-danger-soft",
+              )}
             >
               <div className="flex flex-wrap items-center gap-3">
                 <h3 id="question-feedback-title" className="font-bold">
@@ -223,6 +244,28 @@ export function QuestionPresenter({
             </section>
           ) : null}
 
+          {showShortcutHint ? (
+            <p
+              className="mt-6 hidden text-xs text-muted-foreground md:block"
+              aria-hidden="true"
+            >
+              단축키: <kbd className="rounded border border-border px-1">←</kbd>{" "}
+              <kbd className="rounded border border-border px-1">→</kbd> 이동 ·{" "}
+              <kbd className="rounded border border-border px-1">1</kbd>–
+              <kbd className="rounded border border-border px-1">
+                {Math.min(9, question.choices.length)}
+              </kbd>{" "}
+              선택 · <kbd className="rounded border border-border px-1">F</kbd> 나중에
+              보기
+              {onSubmit && !submitted ? (
+                <>
+                  {" "}
+                  · <kbd className="rounded border border-border px-1">Enter</kbd> 제출
+                </>
+              ) : null}
+            </p>
+          ) : null}
+
           {onSubmit && !submitted ? (
             <div className="mt-6 flex justify-end">
               <Button
@@ -240,10 +283,7 @@ export function QuestionPresenter({
         </article>
       </div>
 
-      <aside
-        aria-label="문항 이동"
-        className="order-first grid gap-3 lg:sticky lg:top-6 lg:order-none"
-      >
+      <aside aria-label="문항 이동" className="grid gap-3 lg:sticky lg:top-6">
         <nav aria-label="이전 또는 다음 문항" className="grid grid-cols-2 gap-3">
           <Button
             disabled={
@@ -268,10 +308,37 @@ export function QuestionPresenter({
             다음 문항
           </Button>
         </nav>
+        {flaggedCount > 0 ? (
+          <button
+            type="button"
+            aria-pressed={flaggedOnly}
+            onClick={() => setFlaggedOnly(!flaggedOnly)}
+            className={cn(
+              "inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
+              flaggedOnly
+                ? "border-warning/50 bg-warning-soft text-warning"
+                : "border-border bg-card text-muted-foreground hover:bg-muted",
+            )}
+          >
+            <span aria-hidden="true">★</span>
+            나중에 보기만 ({flaggedCount})
+          </button>
+        ) : null}
         <QuestionNavigator
-          className="max-h-60 overflow-y-auto lg:max-h-[calc(100vh-10rem)]"
-          items={[...navigatorItems]}
-          onNavigate={onNavigate ? (_item, index) => onNavigate(index) : undefined}
+          className="max-h-60 overflow-y-auto lg:max-h-[calc(100vh-14rem)]"
+          items={navigatorItems.filter(
+            (item) => !(flaggedOnly && flaggedCount > 0) || item.flagged,
+          )}
+          onNavigate={
+            onNavigate
+              ? (item) =>
+                  onNavigate(
+                    navigatorItems.findIndex(
+                      (candidate) => candidate.number === item.number,
+                    ),
+                  )
+              : undefined
+          }
         />
       </aside>
     </section>
