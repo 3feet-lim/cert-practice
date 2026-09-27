@@ -452,7 +452,7 @@ export interface QuestionNavigatorItem {
   href: string;
   state?: "current" | "answered" | "unanswered";
   /** Answer progress independent of focus, so the current question keeps its status. */
-  progress?: "unanswered" | "answered" | "submitted";
+  progress?: "unanswered" | "answered" | "correct" | "incorrect";
   flagged?: boolean;
 }
 export interface QuestionNavigatorProps {
@@ -465,7 +465,8 @@ export interface QuestionNavigatorProps {
 const progressLabels = {
   unanswered: "미응답",
   answered: "답 선택함",
-  submitted: "제출함",
+  correct: "정답",
+  incorrect: "오답",
 } as const;
 
 function navigatorProgress(item: QuestionNavigatorItem) {
@@ -479,7 +480,9 @@ export function QuestionNavigator({
   onNavigate,
   className,
 }: QuestionNavigatorProps) {
-  const showsSubmitted = items.some((item) => item.progress === "submitted");
+  const showsGraded = items.some(
+    (item) => item.progress === "correct" || item.progress === "incorrect",
+  );
   return (
     <nav
       aria-label={label}
@@ -493,9 +496,11 @@ export function QuestionNavigator({
             "relative inline-flex size-10 items-center justify-center rounded-md border text-sm font-bold focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
             current && item.progress === undefined
               ? "border-primary bg-primary text-primary-foreground"
-              : progress === "submitted"
+              : progress === "correct"
                 ? "border-success/40 bg-success-soft text-success"
-                : progress === "answered"
+                : progress === "incorrect"
+                  ? "border-danger/40 bg-danger-soft text-danger"
+                  : progress === "answered"
                   ? "border-primary/40 bg-primary-soft text-primary"
                   : "border-border bg-card text-foreground",
             current &&
@@ -557,11 +562,17 @@ export function QuestionNavigator({
           <span className="size-3 rounded-sm border border-primary/40 bg-primary-soft" />
           답 선택함
         </li>
-        {showsSubmitted ? (
-          <li className="inline-flex items-center gap-1.5">
-            <span className="size-3 rounded-sm border border-success/40 bg-success-soft" />
-            제출함
-          </li>
+        {showsGraded ? (
+          <>
+            <li className="inline-flex items-center gap-1.5">
+              <span className="size-3 rounded-sm border border-success/40 bg-success-soft" />
+              정답
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <span className="size-3 rounded-sm border border-danger/40 bg-danger-soft" />
+              오답
+            </li>
+          </>
         ) : null}
         <li className="inline-flex items-center gap-1.5">
           <span className="text-warning">★</span>

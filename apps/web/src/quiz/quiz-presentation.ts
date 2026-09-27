@@ -51,7 +51,9 @@ export function createQuestionNavigatorItems(
       state: index === currentIndex ? "current" : answered ? "answered" : "unanswered",
       progress:
         question.kind === "practice-submitted"
-          ? "submitted"
+          ? question.isCorrect
+            ? "correct"
+            : "incorrect"
           : answered
             ? "answered"
             : "unanswered",
