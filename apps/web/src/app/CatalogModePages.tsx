@@ -78,14 +78,14 @@ function ActivePracticeBanner() {
           {sessions.map((session) => (
             <li
               key={session.practiceSessionId}
-              className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-card p-4 shadow-sm"
+              className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-card p-4 shadow-sm"
             >
-              <p className="min-w-0 flex-1 text-sm text-foreground">
+              <p className="whitespace-nowrap text-sm text-foreground">
                 {session.certificationCode} · {session.currentQuestionNumber} /{" "}
                 {session.totalQuestions}번 문항
               </p>
               <Link
-                className={`${linkButtonClassName} shrink-0 whitespace-nowrap`}
+                className={`${linkButtonClassName} self-end`}
                 aria-label={`${session.certificationCode} 연습 이어 풀기`}
                 to={`/app/practice/${session.practiceSessionId}`}
               >
