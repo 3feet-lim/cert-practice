@@ -30,6 +30,7 @@ import {
 } from "@cert-quiz/contracts";
 
 import { domainFailure } from "./errors.js";
+import { catalogChoiceId } from "./import-service.js";
 import { Fraction } from "./fraction.js";
 import type {
   Attempt,
@@ -542,7 +543,7 @@ function toQuestionSnapshot(question: PersistedQuestionSnapshot): QuestionSnapsh
     displayNumber: question.displayIndex + 1,
     domainName: source.domainName,
     stem: source.stem,
-    choices: source.choices.map((choice) => ({
+    choices: sourceOrderedChoices(question.id, source.choices).map((choice) => ({
       id: choice.id,
       text: choice.text,
     })) as QuestionSnapshot["choices"],
@@ -558,6 +559,26 @@ function toQuestionSnapshot(question: PersistedQuestionSnapshot): QuestionSnapsh
     earnedScore: decimal(score),
     explanation: source.explanation,
   };
+}
+/**
+ * Snapshots created before choice shuffling was removed persist choices in a
+ * shuffled order, while explanations reference source labels (A/B/C/D).
+ * Catalog choice ids are derived from (questionId, sourceIndex), so the source
+ * order can be recovered. If any id does not match (e.g. non-catalog ids), the
+ * stored order is kept unchanged.
+ */
+export function sourceOrderedChoices<T extends { id: string }>(
+  questionId: string,
+  choices: readonly T[],
+): readonly T[] {
+  const byId = new Map(choices.map((choice) => [choice.id, choice]));
+  const ordered: T[] = [];
+  for (let index = 0; index < choices.length; index += 1) {
+    const choice = byId.get(catalogChoiceId(questionId, index));
+    if (!choice) return choices;
+    ordered.push(choice);
+  }
+  return ordered;
 }
 function scoringQuestion(
   question: PersistedQuestionSnapshot,

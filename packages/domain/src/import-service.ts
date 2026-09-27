@@ -310,7 +310,7 @@ function materialize(
         stem: { en: question.stemEn ?? null, ko: question.stemKo },
         explanation: { en: question.explanationEn ?? null, ko: question.explanationKo },
         choices: question.choices.map((choice, choiceIndex) => ({
-          id: stableGeneratedId(source.questions[index]!.id, "choice", choiceIndex),
+          id: catalogChoiceId(source.questions[index]!.id, choiceIndex),
           text: { en: choice.textEn ?? null, ko: choice.textKo },
           externalId: choice.id,
         })),
@@ -629,6 +629,14 @@ function fnv1a64(input: string, offsetBasis: bigint): bigint {
  * the seed unique, colliding whenever the same kind/index repeated across
  * different questions. Hashing the full message avoids that.
  */
+/**
+ * Returns the deterministic id assigned to the choice at `choiceIndex` (its
+ * position in the imported source) of the catalog question `questionId`.
+ */
+export function catalogChoiceId(questionId: string, choiceIndex: number): string {
+  return stableGeneratedId(questionId, "choice", choiceIndex);
+}
+
 function stableGeneratedId(seed: string, kind: string, index: number): string {
   const message = `${seed}:${kind}:${index}`;
   const high = fnv1a64(message, 0xcbf29ce484222325n).toString(16).padStart(16, "0");

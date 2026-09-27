@@ -4,7 +4,9 @@ import {
   FixedClock,
   SequenceRandomSource,
   SequenceUuidFactory,
+  catalogChoiceId,
   hasExpired,
+  sourceOrderedChoices,
   isWithinHalfOpenInterval,
   projectExamActive,
   projectPracticeSubmitted,
@@ -77,5 +79,25 @@ describe("strict SnapshotProjector", () => {
     }
     expect(submitted).toMatchObject({ kind: "practice-submitted", earnedScore: "1" });
     expect(review).toMatchObject({ kind: "review", earnedScore: "1" });
+  });
+});
+
+describe("sourceOrderedChoices", () => {
+  const questionId = "33333333-3333-4333-8333-333333333333";
+  const source = [0, 1, 2, 3].map((index) => ({
+    id: catalogChoiceId(questionId, index),
+    label: String.fromCharCode(65 + index),
+  }));
+
+  it("restores imported source order for legacy shuffled snapshots", () => {
+    const shuffledLegacy = [source[0]!, source[2]!, source[1]!, source[3]!];
+    expect(
+      sourceOrderedChoices(questionId, shuffledLegacy).map(({ label }) => label),
+    ).toEqual(["A", "B", "C", "D"]);
+  });
+
+  it("keeps stored order when ids are not catalog-derived", () => {
+    const foreign = [{ id: "x" }, { id: "y" }];
+    expect(sourceOrderedChoices(questionId, foreign)).toBe(foreign);
   });
 });
