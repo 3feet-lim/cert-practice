@@ -115,6 +115,30 @@ describe("AsyncBoundary", () => {
 });
 
 describe("SafeMarkdown", () => {
+  it("autolinks bare HTTPS URLs without touching code or non-HTTPS text", () => {
+    const url =
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-about-aws-runpatchbaseline.html";
+    render(
+      <SafeMarkdown
+        content={`참고 문서:\n\n- AWS-RunPatchBaseline: ${url}.\n- 괄호 (https://example.test/a)\n- \`https://code.example.test\`\n- http://insecure.example.test`}
+      />,
+    );
+
+    const link = screen.getByRole("link", { name: url });
+    expect(link).toHaveAttribute("href", url);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(
+      screen.getByRole("link", { name: "https://example.test/a" }),
+    ).toHaveAttribute("href", "https://example.test/a");
+    expect(
+      screen.queryByRole("link", { name: "https://code.example.test" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /insecure\.example\.test/ }),
+    ).not.toBeInTheDocument();
+  });
+
   it("escapes raw HTML and renders unsafe links and images as inert text", () => {
     render(
       <SafeMarkdown

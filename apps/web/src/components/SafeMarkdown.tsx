@@ -2,6 +2,7 @@ import { useState, type ImgHTMLAttributes } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { cn } from "../lib/cn";
+import { remarkAutolink } from "../lib/remark-autolink";
 import { isSafeUrl } from "../lib/safe-url";
 
 function SafeImage({ src, alt = "", title }: ImgHTMLAttributes<HTMLImageElement>) {
@@ -58,6 +59,7 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
     <div className={cn("safe-markdown text-foreground", className)}>
       <ReactMarkdown
         skipHtml={false}
+        remarkPlugins={[remarkAutolink]}
         urlTransform={(url) => url}
         components={{
           a({ href, children, title }) {
@@ -80,7 +82,7 @@ export function SafeMarkdown({ content, className }: SafeMarkdownProps) {
                 {...(isExternal
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
-                className="font-medium text-primary underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+                className="font-medium text-primary underline underline-offset-2 [overflow-wrap:anywhere] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
               >
                 {children}
               </a>
