@@ -493,7 +493,9 @@ export function QuestionNavigator({
           const current = item.state === "current";
           const progress = navigatorProgress(item);
           const className = cn(
-            "relative inline-flex size-10 items-center justify-center rounded-md border text-sm font-bold focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
+            "relative inline-flex size-10 items-center justify-center rounded-md border text-sm font-bold transition focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30",
+            // Hover lift + shadow and a pressed state signal clickability without the link-style pointer cursor.
+            "hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-none motion-reduce:transform-none",
             current && item.progress === undefined
               ? "border-primary bg-primary text-primary-foreground"
               : progress === "correct"
