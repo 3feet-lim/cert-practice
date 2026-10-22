@@ -10,6 +10,19 @@ provider "aws" {
   }
 }
 
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
+
+  default_tags {
+    tags = merge(var.tags, {
+      Environment = "dev"
+      ManagedBy   = "Terraform"
+      Project     = var.service_name
+    })
+  }
+}
+
 module "dsql" {
   source = "../../modules/dsql"
 

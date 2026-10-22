@@ -1,7 +1,7 @@
 locals {
   cloudfront_aliases        = var.web_domain_name == null ? [] : [var.web_domain_name]
   web_origin                = var.web_domain_name == null ? "https://${aws_cloudfront_distribution.web.domain_name}" : "https://${var.web_domain_name}"
-  certificate_configuration = var.web_domain_name == null ? null : var.acm_certificate_arn
+  certificate_configuration = var.web_domain_name == null ? null : aws_acm_certificate_validation.web[0].certificate_arn
 }
 
 resource "aws_s3_bucket" "web" {
@@ -191,13 +191,8 @@ resource "aws_cloudfront_distribution" "web" {
 
   lifecycle {
     precondition {
-      condition     = var.web_domain_name == null || var.acm_certificate_arn != null
-      error_message = "web_domain_name requires an issued us-east-1 ACM certificate ARN."
-    }
-
-    precondition {
-      condition     = var.route53_zone_id == null || var.web_domain_name != null
-      error_message = "route53_zone_id requires web_domain_name."
+      condition     = var.web_domain_name == null || var.web_hosted_zone_name != null
+      error_message = "web_domain_name requires web_hosted_zone_name to resolve the Route 53 hosted zone."
     }
   }
 }
@@ -231,9 +226,9 @@ resource "aws_s3_bucket_policy" "web" {
 }
 
 resource "aws_route53_record" "web" {
-  count = var.web_domain_name != null && var.route53_zone_id != null ? 1 : 0
+  count = var.web_domain_name == null ? 0 : 1
 
-  zone_id = var.route53_zone_id
+  zone_id = data.aws_route53_zone.web[0].zone_id
   name    = var.web_domain_name
   type    = "A"
 
