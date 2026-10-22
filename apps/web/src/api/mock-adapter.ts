@@ -26,22 +26,22 @@ import {
   type SubmitPracticeQuestionResponse,
   type UpdateScoreVisibilityResponse,
   type Uuid,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import {
-  createCertQuizMockStateMachine,
+  createCertForgeMockStateMachine,
   MockStateError,
   MOCK_IDS,
-  type CertQuizMockStateMachine,
+  type CertForgeMockStateMachine,
 } from "../mocks/state-machine";
 import { HEALTH_FIXTURE } from "../mocks/health-fixture";
-import type { CertQuizApi, CertQuizApiResult } from "./port";
-import { createUnavailableCertQuizApi } from "./unavailable-adapter";
+import type { CertForgeApi, CertForgeApiResult } from "./port";
+import { createUnavailableCertForgeApi } from "./unavailable-adapter";
 
 export const MOCK_HEALTH_FIXTURE = HEALTH_FIXTURE;
 
-const FIXTURES = createCertQuizFixtures();
+const FIXTURES = createCertForgeFixtures();
 
 export type MockAuthActor = keyof typeof FIXTURES.auth;
 export type MockCatalogFixture = keyof typeof FIXTURES.catalog;
@@ -68,13 +68,13 @@ export function createMockAuthController(
   };
 }
 
-export interface MockCertQuizApiOptions {
+export interface MockCertForgeApiOptions {
   healthPayload?: unknown;
   authActor?: MockAuthActor;
   authController?: MockAuthController;
   catalog?: MockCatalogFixture;
-  importState?: CertQuizMockStateMachine;
-  examState?: CertQuizMockStateMachine;
+  importState?: CertForgeMockStateMachine;
+  examState?: CertForgeMockStateMachine;
   /** Deterministic server-time source for the practice-result retention boundary. */
   now?: () => Date;
   /** Browser-test fixture state only; it is not a backend acceptance mode. */
@@ -82,7 +82,7 @@ export interface MockCertQuizApiOptions {
     "completed-results" | "catalog-loading" | "catalog-empty" | "catalog-retry-once";
 }
 
-function authenticationFailure<Output>(): CertQuizApiResult<Output> {
+function authenticationFailure<Output>(): CertForgeApiResult<Output> {
   return {
     ok: false,
     error: {
@@ -97,7 +97,7 @@ function authenticationFailure<Output>(): CertQuizApiResult<Output> {
 
 function authorizationFailure<Output>(
   authActor: MockAuthActor,
-): CertQuizApiResult<Output> | undefined {
+): CertForgeApiResult<Output> | undefined {
   if (authActor === "unauthenticated") return authenticationFailure();
   if (authActor === "pending") {
     return {
@@ -116,7 +116,7 @@ function authorizationFailure<Output>(
 
 function adminAuthorizationFailure<Output>(
   authActor: MockAuthActor,
-): CertQuizApiResult<Output> | undefined {
+): CertForgeApiResult<Output> | undefined {
   const failure = authorizationFailure<Output>(authActor);
   if (failure) return failure;
   if (authActor !== "admin") {
@@ -142,10 +142,10 @@ function approvedActor(authActor: MockAuthActor): "approved" | "admin" | undefin
  * Frontend-only adapter used by bootstrap and route screens. It validates
  * deterministic fixture data and performs no HTTP, Hono, Cognito, or AWS work.
  */
-export function createMockCertQuizApi(
-  options: MockCertQuizApiOptions = {},
-): CertQuizApi {
-  const fallback = createUnavailableCertQuizApi();
+export function createMockCertForgeApi(
+  options: MockCertForgeApiOptions = {},
+): CertForgeApi {
+  const fallback = createUnavailableCertForgeApi();
   const healthPayload = options.healthPayload ?? MOCK_HEALTH_FIXTURE;
   const authController =
     options.authController ?? createMockAuthController(options.authActor ?? "approved");
@@ -196,8 +196,8 @@ export function createMockCertQuizApi(
     left.length === right.length && left.every((choiceId) => right.includes(choiceId));
   let pendingUsers = [...FIXTURES.admin.pendingUsers.users];
   const approvedPendingUserIds = new Set<Uuid>();
-  const importState = options.importState ?? createCertQuizMockStateMachine();
-  const examState = options.examState ?? createCertQuizMockStateMachine();
+  const importState = options.importState ?? createCertForgeMockStateMachine();
+  const examState = options.examState ?? createCertForgeMockStateMachine();
   // The deterministic exam state is owned by the state-machine fixture user.
   const examActorId = () => MOCK_IDS.user;
   const importActorId = () =>
@@ -205,7 +205,9 @@ export function createMockCertQuizApi(
       ? FIXTURES.auth.admin.user.id
       : FIXTURES.auth.approved.user.id;
 
-  const importFailure = <Output>(error: MockStateError): CertQuizApiResult<Output> => ({
+  const importFailure = <Output>(
+    error: MockStateError,
+  ): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: error.code,
@@ -224,7 +226,7 @@ export function createMockCertQuizApi(
 
   const practiceFailure = <Output>(
     error: MockStateError,
-  ): CertQuizApiResult<Output> => ({
+  ): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: error.code,
@@ -239,7 +241,7 @@ export function createMockCertQuizApi(
     },
   });
 
-  const examFailure = <Output>(error: MockStateError): CertQuizApiResult<Output> => ({
+  const examFailure = <Output>(error: MockStateError): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: error.code,
@@ -254,7 +256,7 @@ export function createMockCertQuizApi(
     },
   });
 
-  const notFoundFailure = <Output>(): CertQuizApiResult<Output> => ({
+  const notFoundFailure = <Output>(): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: "not-found",
@@ -265,7 +267,7 @@ export function createMockCertQuizApi(
     },
   });
 
-  const expiredPracticeResultFailure = <Output>(): CertQuizApiResult<Output> => ({
+  const expiredPracticeResultFailure = <Output>(): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: "practice-result-expired",
@@ -276,7 +278,7 @@ export function createMockCertQuizApi(
     },
   });
 
-  const staleVisibilityFailure = <Output>(): CertQuizApiResult<Output> => ({
+  const staleVisibilityFailure = <Output>(): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: "stale-version",
@@ -287,7 +289,7 @@ export function createMockCertQuizApi(
     },
   });
 
-  const leaderboardNotFoundFailure = <Output>(): CertQuizApiResult<Output> => ({
+  const leaderboardNotFoundFailure = <Output>(): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: "not-found",
@@ -298,7 +300,7 @@ export function createMockCertQuizApi(
     },
   });
 
-  const invalidReplacementConfirmation = <Output>(): CertQuizApiResult<Output> => ({
+  const invalidReplacementConfirmation = <Output>(): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: "validation-failed",
@@ -311,7 +313,7 @@ export function createMockCertQuizApi(
 
   return {
     ...fallback,
-    getHealth: async (): Promise<CertQuizApiResult<HealthDto>> => {
+    getHealth: async (): Promise<CertForgeApiResult<HealthDto>> => {
       const parsed = healthDtoSchema.safeParse(healthPayload);
 
       if (!parsed.success) {
@@ -330,7 +332,7 @@ export function createMockCertQuizApi(
       const meta: ResponseMeta = { requestId: "mock:health" };
       return { ok: true, data: parsed.data, meta };
     },
-    getPendingUsers: async (): Promise<CertQuizApiResult<PendingUsersDto>> => {
+    getPendingUsers: async (): Promise<CertForgeApiResult<PendingUsersDto>> => {
       const failure = adminAuthorizationFailure<PendingUsersDto>(getAuthActor());
       if (failure) return failure;
       return {
@@ -341,7 +343,7 @@ export function createMockCertQuizApi(
     },
     approveUser: async ({
       userId,
-    }): Promise<CertQuizApiResult<ApproveUserResponse>> => {
+    }): Promise<CertForgeApiResult<ApproveUserResponse>> => {
       const failure = adminAuthorizationFailure<ApproveUserResponse>(getAuthActor());
       if (failure) return failure;
       const pendingIndex = pendingUsers.findIndex((user) => user.id === userId);
@@ -395,7 +397,7 @@ export function createMockCertQuizApi(
         throw error;
       }
     },
-    getApprovalStatus: async (): Promise<CertQuizApiResult<ApprovalStatusDto>> => {
+    getApprovalStatus: async (): Promise<CertForgeApiResult<ApprovalStatusDto>> => {
       const authActor = getAuthActor();
       if (authActor === "unauthenticated") {
         return authenticationFailure();
@@ -407,7 +409,7 @@ export function createMockCertQuizApi(
         meta: { requestId: `mock:auth:${authActor}:approval` },
       };
     },
-    getCatalog: async (): Promise<CertQuizApiResult<CatalogDto>> => {
+    getCatalog: async (): Promise<CertForgeApiResult<CatalogDto>> => {
       const failure = authorizationFailure<CatalogDto>(getAuthActor());
       if (failure) return failure;
       if (options.e2eScenario === "catalog-loading") {
@@ -435,7 +437,7 @@ export function createMockCertQuizApi(
       };
     },
     listActivePracticeSessions: async (): Promise<
-      CertQuizApiResult<ActivePracticeSessionsDto>
+      CertForgeApiResult<ActivePracticeSessionsDto>
     > => {
       const failure = authorizationFailure<ActivePracticeSessionsDto>(getAuthActor());
       if (failure) return failure;
@@ -445,7 +447,7 @@ export function createMockCertQuizApi(
         meta: { requestId: "mock:practice:active" },
       };
     },
-    startPractice: async (): Promise<CertQuizApiResult<StartPracticeResponse>> => {
+    startPractice: async (): Promise<CertForgeApiResult<StartPracticeResponse>> => {
       const failure = authorizationFailure<StartPracticeResponse>(getAuthActor());
       if (failure) return failure;
       return {
@@ -460,7 +462,7 @@ export function createMockCertQuizApi(
     },
     resumePractice: async ({
       practiceSessionId,
-    }): Promise<CertQuizApiResult<PracticeSessionDto>> => {
+    }): Promise<CertForgeApiResult<PracticeSessionDto>> => {
       const failure = authorizationFailure<PracticeSessionDto>(getAuthActor());
       if (failure) return failure;
       if (practiceSessionId !== currentPractice.session.practiceSessionId) {
@@ -475,7 +477,7 @@ export function createMockCertQuizApi(
     replacePractice: async ({
       practiceSessionId,
       confirmationNonce,
-    }): Promise<CertQuizApiResult<PracticeSessionDto>> => {
+    }): Promise<CertForgeApiResult<PracticeSessionDto>> => {
       const failure = authorizationFailure<PracticeSessionDto>(getAuthActor());
       if (failure) return failure;
       if (confirmationNonce.length === 0) return invalidReplacementConfirmation();
@@ -717,7 +719,7 @@ export function createMockCertQuizApi(
         meta: { requestId: "mock:practice:result" },
       };
     },
-    startExam: async (): Promise<CertQuizApiResult<StartExamResponse>> => {
+    startExam: async (): Promise<CertForgeApiResult<StartExamResponse>> => {
       const failure = authorizationFailure<StartExamResponse>(getAuthActor());
       if (failure) return failure;
       return {
@@ -726,7 +728,9 @@ export function createMockCertQuizApi(
         meta: { requestId: "mock:exam:start" },
       };
     },
-    getExam: async ({ examSessionId }): Promise<CertQuizApiResult<GetExamResponse>> => {
+    getExam: async ({
+      examSessionId,
+    }): Promise<CertForgeApiResult<GetExamResponse>> => {
       const failure = authorizationFailure<GetExamResponse>(getAuthActor());
       if (failure) return failure;
       try {
@@ -743,7 +747,7 @@ export function createMockCertQuizApi(
     patchExamState: async ({
       examSessionId,
       ...request
-    }): Promise<CertQuizApiResult<ExamStateResponse>> => {
+    }): Promise<CertForgeApiResult<ExamStateResponse>> => {
       const failure = authorizationFailure<ExamStateResponse>(getAuthActor());
       if (failure) return failure;
       try {
@@ -759,7 +763,7 @@ export function createMockCertQuizApi(
     },
     getExamSubmissionPreview: async ({
       examSessionId,
-    }): Promise<CertQuizApiResult<SubmissionPreviewDto>> => {
+    }): Promise<CertForgeApiResult<SubmissionPreviewDto>> => {
       const failure = authorizationFailure<SubmissionPreviewDto>(getAuthActor());
       if (failure) return failure;
       try {
@@ -775,7 +779,7 @@ export function createMockCertQuizApi(
     },
     submitExam: async ({
       examSessionId,
-    }): Promise<CertQuizApiResult<SubmitExamResponse>> => {
+    }): Promise<CertForgeApiResult<SubmitExamResponse>> => {
       const failure = authorizationFailure<SubmitExamResponse>(getAuthActor());
       if (failure) return failure;
       try {
@@ -789,7 +793,7 @@ export function createMockCertQuizApi(
         throw error;
       }
     },
-    getAttempt: async ({ attemptId }): Promise<CertQuizApiResult<ExamResultDto>> => {
+    getAttempt: async ({ attemptId }): Promise<CertForgeApiResult<ExamResultDto>> => {
       const failure = authorizationFailure<ExamResultDto>(getAuthActor());
       if (failure) return failure;
       if (
@@ -813,7 +817,7 @@ export function createMockCertQuizApi(
         throw error;
       }
     },
-    getHistory: async (): Promise<CertQuizApiResult<HistoryPageDto>> => {
+    getHistory: async (): Promise<CertForgeApiResult<HistoryPageDto>> => {
       const failure = authorizationFailure<HistoryPageDto>(getAuthActor());
       if (failure) return failure;
       // The fixture is deliberately attempt-only; practice results never enter this projection.
@@ -823,7 +827,7 @@ export function createMockCertQuizApi(
         meta: { requestId: "mock:history:attempts" },
       };
     },
-    getHistoryTrends: async (): Promise<CertQuizApiResult<HistoryTrendsDto>> => {
+    getHistoryTrends: async (): Promise<CertForgeApiResult<HistoryTrendsDto>> => {
       const failure = authorizationFailure<HistoryTrendsDto>(getAuthActor());
       if (failure) return failure;
       return {
@@ -835,7 +839,7 @@ export function createMockCertQuizApi(
     updateScoreVisibility: async ({
       scorePublic,
       expectedVersion,
-    }): Promise<CertQuizApiResult<UpdateScoreVisibilityResponse>> => {
+    }): Promise<CertForgeApiResult<UpdateScoreVisibilityResponse>> => {
       const actor = getAuthActor();
       const failure = authorizationFailure<UpdateScoreVisibilityResponse>(actor);
       if (failure) return failure;
@@ -855,7 +859,7 @@ export function createMockCertQuizApi(
     },
     getLeaderboard: async ({
       certificationId,
-    }): Promise<CertQuizApiResult<LeaderboardDto>> => {
+    }): Promise<CertForgeApiResult<LeaderboardDto>> => {
       const actor = getAuthActor();
       const failure = authorizationFailure<LeaderboardDto>(actor);
       if (failure) return failure;
@@ -879,7 +883,7 @@ export function createMockCertQuizApi(
         meta: { requestId: "mock:leaderboard" },
       };
     },
-    getCurrentUser: async (): Promise<CertQuizApiResult<CurrentUserDto>> => {
+    getCurrentUser: async (): Promise<CertForgeApiResult<CurrentUserDto>> => {
       const authActor = getAuthActor();
       if (authActor === "unauthenticated") {
         return authenticationFailure();

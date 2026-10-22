@@ -10,8 +10,8 @@ import type { AdapterDecision } from "./types.js";
 export function endpointParameterNameForAdapter(
   adapter: AdapterDecision["adapter"],
 ): string | null {
-  if (adapter === "dsql") return "/certquiz/dev/dsql-endpoint";
-  if (adapter === "postgres") return "/certquiz/dev/postgres-endpoint";
+  if (adapter === "dsql") return "/certforge/dev/dsql-endpoint";
+  if (adapter === "postgres") return "/certforge/dev/postgres-endpoint";
   return null;
 }
 

@@ -49,7 +49,7 @@ function planArguments(environment, planPath) {
 
   return [
     ...common,
-    "-var=cognito_hosted_ui_domain_prefix=certquiz-prod-validation",
+    "-var=cognito_hosted_ui_domain_prefix=certforge-prod-validation",
     "-var=enable_google_identity_provider=false",
     "-var=web_domain_name=quiz.validation.example.com",
     "-var=route53_zone_id=Z0123456789ABCDEF",
@@ -74,7 +74,7 @@ async function validateTerraform() {
 }
 
 async function validatePlans() {
-  const temporaryDirectory = await mkdtemp(join(tmpdir(), "certquiz-terraform-"));
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), "certforge-terraform-"));
   try {
     for (const directory of environmentRoots) {
       const environment = directory.endsWith("/prod") ? "prod" : "dev";
@@ -92,8 +92,8 @@ async function validatePlans() {
 }
 
 function validateServerlessPackage() {
-  const lambdaRoleArn = requiredEnvironment("CERTQUIZ_LAMBDA_ROLE_ARN");
-  const databaseEndpoint = requiredEnvironment("CERTQUIZ_DSQL_ENDPOINT");
+  const lambdaRoleArn = requiredEnvironment("CERTFORGE_LAMBDA_ROLE_ARN");
+  const databaseEndpoint = requiredEnvironment("CERTFORGE_DSQL_ENDPOINT");
   execute(
     "pnpm",
     [
@@ -104,7 +104,7 @@ function validateServerlessPackage() {
       "run-serverless.mjs",
       "package",
       "--stage",
-      process.env.CERTQUIZ_INFRA_STAGE ?? "dev",
+      process.env.CERTFORGE_INFRA_STAGE ?? "dev",
       "--region",
       process.env.AWS_REGION ?? "ap-northeast-2",
       `--param=lambdaRoleArn=${lambdaRoleArn}`,

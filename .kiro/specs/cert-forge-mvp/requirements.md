@@ -2,7 +2,7 @@
 
 ## Introduction
 
-CertQuiz MVP는 소수의 승인된 사용자가 클라우드 자격증 문제를 연습 모드 또는 모의고사 모드로 풀고, 모의고사 성과를 이력과 리더보드에서 확인할 수 있는 비공개 웹 애플리케이션이다. 첫 릴리스는 AWS Certified DevOps Engineer – Professional(DOP-C02)만 제공하지만, 자격증별 메타데이터와 문제 은행을 데이터로 추가할 수 있는 확장 구조를 요구한다.
+CertForge MVP는 소수의 승인된 사용자가 클라우드 자격증 문제를 연습 모드 또는 모의고사 모드로 풀고, 모의고사 성과를 이력과 리더보드에서 확인할 수 있는 비공개 웹 애플리케이션이다. 첫 릴리스는 AWS Certified DevOps Engineer – Professional(DOP-C02)만 제공하지만, 자격증별 메타데이터와 문제 은행을 데이터로 추가할 수 있는 확장 구조를 요구한다.
 
 본 문서는 `design.md`, `wireframes.html` 및 대화에서 확정된 내용을 검증 가능한 제품 요구사항으로 정규화한다. 와이어프레임은 정보 구조와 화면 흐름의 참고 자료이며 시각 디자인의 최종 명세가 아니다.
 
@@ -27,7 +27,7 @@ CertQuiz MVP는 소수의 승인된 사용자가 클라우드 자격증 문제�
 
 ## Glossary
 
-- **CertQuiz_System**: 인증, 자격증 선택, 문제 풀이, 채점, 결과, 이력, 리더보드 및 관리 기능을 제공하는 전체 시스템
+- **CertForge_System**: 인증, 자격증 선택, 문제 풀이, 채점, 결과, 이력, 리더보드 및 관리 기능을 제공하는 전체 시스템
 - **MVP**: 본 요구사항 문서에서 정의한 첫 번째 배포 범위
 - **Provider**: AWS처럼 하나 이상의 자격증을 발급하는 기관
 - **Certification**: 시험 코드, 이름, 회차 문항 수, 제한 시간, 합격 기준, 채점 방식 및 도메인 구성을 가진 자격증 정의
@@ -80,7 +80,7 @@ CertQuiz MVP는 소수의 승인된 사용자가 클라우드 자격증 문제�
 - **Standard_Competition_Rank**: 자신보다 높은 Accuracy_Rate를 가진 후보 수에 1을 더하여 순위를 계산하고 동점 후보에게 같은 순위를 부여하는 방식
 - **Import_Service**: 관리자 JSON 파일을 검증하고 Certification 데이터를 교체하는 구성 요소
 - **Retention_Manager**: Completed_Practice_Result의 168시간 보관 기한을 적용하는 구성 요소
-- **API_Request**: 인증된 클라이언트가 CertQuiz_System 서버 기능에 보내는 요청
+- **API_Request**: 인증된 클라이언트가 CertForge_System 서버 기능에 보내는 요청
 - **Idempotent_Submission**: 같은 Exam_Session에 제출 요청이 반복되어도 하나의 Attempt와 동일한 결과만 생성하는 제출 특성
 - **JSON_Import**: Provider, Certification, Domain 및 Question_Pool을 하나의 JSON 문서로 전달하는 관리자 입력 형식
 - **Canonical_JSON**: 객체 키 순서, 의미 없는 공백 및 동등한 JSON 숫자 표기 차이는 동일하게 취급하고 배열 순서는 보존하는 JSON 내용 표현
@@ -253,7 +253,7 @@ CertQuiz MVP는 소수의 승인된 사용자가 클라우드 자격증 문제�
 6. WHEN 잠긴 최종 응답과 동일한 Choice 집합으로 같은 Question의 제출이 반복되면, THE Practice_Manager SHALL 최초 제출과 동일한 채점 결과 및 획득 점수를 반환하고 Practice_Session을 추가로 변경하지 않는다.
 7. IF 잠긴 최종 응답과 다른 Choice 집합으로 같은 Question의 제출이 반복되면, THEN THE Practice_Manager SHALL 응답 변경을 거부하고 잠긴 최종 응답과 획득 점수를 유지한다.
 8. WHEN Question의 최초 제출 저장이 성공하면, THE Question_Presenter SHALL 해당 Question의 정오답, 정답 Choice, 획득 점수 및 선택된 Language_Mode의 해설을 표시한다.
-9. WHILE Question의 최초 제출 전 상태가 유지되면, THE CertQuiz_System SHALL 해당 Question_Projection에 정답 Choice, 정오답, 획득 점수 및 해설 필드 자체를 포함하지 않는다.
+9. WHILE Question의 최초 제출 전 상태가 유지되면, THE CertForge_System SHALL 해당 Question_Projection에 정답 Choice, 정오답, 획득 점수 및 해설 필드 자체를 포함하지 않는다.
 10. WHILE 하나 이상의 Question이 최초 제출 전 상태이면, THE Question_Presenter SHALL 최초 제출이 완료된 Question에만 정답 Choice, 정오답, 획득 점수 및 해설을 표시한다.
 11. WHEN Practice_Session의 마지막 미제출 Question의 최초 제출이 성공하면, THE Practice_Manager SHALL Practice_Session 완료와 Completed_Practice_Result 하나의 생성을 원자적으로 처리한다.
 12. WHEN 완료된 Practice_Session의 마지막 Question 제출이 반복되면, THE Practice_Manager SHALL 기존 Completed_Practice_Result와 동일한 결과를 반환하고 Completed_Practice_Result를 추가로 생성하지 않는다.
@@ -288,7 +288,7 @@ CertQuiz MVP는 소수의 승인된 사용자가 클라우드 자격증 문제�
 4. WHEN 사용자가 만료 시각 전에 Exam_Session으로 돌아오면, THE Exam_Manager SHALL 저장된 Question_Snapshot, Choice 순서, 응답, Flag, 현재 위치, State_Version 및 서버 기준 남은 시간을 복원한다.
 5. IF Exam_Session 복원이 실패하면, THEN THE Exam_Manager SHALL 대체 Exam_Session 또는 Question_Snapshot을 생성하지 않고 복원 오류를 반환한다.
 6. WHILE Exam_Session이 활성 상태이면, THE Exam_Manager SHALL 사용자의 화면 이탈 또는 연결 종료와 관계없이 저장된 시작 시각과 만료 시각을 유지한다.
-7. WHILE Exam_Session이 제출 전 상태이면, THE CertQuiz_System SHALL 각 Question_Projection에 정답 Choice, 정오답, 획득 점수 및 해설 필드 자체를 포함하지 않는다.
+7. WHILE Exam_Session이 제출 전 상태이면, THE CertForge_System SHALL 각 Question_Projection에 정답 Choice, 정오답, 획득 점수 및 해설 필드 자체를 포함하지 않는다.
 8. WHILE Exam_Session이 활성 상태이고 서버 현재 시각이 만료 시각보다 이르면, THE Exam_Manager SHALL 저장된 Question 응답의 변경을 허용한다.
 9. IF 서버 현재 시각이 Exam_Session의 만료 시각 이상이면, THEN THE Exam_Manager SHALL Question 응답, Flag 및 현재 위치 변경을 거부하고 만료 전 저장 상태를 유지한다.
 10. WHEN Exam_Session의 Question 응답, Flag 또는 현재 위치 변경 요청의 State_Version이 저장된 State_Version과 일치하면, THE Exam_Manager SHALL 변경 상태를 저장하고 State_Version을 정확히 1 증가시킨 후 증가된 State_Version과 Exam_Session 식별자를 성공 응답에 포함한다.
@@ -366,8 +366,8 @@ CertQuiz MVP는 소수의 승인된 사용자가 클라우드 자격증 문제�
 
 #### Acceptance Criteria
 
-1. THE CertQuiz_System SHALL 신규 User_Profile의 점수 공개 설정을 `false`로 초기화한다.
-2. WHEN Approval_Status가 `approved`인 사용자가 점수 공개 설정을 변경하면, THE CertQuiz_System SHALL 변경된 공개 설정을 User_Profile에 저장한다.
+1. THE CertForge_System SHALL 신규 User_Profile의 점수 공개 설정을 `false`로 초기화한다.
+2. WHEN Approval_Status가 `approved`인 사용자가 점수 공개 설정을 변경하면, THE CertForge_System SHALL 변경된 공개 설정을 User_Profile에 저장한다.
 3. IF Approval_Status가 `pending`인 사용자가 점수 공개 설정 변경을 요청하면, THEN THE Access_Controller SHALL User_Profile을 변경하지 않고 권한 오류를 반환한다.
 4. WHERE User_Profile의 점수 공개 설정이 `true`이고 해당 Certification의 Attempt가 하나 이상이면, THE Leaderboard_Service SHALL 해당 사용자를 해당 Certification의 순위 후보에 정확히 한 번 포함한다.
 5. WHERE User_Profile의 점수 공개 설정이 `true`이고 해당 Certification의 Attempt가 없으면, THE Leaderboard_Service SHALL 해당 사용자를 해당 Certification의 순위 후보에서 제외한다.
@@ -423,19 +423,19 @@ CertQuiz MVP는 소수의 승인된 사용자가 클라우드 자격증 문제�
 
 #### Acceptance Criteria
 
-1. WHILE 하나 이상의 화면 데이터 API_Request가 완료 전이면, THE CertQuiz_System SHALL 완료 전인 각 API_Request의 로딩 상태를 다른 API_Request의 로딩 상태와 독립적으로 표시한다.
-2. WHEN 화면 데이터 API_Request가 성공 또는 실패로 완료되면, THE CertQuiz_System SHALL 완료된 API_Request의 로딩 상태만 종료한다.
-3. WHEN 화면 조회 결과가 비어 있으면, THE CertQuiz_System SHALL 요청한 데이터 종류와 적용된 조회 조건에서 결과가 없음을 식별하는 메시지와 사용자가 수행할 수 있는 다음 행동을 표시한다.
-4. IF API_Request가 실패하면, THEN THE CertQuiz_System SHALL 인증 정보, 보호 데이터, 내부 오류 세부정보 및 다른 사용자의 데이터가 포함되지 않은 오류 메시지를 표시한다.
-5. IF 사용자 입력을 포함한 API_Request가 실패하면, THEN THE CertQuiz_System SHALL 요청 직전의 사용자 입력을 편집 가능한 상태로 유지한다.
-6. WHERE 동일한 API_Request의 반복으로 성공할 수 있는 오류이면, THE CertQuiz_System SHALL 재시도 기능을 표시한다.
-7. IF 동일한 API_Request의 반복으로 성공할 수 없는 오류이면, THEN THE CertQuiz_System SHALL 재시도 기능 대신 오류를 해결하는 데 필요한 다음 행동을 표시한다.
-8. WHILE 동일한 제출 대상의 제출 API_Request가 처리 중이면, THE CertQuiz_System SHALL 해당 제출 대상에 대한 추가 제출을 차단하고 최초 제출 흐름의 상태를 표시한다.
-9. WHEN 제출 API_Request가 성공하면, THE CertQuiz_System SHALL 해당 제출 대상의 제출 결과를 정확히 한 번 표시한다.
+1. WHILE 하나 이상의 화면 데이터 API_Request가 완료 전이면, THE CertForge_System SHALL 완료 전인 각 API_Request의 로딩 상태를 다른 API_Request의 로딩 상태와 독립적으로 표시한다.
+2. WHEN 화면 데이터 API_Request가 성공 또는 실패로 완료되면, THE CertForge_System SHALL 완료된 API_Request의 로딩 상태만 종료한다.
+3. WHEN 화면 조회 결과가 비어 있으면, THE CertForge_System SHALL 요청한 데이터 종류와 적용된 조회 조건에서 결과가 없음을 식별하는 메시지와 사용자가 수행할 수 있는 다음 행동을 표시한다.
+4. IF API_Request가 실패하면, THEN THE CertForge_System SHALL 인증 정보, 보호 데이터, 내부 오류 세부정보 및 다른 사용자의 데이터가 포함되지 않은 오류 메시지를 표시한다.
+5. IF 사용자 입력을 포함한 API_Request가 실패하면, THEN THE CertForge_System SHALL 요청 직전의 사용자 입력을 편집 가능한 상태로 유지한다.
+6. WHERE 동일한 API_Request의 반복으로 성공할 수 있는 오류이면, THE CertForge_System SHALL 재시도 기능을 표시한다.
+7. IF 동일한 API_Request의 반복으로 성공할 수 없는 오류이면, THEN THE CertForge_System SHALL 재시도 기능 대신 오류를 해결하는 데 필요한 다음 행동을 표시한다.
+8. WHILE 동일한 제출 대상의 제출 API_Request가 처리 중이면, THE CertForge_System SHALL 해당 제출 대상에 대한 추가 제출을 차단하고 최초 제출 흐름의 상태를 표시한다.
+9. WHEN 제출 API_Request가 성공하면, THE CertForge_System SHALL 해당 제출 대상의 제출 결과를 정확히 한 번 표시한다.
 
 ## Out of Scope
 
-다음 항목은 독립적인 후속 기능으로 추가할 수 있지만 CertQuiz MVP 범위에는 포함하지 않는다.
+다음 항목은 독립적인 후속 기능으로 추가할 수 있지만 CertForge MVP 범위에는 포함하지 않는다.
 
 - 이메일 승인 알림, 시험 알림 및 기타 이메일 발송
 - 사용자 거부, 정지, 삭제, 역할 편집, 일괄 처리 및 감사 로그를 포함한 고급 사용자 관리

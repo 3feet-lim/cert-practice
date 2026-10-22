@@ -1,11 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const realApiEnabled = process.env.CERTQUIZ_REAL_E2E === "1";
-const realApiWebUrl = process.env.CERTQUIZ_E2E_WEB_BASE_URL;
+const realApiEnabled = process.env.CERTFORGE_REAL_E2E === "1";
+const realApiWebUrl = process.env.CERTFORGE_E2E_WEB_BASE_URL;
 
 if (realApiEnabled && !realApiWebUrl) {
   throw new Error(
-    "CERTQUIZ_REAL_E2E=1 requires CERTQUIZ_E2E_WEB_BASE_URL for the deployed web application.",
+    "CERTFORGE_REAL_E2E=1 requires CERTFORGE_E2E_WEB_BASE_URL for the deployed web application.",
   );
 }
 
@@ -40,7 +40,7 @@ export default defineConfig({
     : {
         webServer: {
           command:
-            "pnpm --filter @cert-quiz/web dev --host 127.0.0.1 --port 4173 --strictPort",
+            "pnpm --filter @cert-forge/web dev --host 127.0.0.1 --port 4173 --strictPort",
           url: localWebUrl,
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

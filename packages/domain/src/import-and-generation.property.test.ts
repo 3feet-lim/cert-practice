@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import type { ImportDocument } from "@cert-quiz/contracts";
+import type { ImportDocument } from "@cert-forge/contracts";
 
 import { allocateLargestRemainder } from "./catalog.js";
 import { Fraction } from "./fraction.js";
@@ -233,7 +233,7 @@ function expectUnavailableSummary(
   );
 }
 
-// Feature: cert-quiz-mvp, Property 23: Import dry-run purity, limits, and independent errors
+// Feature: cert-forge-mvp, Property 23: Import dry-run purity, limits, and independent errors
 // **Validates: Requirements 15.1-15.19**
 describe("Property 23: import dry-run validation", () => {
   it("matches an independent oracle across generated syntax, schema, depth, cardinality, semantic, language, and pool cases without mutating a dry-run catalog", async () => {
@@ -434,7 +434,7 @@ function generationSourceForAllocation(
   };
 }
 
-// Feature: cert-quiz-mvp, Property 5: largest-remainder allocation exactness
+// Feature: cert-forge-mvp, Property 5: largest-remainder allocation exactness
 // **Validates: Requirements 4.1-4.4, 4.8**
 describe("Property 5: largest-remainder allocation", () => {
   it("allocates every positive domain partition by floor, remainder, and import order", () => {
@@ -512,7 +512,7 @@ describe("Property 5: largest-remainder allocation", () => {
   });
 });
 
-// Feature: cert-quiz-mvp, Property 6: uniform sampling and permutation
+// Feature: cert-forge-mvp, Property 6: uniform sampling and permutation
 describe("Property 6: sampling and display permutations", () => {
   it("visits each small subset and permutation with the same multiplicity", () => {
     expect(
@@ -533,7 +533,7 @@ describe("Property 6: sampling and display permutations", () => {
   });
 });
 
-// Feature: cert-quiz-mvp, Property 7: snapshot construction is complete before persistence
+// Feature: cert-forge-mvp, Property 7: snapshot construction is complete before persistence
 describe("Property 7: snapshot generation", () => {
   it("selects without duplicates, uses display order, and reports every insufficient domain", () => {
     const source = generationSource();

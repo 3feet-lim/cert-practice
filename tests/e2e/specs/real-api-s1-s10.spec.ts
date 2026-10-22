@@ -8,20 +8,20 @@ import {
   type Page,
 } from "@playwright/test";
 
-const pendingToken = process.env.CERTQUIZ_E2E_PENDING_TOKEN ?? "";
-const adminToken = process.env.CERTQUIZ_E2E_ADMIN_TOKEN ?? "";
-const pendingDisplayName = process.env.CERTQUIZ_E2E_PENDING_DISPLAY_NAME ?? "";
-const emptyCatalogWebUrl = process.env.CERTQUIZ_E2E_EMPTY_CATALOG_WEB_URL;
-const importJsonPath = process.env.CERTQUIZ_E2E_IMPORT_JSON_PATH;
-const importCommitAllowed = process.env.CERTQUIZ_E2E_ALLOW_IMPORT_COMMIT === "1";
+const pendingToken = process.env.CERTFORGE_E2E_PENDING_TOKEN ?? "";
+const adminToken = process.env.CERTFORGE_E2E_ADMIN_TOKEN ?? "";
+const pendingDisplayName = process.env.CERTFORGE_E2E_PENDING_DISPLAY_NAME ?? "";
+const emptyCatalogWebUrl = process.env.CERTFORGE_E2E_EMPTY_CATALOG_WEB_URL;
+const importJsonPath = process.env.CERTFORGE_E2E_IMPORT_JSON_PATH;
+const importCommitAllowed = process.env.CERTFORGE_E2E_ALLOW_IMPORT_COMMIT === "1";
 const configured =
-  process.env.CERTQUIZ_REAL_E2E === "1" &&
+  process.env.CERTFORGE_REAL_E2E === "1" &&
   pendingToken.length > 0 &&
   adminToken.length > 0 &&
   pendingDisplayName.length > 0;
 
 const missingConfiguration =
-  "Set CERTQUIZ_REAL_E2E=1 plus deployed-web URL, pending/admin Cognito test tokens, and the pending user display name to run live API E2E.";
+  "Set CERTFORGE_REAL_E2E=1 plus deployed-web URL, pending/admin Cognito test tokens, and the pending user display name to run live API E2E.";
 
 /**
  * Opens the deployed web application with a real Cognito test token supplied
@@ -183,11 +183,11 @@ test.describe("S1-S10 real API browser flow", () => {
   });
 
   test("S6 opens a real completed-practice review fixture", async ({ browser }) => {
-    const practiceResultId = process.env.CERTQUIZ_E2E_PRACTICE_RESULT_ID;
+    const practiceResultId = process.env.CERTFORGE_E2E_PRACTICE_RESULT_ID;
     if (!practiceResultId) {
       test.skip(
         true,
-        "CERTQUIZ_E2E_PRACTICE_RESULT_ID is required for the real S6 review fixture.",
+        "CERTFORGE_E2E_PRACTICE_RESULT_ID is required for the real S6 review fixture.",
       );
       return;
     }
@@ -223,7 +223,7 @@ test.describe("S1-S10 real API browser flow", () => {
     if (!importCommitAllowed || !importJsonPath) {
       test.skip(
         true,
-        "Set CERTQUIZ_E2E_ALLOW_IMPORT_COMMIT=1 and CERTQUIZ_E2E_IMPORT_JSON_PATH only for a disposable test deployment.",
+        "Set CERTFORGE_E2E_ALLOW_IMPORT_COMMIT=1 and CERTFORGE_E2E_IMPORT_JSON_PATH only for a disposable test deployment.",
       );
       return;
     }
@@ -250,7 +250,7 @@ test.describe("S1-S10 real API browser flow", () => {
     if (!emptyCatalogWebUrl) {
       test.skip(
         true,
-        "CERTQUIZ_E2E_EMPTY_CATALOG_WEB_URL is required for the real empty-catalog deployment check.",
+        "CERTFORGE_E2E_EMPTY_CATALOG_WEB_URL is required for the real empty-catalog deployment check.",
       );
       return;
     }

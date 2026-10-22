@@ -1,9 +1,9 @@
-// Feature: cert-quiz-mvp, Property 9
-import type { ActiveQuestion } from "@cert-quiz/contracts";
+// Feature: cert-forge-mvp, Property 9
+import type { ActiveQuestion } from "@cert-forge/contracts";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import { clampQuestionIndex, createQuestionNavigatorItems } from "./quiz-presentation";
 import { createQuizStore, type QuizTarget } from "./quiz-store";
 
@@ -11,7 +11,7 @@ const PROPERTY_RUNS = 200;
 const PROPERTY_SEED = 9062025;
 const PROPERTY_PATH = "";
 
-const fixtures = createCertQuizFixtures();
+const fixtures = createCertForgeFixtures();
 const fixtureQuestions = fixtures.practice.active.questions;
 const MAX_QUESTION_COUNT = fixtureQuestions.length;
 const MAX_SELECTION_SEED = Math.max(

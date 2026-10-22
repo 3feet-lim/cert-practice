@@ -272,13 +272,13 @@ export function renderStandalonePreview() {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="CertQuiz deterministic standalone static UI design review">
-<title>CertQuiz · Standalone Static UI Review</title>
+<meta name="description" content="CertForge deterministic standalone static UI design review">
+<title>CertForge · Standalone Static UI Review</title>
 <link rel="stylesheet" href="./assets/ui-preview.css">
 </head>
 <body>
 <a class="skip-link" href="#gallery">본문으로 건너뛰기</a>
-<header class="hero"><div class="brand"><span class="brand-mark">CQ</span><span>CertQuiz · Static UI Review</span></div><p class="eyebrow">DETERMINISTIC · OFFLINE · SINGLE FILE</p><h1>S1–S10 사용자 흐름을 하나의 문서에서 검토하세요.</h1><p class="lead">라이트 데스크톱 shell, 상태 피드백, 점수 정보 계층과 관리자 화면을 고정 데이터로 제공합니다. 파일을 더블클릭해 바로 열 수 있는 read-only design artifact입니다.</p><div class="meta-strip"><span>Entry · artifacts/ui-preview/index.html</span><span>Regenerate · pnpm ui:preview:export</span><span>Fragment navigation only</span><span>No runtime network</span><span>Fixture · ${fixture.timestamp}</span></div></header>
+<header class="hero"><div class="brand"><span class="brand-mark">CQ</span><span>CertForge · Static UI Review</span></div><p class="eyebrow">DETERMINISTIC · OFFLINE · SINGLE FILE</p><h1>S1–S10 사용자 흐름을 하나의 문서에서 검토하세요.</h1><p class="lead">라이트 데스크톱 shell, 상태 피드백, 점수 정보 계층과 관리자 화면을 고정 데이터로 제공합니다. 파일을 더블클릭해 바로 열 수 있는 read-only design artifact입니다.</p><div class="meta-strip"><span>Entry · artifacts/ui-preview/index.html</span><span>Regenerate · pnpm ui:preview:export</span><span>Fragment navigation only</span><span>No runtime network</span><span>Fixture · ${fixture.timestamp}</span></div></header>
 <div class="jumpbar"><nav aria-label="화면 바로가기"><a href="#gallery">Gallery</a>${jumpLinks}</nav></div>
 <main id="main-content">${renderOverview()}${renderS1()}${renderS2()}${renderS3()}${renderS4()}${renderS5()}${renderS6()}${renderS7()}${renderS8()}${renderS9()}${renderAdminUsers()}${renderS10()}<footer class="footer"><strong>Static review boundary</strong><p>이 문서는 고정 fixture와 inline style만 포함합니다. 로그인, 저장, 제출, 파일 처리, 타이머 진행 또는 데이터 변경을 수행하지 않습니다.</p><a class="back-top" href="#gallery">↑ Gallery로 돌아가기</a></footer></main>
 </body>
@@ -334,7 +334,7 @@ function relativeHref(fromFile, toFile) {
 }
 
 function documentShell({ title, stylesheetHref, body }) {
-  return `<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="description" content="CertQuiz deterministic static UI review">\n<title>${title} · CertQuiz UI review</title>\n<link rel="stylesheet" href="${stylesheetHref}">\n</head>\n<body>\n<a class="skip-link" href="#main-content">본문으로 건너뛰기</a>\n${body}\n</body>\n</html>\n`;
+  return `<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="description" content="CertForge deterministic static UI review">\n<title>${title} · CertForge UI review</title>\n<link rel="stylesheet" href="${stylesheetHref}">\n</head>\n<body>\n<a class="skip-link" href="#main-content">본문으로 건너뛰기</a>\n${body}\n</body>\n</html>\n`;
 }
 
 function renderGalleryDocument() {
@@ -342,7 +342,7 @@ function renderGalleryDocument() {
   return documentShell({
     title: "S1–S10 gallery",
     stylesheetHref: "assets/ui-preview.css",
-    body: `<header class="hero"><div class="brand"><span class="brand-mark">CQ</span><span>CertQuiz · Static UI Review</span></div><p class="eyebrow">DETERMINISTIC · OFFLINE · MULTIPAGE</p><h1>S1–S10 정적 화면 갤러리</h1><p class="lead">Task 1.5의 고정 read-only fixture와 presentational markup만으로 만든 검토 artifact입니다.</p><div class="meta-strip"><span>Command · pnpm ui:preview:export</span><span>Entry · artifacts/ui-preview/index.html</span><span>Output · artifacts/ui-preview/screens/.../*.html</span><span>Assets · artifacts/ui-preview/assets/</span></div></header><main id="main-content"><section class="overview" aria-labelledby="gallery-title"><p class="eyebrow">GALLERY METADATA</p><h2 id="gallery-title">CertQuiz S1–S10 UI gallery</h2><p class="lead">API, MSW, auth, timer progression, mutation, DB, backend 및 외부 network 없이 제공됩니다.</p><div class="overview-grid">${cards}</div></section><footer class="footer"><strong>Static review boundary</strong><p>반복 export는 동일한 경로, 문서 내용, navigation과 local asset reference를 생성합니다.</p></footer></main>`,
+    body: `<header class="hero"><div class="brand"><span class="brand-mark">CQ</span><span>CertForge · Static UI Review</span></div><p class="eyebrow">DETERMINISTIC · OFFLINE · MULTIPAGE</p><h1>S1–S10 정적 화면 갤러리</h1><p class="lead">Task 1.5의 고정 read-only fixture와 presentational markup만으로 만든 검토 artifact입니다.</p><div class="meta-strip"><span>Command · pnpm ui:preview:export</span><span>Entry · artifacts/ui-preview/index.html</span><span>Output · artifacts/ui-preview/screens/.../*.html</span><span>Assets · artifacts/ui-preview/assets/</span></div></header><main id="main-content"><section class="overview" aria-labelledby="gallery-title"><p class="eyebrow">GALLERY METADATA</p><h2 id="gallery-title">CertForge S1–S10 UI gallery</h2><p class="lead">API, MSW, auth, timer progression, mutation, DB, backend 및 외부 network 없이 제공됩니다.</p><div class="overview-grid">${cards}</div></section><footer class="footer"><strong>Static review boundary</strong><p>반복 export는 동일한 경로, 문서 내용, navigation과 local asset reference를 생성합니다.</p></footer></main>`,
   });
 }
 
@@ -356,7 +356,7 @@ function renderScreenDocument(entry, index) {
   return documentShell({
     title: `${entry.screen} ${entry.title} ${entry.variant}`,
     stylesheetHref: "../../assets/ui-preview.css",
-    body: `<header class="hero" data-static-fixture="${entry.fixtureKey}"><div class="brand"><span class="brand-mark">CQ</span><span>CertQuiz · Static UI Review</span></div><p class="eyebrow">${entry.screen} · ${entry.variant.toUpperCase()}</p><h1>${entry.title}</h1><p class="lead">고정 fixture와 presentational component markup만 사용한 static review screen입니다.</p></header><div class="jumpbar">${nav}</div><main id="main-content"><section class="screen" aria-labelledby="screen-title"><header class="screen-head"><div><p class="eyebrow">STATIC ARTIFACT · ${entry.fixtureKey}</p><h2 id="screen-title">${entry.title} · ${entry.variant}</h2><p class="lead">Command: <code>pnpm ui:preview:export</code> · entry: <code>artifacts/ui-preview/index.html</code></p></div></header><div class="stack">${state(stateKind, entry.variant.toUpperCase(), `${entry.title} ${entry.variant} fixture`, "이 화면은 동작을 실행하지 않는 결정적 read-only 표현입니다.")}${details}</div></section><footer class="footer">${nav}</footer></main>`,
+    body: `<header class="hero" data-static-fixture="${entry.fixtureKey}"><div class="brand"><span class="brand-mark">CQ</span><span>CertForge · Static UI Review</span></div><p class="eyebrow">${entry.screen} · ${entry.variant.toUpperCase()}</p><h1>${entry.title}</h1><p class="lead">고정 fixture와 presentational component markup만 사용한 static review screen입니다.</p></header><div class="jumpbar">${nav}</div><main id="main-content"><section class="screen" aria-labelledby="screen-title"><header class="screen-head"><div><p class="eyebrow">STATIC ARTIFACT · ${entry.fixtureKey}</p><h2 id="screen-title">${entry.title} · ${entry.variant}</h2><p class="lead">Command: <code>pnpm ui:preview:export</code> · entry: <code>artifacts/ui-preview/index.html</code></p></div></header><div class="stack">${state(stateKind, entry.variant.toUpperCase(), `${entry.title} ${entry.variant} fixture`, "이 화면은 동작을 실행하지 않는 결정적 read-only 표현입니다.")}${details}</div></section><footer class="footer">${nav}</footer></main>`,
   });
 }
 
@@ -430,7 +430,7 @@ export async function exportUiPreview(outputRoot = defaultOutputRoot) {
 const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isDirectExecution) {
   const result = await exportUiPreview();
-  console.log("CertQuiz deterministic multipage static UI review exported.");
+  console.log("CertForge deterministic multipage static UI review exported.");
   console.log("Command: pnpm ui:preview:export");
   console.log(`Entry: ${path.relative(repositoryRoot, result.outputPath)}`);
   console.log(`Documents: ${result.documentCount} · Assets: ${result.assetCount} · Bytes: ${result.byteSize}`);

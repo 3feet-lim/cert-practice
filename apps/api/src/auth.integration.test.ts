@@ -6,9 +6,9 @@ import {
   pendingUsersDtoSchema,
   successEnvelopeSchema,
   updateScoreVisibilityResponseSchema,
-} from "@cert-quiz/contracts";
-import { InMemoryUnitOfWork } from "@cert-quiz/db";
-import { domainFailure, type UserProfile } from "@cert-quiz/domain";
+} from "@cert-forge/contracts";
+import { InMemoryUnitOfWork } from "@cert-forge/db";
+import { domainFailure, type UserProfile } from "@cert-forge/domain";
 import { describe, expect, it } from "vitest";
 
 import {

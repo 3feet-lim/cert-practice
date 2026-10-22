@@ -3,7 +3,7 @@ import {
   isDomainFailure,
   type UnitOfWork,
   type UserProfile,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import type { Context, MiddlewareHandler } from "hono";
 
 export type VerifiedCognitoClaims = {

@@ -1,4 +1,4 @@
-import { domainFailure } from "@cert-quiz/domain";
+import { domainFailure } from "@cert-forge/domain";
 
 import type { CognitoTokenVerifier, VerifiedCognitoClaims } from "./authentication.js";
 

@@ -1,5 +1,5 @@
-import { Fraction } from "@cert-quiz/domain";
-import type { CatalogRevision, CatalogRevisionSource } from "@cert-quiz/domain";
+import { Fraction } from "@cert-forge/domain";
+import type { CatalogRevision, CatalogRevisionSource } from "@cert-forge/domain";
 
 const UUID_PREFIX = "00000000-0000-4000-8000-";
 const uuid = (value: number) => `${UUID_PREFIX}${String(value).padStart(12, "0")}`;

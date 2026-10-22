@@ -22,7 +22,7 @@ import {
   type UnitOfWork,
   type UserProfile,
   type UserRepository,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import type { PoolClient, QueryResult, QueryResultRow } from "pg";
 
 import type { DsqlPool } from "./dsql-pool.js";

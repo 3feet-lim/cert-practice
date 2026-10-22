@@ -2,7 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
 import {
-  createCertQuizMockStateMachine,
+  createCertForgeMockStateMachine,
   MOCK_IDS,
   MockStateError,
 } from "./state-machine";
@@ -20,7 +20,7 @@ const expectMockError = (work: () => unknown, code: string): void => {
 describe("UI-development mock state machine (not backend guarantee evidence)", () => {
   // **Validates: Requirements 6.7-6.12, 7.10-7.12, 10.10-10.12**
   it("models version increments and stale rollback without claiming backend persistence or atomicity", () => {
-    const state = createCertQuizMockStateMachine();
+    const state = createCertForgeMockStateMachine();
 
     const practiceResponse = state.patchPractice(MOCK_IDS.practice, MOCK_IDS.user, {
       expectedVersion: 0,
@@ -51,7 +51,7 @@ describe("UI-development mock state machine (not backend guarantee evidence)", (
 
   // **Validates: Requirements 8.1-8.12**
   it("models first-submit lock, identical replay, and one completed result without claiming concurrency guarantees", () => {
-    const state = createCertQuizMockStateMachine();
+    const state = createCertForgeMockStateMachine();
 
     const first = state.submitPracticeQuestion(
       MOCK_IDS.practice,
@@ -99,7 +99,7 @@ describe("UI-development mock state machine (not backend guarantee evidence)", (
 
   // **Validates: Requirements 10.3-10.13, 11.6-11.10**
   it("models serverNow/expiresAt, preview counts, and same-submit result without claiming real server time or idempotency", () => {
-    const state = createCertQuizMockStateMachine();
+    const state = createCertForgeMockStateMachine();
 
     const activeExam = state.getExam(MOCK_IDS.exam, MOCK_IDS.user);
     expect(activeExam).toMatchObject({
@@ -132,7 +132,7 @@ describe("UI-development mock state machine (not backend guarantee evidence)", (
 
   // **Validates: Requirements 15.20-15.27**
   it("models actor-bound import token expiry and reuse without claiming authorization or atomic catalog replacement", () => {
-    const state = createCertQuizMockStateMachine();
+    const state = createCertForgeMockStateMachine();
     const validation = state.createImportValidation('{"version":1}', MOCK_IDS.user);
 
     const committed = state.commitImport(
@@ -157,7 +157,7 @@ describe("UI-development mock state machine (not backend guarantee evidence)", (
       "token-used",
     );
 
-    const expiringState = createCertQuizMockStateMachine();
+    const expiringState = createCertForgeMockStateMachine();
     const expiringValidation = expiringState.createImportValidation(
       '{"version":2}',
       MOCK_IDS.user,
@@ -181,7 +181,7 @@ describe("UI-development mock state machine (not backend guarantee evidence)", (
   it("generated UI mock flag saves increase exactly once while a generated stale replay is a no-op", () => {
     fc.assert(
       fc.property(fc.array(fc.boolean(), { minLength: 1, maxLength: 30 }), (flags) => {
-        const state = createCertQuizMockStateMachine();
+        const state = createCertForgeMockStateMachine();
         let version = 0;
 
         for (const flagged of flags) {

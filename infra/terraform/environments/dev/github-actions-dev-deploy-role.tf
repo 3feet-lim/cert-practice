@@ -1,7 +1,10 @@
-# The existing Serverless stack publishes the deployment bucket name. Reading that
-# output prevents this role from gaining access to another account's bucket.
+# The Serverless stack publishes the deployment bucket name. Reading that output
+# prevents this role from gaining access to another account's bucket. The stack
+# is created by the first Serverless deploy, which runs after this Terraform root,
+# so the lookup is conditional: absent on the bootstrap apply, present afterwards.
 data "aws_cloudformation_stack" "serverless_dev" {
-  name = "${var.service_name}-api-dev"
+  count = var.serverless_stack_exists ? 1 : 0
+  name  = "${var.service_name}-api-dev"
 }
 
 locals {
@@ -12,7 +15,7 @@ locals {
   github_actions_dev_function_arn         = "arn:${data.aws_partition.current.partition}:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.service_name}-dev-*"
   github_actions_dev_log_group_arn        = "arn:${data.aws_partition.current.partition}:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.service_name}-dev-*"
   github_actions_dev_event_rule_arn       = "arn:${data.aws_partition.current.partition}:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/${var.service_name}-dev-*"
-  github_actions_dev_bucket_name          = data.aws_cloudformation_stack.serverless_dev.outputs["ServerlessDeploymentBucketName"]
+  github_actions_dev_bucket_name          = var.serverless_stack_exists ? data.aws_cloudformation_stack.serverless_dev[0].outputs["ServerlessDeploymentBucketName"] : "serverless-framework-deployments-${var.aws_region}-placeholder"
   github_actions_dev_bucket_arn           = "arn:${data.aws_partition.current.partition}:s3:::${local.github_actions_dev_bucket_name}"
   github_actions_dev_framework_bucket_arn = "arn:${data.aws_partition.current.partition}:s3:::serverless-framework-deployments-${var.aws_region}-*"
 }

@@ -27,9 +27,9 @@ const webBoundaryRules = {
           message: "Hono implementations are server-only dependencies.",
         },
         {
-          regex: "^@cert-quiz/(?!contracts(?:/|$))",
+          regex: "^@cert-forge/(?!contracts(?:/|$))",
           message:
-            "The web app may cross workspace boundaries only through @cert-quiz/contracts.",
+            "The web app may cross workspace boundaries only through @cert-forge/contracts.",
         },
         {
           regex:
@@ -75,7 +75,7 @@ const dbBoundaryRules = {
     {
       patterns: [
         {
-          regex: "^@cert-quiz/(?:api|web)(?:/|$)",
+          regex: "^@cert-forge/(?:api|web)(?:/|$)",
           message: "Database code must not depend on application or web code.",
         },
         {
@@ -93,7 +93,7 @@ const apiBoundaryRules = {
     {
       patterns: [
         {
-          regex: "^@cert-quiz/(?!contracts(?:/|$)|domain(?:/|$)|db(?:/|$))",
+          regex: "^@cert-forge/(?!contracts(?:/|$)|domain(?:/|$)|db(?:/|$))",
           message:
             "API code may cross workspace boundaries only through contracts, domain, and db.",
         },

@@ -1,4 +1,4 @@
-import type { ActiveQuestion, Uuid } from "@cert-quiz/contracts";
+import type { ActiveQuestion, Uuid } from "@cert-forge/contracts";
 import { useEffect, type ReactNode } from "react";
 
 import { QuestionPresenter } from "./QuestionPresenter";

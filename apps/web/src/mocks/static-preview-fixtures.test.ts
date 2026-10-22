@@ -1,10 +1,10 @@
-import * as contracts from "@cert-quiz/contracts";
+import * as contracts from "@cert-forge/contracts";
 import { describe, expect, it, vi } from "vitest";
 
 import {
   CERT_QUIZ_STATIC_PREVIEW_FIXTURES,
   DOP_C02_METADATA,
-  createCertQuizStaticPreviewFixtures,
+  createCertForgeStaticPreviewFixtures,
 } from "./index";
 
 function expectParses(
@@ -138,8 +138,8 @@ describe("static UI preview fixtures", () => {
   });
 
   it("replays identical IDs, timestamps, scores, and question order", () => {
-    const first = createCertQuizStaticPreviewFixtures();
-    const replay = createCertQuizStaticPreviewFixtures();
+    const first = createCertForgeStaticPreviewFixtures();
+    const replay = createCertForgeStaticPreviewFixtures();
     const catalogSuccess = fixtureData(first.catalog.success, "catalog success");
     const practiceSuccess = fixtureData(first.practice.success, "practice success");
     const resultsSuccess = fixtureData(first.results.success, "results success");
@@ -188,7 +188,7 @@ describe("static UI preview fixtures", () => {
 
   it("is deeply frozen, preserves invalid import input, and performs no I/O", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch");
-    const preview = createCertQuizStaticPreviewFixtures();
+    const preview = createCertForgeStaticPreviewFixtures();
     const practiceSuccess = fixtureData(preview.practice.success, "practice success");
 
     expect(fetchSpy).not.toHaveBeenCalled();

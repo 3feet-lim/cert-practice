@@ -46,8 +46,8 @@ test("Task 21 package validation is report-gated and uses only explicitly suppli
     /"infra:package": "node scripts\/validate-infrastructure\.mjs --package"/,
   );
   for (const variable of [
-    "CERTQUIZ_LAMBDA_ROLE_ARN",
-    "CERTQUIZ_DSQL_ENDPOINT",
+    "CERTFORGE_LAMBDA_ROLE_ARN",
+    "CERTFORGE_DSQL_ENDPOINT",
     "SERVERLESS_ACCESS_KEY",
   ]) {
     assert.match(command, new RegExp(`requiredEnvironment\\("${variable}"\\)`));
@@ -83,8 +83,8 @@ test("Task 21 local validation uses Serverless Offline without workflow automati
   assert.match(serverlessConfig, /plugins:\s*\n\s*- serverless-offline/);
   assert.match(serverlessConfig, /noPrependStageInUrl: true/);
   assert.match(serverlessConfig, /ignoreJWTSignature: true/);
-  assert.match(serverlessConfig, /CERTQUIZ_LOCAL_EMULATION/);
-  assert.match(runner, /CERTQUIZ_LOCAL_EMULATION: "true"/);
+  assert.match(serverlessConfig, /CERTFORGE_LOCAL_EMULATION/);
+  assert.match(runner, /CERTFORGE_LOCAL_EMULATION: "true"/);
   assert.match(runner, /"offline", "start"/);
   assert.match(localHealth, /\/v1\/health/);
 });
@@ -99,14 +99,14 @@ test("Task 21 deployed smoke resolves a stack HttpApiUrl by default and keeps ov
     packageJson,
     /"infra:smoke": "node scripts\/deployed-infrastructure-smoke\.mjs"/,
   );
-  assert.match(smoke, /CERTQUIZ_DEPLOYED_API_ORIGIN/);
-  assert.match(smoke, /CERTQUIZ_DEPLOYED_WEB_ORIGIN/);
-  assert.match(smoke, /CERTQUIZ_STAGE \?\? "dev"/);
+  assert.match(smoke, /CERTFORGE_DEPLOYED_API_ORIGIN/);
+  assert.match(smoke, /CERTFORGE_DEPLOYED_WEB_ORIGIN/);
+  assert.match(smoke, /CERTFORGE_STAGE \?\? "dev"/);
   assert.match(
     smoke,
-    /CERTQUIZ_REGION \?\? process\.env\.AWS_REGION \?\? "ap-northeast-2"/,
+    /CERTFORGE_REGION \?\? process\.env\.AWS_REGION \?\? "ap-northeast-2"/,
   );
-  assert.match(smoke, /certquiz-api-\$\{stage\}/);
+  assert.match(smoke, /certforge-api-\$\{stage\}/);
   assert.match(smoke, /"cloudformation",\s*\n\s*"describe-stacks"/);
   assert.match(smoke, /OutputKey === "HttpApiUrl"/);
   assert.match(smoke, /Health endpoint returned/);

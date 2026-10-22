@@ -3,18 +3,18 @@ import type {
   CatalogDto,
   CommitImportResponse,
   HealthDto,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, expectTypeOf, it, vi } from "vitest";
 
-import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
-import { createMockAuthController, createMockCertQuizApi } from "./mock-adapter";
-import { createCertQuizFixtures } from "../mocks/fixtures";
-import { useCertQuizApi } from "./useCertQuizApi";
-import type { CertQuizApi, CertQuizApiResult, StartPracticeInput } from "./port";
-import { createUnavailableCertQuizApi } from "./unavailable-adapter";
+import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";
+import { createMockAuthController, createMockCertForgeApi } from "./mock-adapter";
+import { createCertForgeFixtures } from "../mocks/fixtures";
+import { useCertForgeApi } from "./useCertForgeApi";
+import type { CertForgeApi, CertForgeApiResult, StartPracticeInput } from "./port";
+import { createUnavailableCertForgeApi } from "./unavailable-adapter";
 
 const certificationId = "00000000-0000-4000-8000-000000000003";
 
@@ -44,10 +44,10 @@ const operationNames = [
   "approveUser",
   "dryRunImport",
   "commitImport",
-] as const satisfies ReadonlyArray<keyof CertQuizApi>;
+] as const satisfies ReadonlyArray<keyof CertForgeApi>;
 
 function ApprovalProbe() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const [status, setStatus] = useState("unknown");
 
   const refresh = async () => {
@@ -58,43 +58,43 @@ function ApprovalProbe() {
   return <button onClick={() => void refresh()}>{status}</button>;
 }
 
-type HealthCallResult = Awaited<ReturnType<CertQuizApi["getHealth"]>>;
-type CatalogCallResult = Awaited<ReturnType<CertQuizApi["getCatalog"]>>;
-type ApprovalCallResult = Awaited<ReturnType<CertQuizApi["getApprovalStatus"]>>;
-type CommitImportCallResult = Awaited<ReturnType<CertQuizApi["commitImport"]>>;
+type HealthCallResult = Awaited<ReturnType<CertForgeApi["getHealth"]>>;
+type CatalogCallResult = Awaited<ReturnType<CertForgeApi["getCatalog"]>>;
+type ApprovalCallResult = Awaited<ReturnType<CertForgeApi["getApprovalStatus"]>>;
+type CommitImportCallResult = Awaited<ReturnType<CertForgeApi["commitImport"]>>;
 
-describe("CertQuizApi port", () => {
+describe("CertForgeApi port", () => {
   it("types route parameters, request DTO fields, result data, and shared errors", () => {
     expectTypeOf<
-      Parameters<CertQuizApi["startPractice"]>[0]
+      Parameters<CertForgeApi["startPractice"]>[0]
     >().toEqualTypeOf<StartPracticeInput>();
     expectTypeOf<StartPracticeInput>().toMatchTypeOf<{
       certificationId: string;
     }>();
-    expectTypeOf<HealthCallResult>().toEqualTypeOf<CertQuizApiResult<HealthDto>>();
-    expectTypeOf<CatalogCallResult>().toEqualTypeOf<CertQuizApiResult<CatalogDto>>();
+    expectTypeOf<HealthCallResult>().toEqualTypeOf<CertForgeApiResult<HealthDto>>();
+    expectTypeOf<CatalogCallResult>().toEqualTypeOf<CertForgeApiResult<CatalogDto>>();
     expectTypeOf<ApprovalCallResult>().toEqualTypeOf<
-      CertQuizApiResult<ApprovalStatusDto>
+      CertForgeApiResult<ApprovalStatusDto>
     >();
     expectTypeOf<CommitImportCallResult>().toEqualTypeOf<
-      CertQuizApiResult<CommitImportResponse>
+      CertForgeApiResult<CommitImportResponse>
     >();
   });
 
   it("provides every S1-S10 operation through the bootstrap fallback", async () => {
-    const api = createUnavailableCertQuizApi();
+    const api = createUnavailableCertForgeApi();
 
     expect(Object.keys(api)).toEqual(operationNames);
 
     for (const operationName of operationNames) {
       const operation = api[operationName] as (
         input?: unknown,
-      ) => Promise<CertQuizApiResult<unknown>>;
+      ) => Promise<CertForgeApiResult<unknown>>;
       await expect(operation()).resolves.toEqual({
         ok: false,
         error: {
           code: "dependency-unavailable",
-          message: "The CertQuiz API adapter is not configured.",
+          message: "The CertForge API adapter is not configured.",
           requestId: "frontend-api-not-configured",
           retryable: true,
           nextAction: "Configure a mock or HTTP adapter and retry.",
@@ -104,7 +104,7 @@ describe("CertQuizApi port", () => {
   });
 
   it("exposes deterministic mock data for shared query hooks without HTTP", async () => {
-    const api = createMockCertQuizApi();
+    const api = createMockCertForgeApi();
 
     await expect(api.getCatalog()).resolves.toMatchObject({
       ok: true,
@@ -117,7 +117,7 @@ describe("CertQuizApi port", () => {
       meta: { requestId: "mock:practice:active" },
     });
     await expect(
-      createMockCertQuizApi({ authActor: "pending" }).getCatalog(),
+      createMockCertForgeApi({ authActor: "pending" }).getCatalog(),
     ).resolves.toMatchObject({
       ok: false,
       error: { code: "approval-required", retryable: false },
@@ -125,8 +125,8 @@ describe("CertQuizApi port", () => {
   });
 
   it("serves attempt-only history, server ranks, and versioned score visibility", async () => {
-    const fixtures = createCertQuizFixtures();
-    const api = createMockCertQuizApi();
+    const fixtures = createCertForgeFixtures();
+    const api = createMockCertForgeApi();
 
     await expect(api.getHistory({})).resolves.toEqual({
       ok: true,
@@ -174,9 +174,9 @@ describe("CertQuizApi port", () => {
   });
 
   it("enforces the practice result 168-hour retention boundary at expiry", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     let serverNow = Date.parse(fixtures.practice.immutableResult.expiresAt) - 1;
-    const api = createMockCertQuizApi({ now: () => new Date(serverNow) });
+    const api = createMockCertForgeApi({ now: () => new Date(serverNow) });
     const session = await api.resumePractice({
       practiceSessionId: fixtures.ids.practiceSessionId,
     });
@@ -208,7 +208,7 @@ describe("CertQuizApi port", () => {
   });
 
   it("keeps mock practice state per instance until an explicit replacement", async () => {
-    const api = createMockCertQuizApi();
+    const api = createMockCertForgeApi();
 
     const initialSessions = await api.listActivePracticeSessions();
     expect(initialSessions).toMatchObject({
@@ -286,7 +286,7 @@ describe("CertQuizApi port", () => {
       data: { practiceSessionId: replacement.data.practiceSessionId },
     });
 
-    const untouchedApi = createMockCertQuizApi();
+    const untouchedApi = createMockCertForgeApi();
     await expect(untouchedApi.listActivePracticeSessions()).resolves.toEqual(
       initialSessions,
     );
@@ -309,8 +309,8 @@ describe("CertQuizApi port", () => {
 
   it("guards mock practice and exam operations before mutating state", async () => {
     const authController = createMockAuthController();
-    const api = createMockCertQuizApi({ authController });
-    const activePracticeSessionId = createCertQuizFixtures().ids.practiceSessionId;
+    const api = createMockCertForgeApi({ authController });
+    const activePracticeSessionId = createCertForgeFixtures().ids.practiceSessionId;
 
     await expect(api.startPractice({ certificationId })).resolves.toMatchObject({
       ok: false,
@@ -346,7 +346,7 @@ describe("CertQuizApi port", () => {
 
   it("resolves the controller actor when each mock API request runs", async () => {
     const authController = createMockAuthController();
-    const api = createMockCertQuizApi({ authController });
+    const api = createMockCertForgeApi({ authController });
 
     await expect(api.getApprovalStatus()).resolves.toMatchObject({
       ok: false,
@@ -375,12 +375,12 @@ describe("CertQuizApi port", () => {
   });
 
   it("provides instance-scoped admin pending users with guarded idempotent approval", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const [firstPendingUser, secondPendingUser] = fixtures.admin.pendingUsers.users;
     if (!firstPendingUser || !secondPendingUser) {
       throw new Error("Expected deterministic pending user fixtures.");
     }
-    const api = createMockCertQuizApi({ authActor: "admin" });
+    const api = createMockCertForgeApi({ authActor: "admin" });
 
     await expect(api.getPendingUsers()).resolves.toEqual({
       ok: true,
@@ -415,7 +415,7 @@ describe("CertQuizApi port", () => {
     });
 
     for (const actor of ["unauthenticated", "pending", "approved"] as const) {
-      const guardedApi = createMockCertQuizApi({ authActor: actor });
+      const guardedApi = createMockCertForgeApi({ authActor: actor });
       const expectedCode =
         actor === "unauthenticated"
           ? "authentication-invalid"
@@ -445,19 +445,19 @@ describe("CertQuizApi port", () => {
       ok: true as const,
       data: { approvalStatus: "approved" as const },
     }));
-    const firstApi: CertQuizApi = {
-      ...createUnavailableCertQuizApi(),
+    const firstApi: CertForgeApi = {
+      ...createUnavailableCertForgeApi(),
       getApprovalStatus: pending,
     };
-    const secondApi: CertQuizApi = {
-      ...createUnavailableCertQuizApi(),
+    const secondApi: CertForgeApi = {
+      ...createUnavailableCertForgeApi(),
       getApprovalStatus: approved,
     };
 
     const view = render(
-      <CertQuizCompositionRoot api={firstApi}>
+      <CertForgeCompositionRoot api={firstApi}>
         <ApprovalProbe />
-      </CertQuizCompositionRoot>,
+      </CertForgeCompositionRoot>,
     );
 
     await user.click(screen.getByRole("button", { name: "unknown" }));
@@ -465,9 +465,9 @@ describe("CertQuizApi port", () => {
     expect(pending).toHaveBeenCalledOnce();
 
     view.rerender(
-      <CertQuizCompositionRoot api={secondApi}>
+      <CertForgeCompositionRoot api={secondApi}>
         <ApprovalProbe />
-      </CertQuizCompositionRoot>,
+      </CertForgeCompositionRoot>,
     );
     await user.click(screen.getByRole("button", { name: "pending" }));
     expect(await screen.findByRole("button", { name: "approved" })).toBeVisible();
@@ -476,7 +476,7 @@ describe("CertQuizApi port", () => {
 
   it("fails fast when a component bypasses the provider", () => {
     expect(() => render(<ApprovalProbe />)).toThrow(
-      "useCertQuizApi must be used within CertQuizApiProvider",
+      "useCertForgeApi must be used within CertForgeApiProvider",
     );
   });
 

@@ -1,5 +1,5 @@
 {
-  "name": "@cert-quiz/db",
+  "name": "@cert-forge/db",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@aws/aurora-dsql-node-postgres-connector": "0.1.9",
-    "@cert-quiz/domain": "workspace:*",
+    "@cert-forge/domain": "workspace:*",
     "pg": "8.23.0",
     "pg-connection-string": "2.14.0"
   },

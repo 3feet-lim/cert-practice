@@ -1,4 +1,4 @@
-const SAME_ORIGIN_BASE = "https://certquiz.invalid";
+const SAME_ORIGIN_BASE = "https://certforge.invalid";
 
 function containsControlCharacter(value: string): boolean {
   return Array.from(value).some((character) => {

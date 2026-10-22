@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("loads the CertQuiz frontend workspace", async ({ page }) => {
+test("loads the CertForge frontend workspace", async ({ page }) => {
   await page.goto("/");
 
   await expect(

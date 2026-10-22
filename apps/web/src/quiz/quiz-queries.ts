@@ -10,12 +10,12 @@ import type {
   SubmitExamResponse,
   SubmitPracticeQuestionResponse,
   Uuid,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 
-import { resolveCertQuizResult } from "../api/query-result";
-import { useCertQuizApi } from "../api/useCertQuizApi";
+import { resolveCertForgeResult } from "../api/query-result";
+import { useCertForgeApi } from "../api/useCertForgeApi";
 import { certQuizQueryKeys } from "../app/query-keys";
 import {
   type QuizQuestionTarget,
@@ -38,11 +38,11 @@ class QuizCacheMissError extends Error {
 }
 
 export function usePracticeSessionQuery(practiceSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const quizStore = useQuizStoreApi();
   const query = useQuery({
     queryKey: certQuizQueryKeys.practice(practiceSessionId),
-    queryFn: () => resolveCertQuizResult(api.resumePractice({ practiceSessionId })),
+    queryFn: () => resolveCertForgeResult(api.resumePractice({ practiceSessionId })),
   });
 
   useEffect(() => {
@@ -57,11 +57,11 @@ export function usePracticeSessionQuery(practiceSessionId: Uuid) {
 }
 
 export function useExamSessionQuery(examSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const quizStore = useQuizStoreApi();
   const query = useQuery({
     queryKey: certQuizQueryKeys.exam(examSessionId),
-    queryFn: () => resolveCertQuizResult(api.getExam({ examSessionId })),
+    queryFn: () => resolveCertForgeResult(api.getExam({ examSessionId })),
   });
 
   useEffect(() => {
@@ -101,7 +101,7 @@ type PracticeStatePatchVariables = Pick<
 >;
 
 export function usePracticeStatePatchMutation(practiceSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const key = certQuizQueryKeys.practice(practiceSessionId);
 
@@ -109,7 +109,7 @@ export function usePracticeStatePatchMutation(practiceSessionId: Uuid) {
     mutationFn: (patch) => {
       const session = queryClient.getQueryData<PracticeSessionDto>(key);
       if (!session) throw new QuizCacheMissError("Practice session");
-      return resolveCertQuizResult(
+      return resolveCertForgeResult(
         api.patchPracticeState({
           practiceSessionId,
           expectedVersion: session.stateVersion,
@@ -156,7 +156,7 @@ function setExamFlag(
 }
 
 export function usePracticeFlagMutation(practiceSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const quizStore = useQuizStoreApi();
   const key = certQuizQueryKeys.practice(practiceSessionId);
@@ -171,7 +171,7 @@ export function usePracticeFlagMutation(practiceSessionId: Uuid) {
     mutationFn: ({ questionId, flagged }) => {
       const session = queryClient.getQueryData<PracticeSessionDto>(key);
       if (!session) throw new QuizCacheMissError("Practice session");
-      return resolveCertQuizResult(
+      return resolveCertForgeResult(
         api.patchPracticeState({
           practiceSessionId,
           expectedVersion: session.stateVersion,
@@ -222,7 +222,7 @@ type ExamStatePatchVariables = Pick<PatchExamStateRequest, "answer" | "currentIn
 
 /** Persists exam answers and navigation; the server remains the state authority. */
 export function useExamStatePatchMutation(examSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const key = certQuizQueryKeys.exam(examSessionId);
 
@@ -232,7 +232,7 @@ export function useExamStatePatchMutation(examSessionId: Uuid) {
       if (session?.kind !== "exam-active-session") {
         throw new QuizCacheMissError("Active exam session");
       }
-      return resolveCertQuizResult(
+      return resolveCertForgeResult(
         api.patchExamState({
           examSessionId,
           expectedVersion: session.stateVersion,
@@ -268,12 +268,12 @@ export function useExamStatePatchMutation(examSessionId: Uuid) {
 
 /** Fetches authoritative counts immediately before the user confirms submission. */
 export function useExamSubmissionPreview(examSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
 
   return useMutation<SubmissionPreviewDto>({
     mutationFn: () =>
-      resolveCertQuizResult(api.getExamSubmissionPreview({ examSessionId })),
+      resolveCertForgeResult(api.getExamSubmissionPreview({ examSessionId })),
     onSuccess: (preview) => {
       queryClient.setQueryData(certQuizQueryKeys.examPreview(examSessionId), preview);
     },
@@ -281,7 +281,7 @@ export function useExamSubmissionPreview(examSessionId: Uuid) {
 }
 
 export function useExamFlagMutation(examSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const quizStore = useQuizStoreApi();
   const key = certQuizQueryKeys.exam(examSessionId);
@@ -293,7 +293,7 @@ export function useExamFlagMutation(examSessionId: Uuid) {
       if (session?.kind !== "exam-active-session") {
         throw new QuizCacheMissError("Active exam session");
       }
-      return resolveCertQuizResult(
+      return resolveCertForgeResult(
         api.patchExamState({
           examSessionId,
           expectedVersion: session.stateVersion,
@@ -348,7 +348,7 @@ export function useExamFlagMutation(examSessionId: Uuid) {
 type PracticeSubmitInput = { questionId: Uuid; selectedChoiceIds: Uuid[] };
 
 export function usePracticeQuestionSubmit(practiceSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const quizStore = useQuizStoreApi();
   const key = certQuizQueryKeys.practice(practiceSessionId);
@@ -360,7 +360,7 @@ export function usePracticeQuestionSubmit(practiceSessionId: Uuid) {
     PracticeSubmitInput & { expectedVersion: number }
   >({
     mutationFn: ({ questionId, selectedChoiceIds, expectedVersion }) =>
-      resolveCertQuizResult(
+      resolveCertForgeResult(
         api.submitPracticeQuestion({
           practiceSessionId,
           questionId,
@@ -415,14 +415,14 @@ export function usePracticeQuestionSubmit(practiceSessionId: Uuid) {
 }
 
 export function useExamSubmit(examSessionId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const quizStore = useQuizStoreApi();
   const key = certQuizQueryKeys.exam(examSessionId);
   const target = examTarget(examSessionId);
 
   const mutation = useMutation<SubmitExamResponse>({
-    mutationFn: () => resolveCertQuizResult(api.submitExam({ examSessionId })),
+    mutationFn: () => resolveCertForgeResult(api.submitExam({ examSessionId })),
     onSuccess: (canonical) => {
       queryClient.setQueryData(
         certQuizQueryKeys.attempt(canonical.attemptId),

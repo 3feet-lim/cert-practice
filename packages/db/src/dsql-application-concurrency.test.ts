@@ -4,7 +4,7 @@ import {
   Fraction,
   type ImportCommitCommand,
   type PersistedQuestionSnapshot,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import type { QueryResultRow } from "pg";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 

@@ -1,8 +1,8 @@
-import type { Uuid } from "@cert-quiz/contracts";
+import type { Uuid } from "@cert-forge/contracts";
 import { useState } from "react";
 
 import { useApproveUserMutation, usePendingUsersQuery } from "../api/queries";
-import { CertQuizRequestError } from "../api/query-result";
+import { CertForgeRequestError } from "../api/query-result";
 import { AsyncBoundary, toQueryAsyncBoundaryState } from "../components";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
@@ -17,7 +17,7 @@ import {
 } from "../components/ui/Table";
 
 function safeApprovalErrorMessage(error: unknown): string {
-  return error instanceof CertQuizRequestError
+  return error instanceof CertForgeRequestError
     ? error.detail.message
     : "사용자 승인을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.";
 }

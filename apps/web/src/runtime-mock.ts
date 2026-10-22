@@ -1,6 +1,6 @@
 import {
   createMockAuthController,
-  createMockCertQuizApi,
+  createMockCertForgeApi,
   type MockAuthActor,
 } from "./api/mock-adapter";
 import type { WebRuntime } from "./runtime-config";
@@ -28,7 +28,7 @@ export function createMockWebRuntime(
   );
   const mockScenario = options.mockScenario;
   return {
-    api: createMockCertQuizApi({
+    api: createMockCertForgeApi({
       authController,
       e2eScenario:
         mockScenario === "completed-results" ||

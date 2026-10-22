@@ -9,10 +9,10 @@ const environment = {
   DSQL_USER: "app",
   COGNITO_ISSUER:
     "https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_example",
-  COGNITO_CLIENT_ID: "cert-quiz-client",
+  COGNITO_CLIENT_ID: "cert-forge-client",
   WEB_ORIGIN: "https://quiz.example.test",
   MARKDOWN_IMAGE_ORIGINS: "https://images.example.test, https://cdn.example.test",
-  RATE_LIMIT_TABLE: "certquiz-prod-rate-limit",
+  RATE_LIMIT_TABLE: "certforge-prod-rate-limit",
   RATE_LIMIT_POLICIES: JSON.stringify({
     "admin-import": { maxRequests: 10, windowSeconds: 300 },
     "exam-start": { maxRequests: 20, windowSeconds: 60 },
@@ -20,8 +20,8 @@ const environment = {
     "practice-start": { maxRequests: 20, windowSeconds: 60 },
     "practice-submit": { maxRequests: 120, windowSeconds: 60 },
   }),
-  TELEMETRY_NAMESPACE: "CertQuiz/prod",
-  TELEMETRY_SERVICE: "certquiz-api",
+  TELEMETRY_NAMESPACE: "CertForge/prod",
+  TELEMETRY_SERVICE: "certforge-api",
 } as const;
 
 describe("production runtime configuration", () => {
@@ -35,7 +35,7 @@ describe("production runtime configuration", () => {
       cognitoClientId: environment.COGNITO_CLIENT_ID,
       webOrigin: environment.WEB_ORIGIN,
       markdownImageOrigins: ["https://images.example.test", "https://cdn.example.test"],
-      rateLimitTable: "certquiz-prod-rate-limit",
+      rateLimitTable: "certforge-prod-rate-limit",
       rateLimitPolicies: {
         "admin-import": { maxRequests: 10, windowSeconds: 300 },
         "exam-start": { maxRequests: 20, windowSeconds: 60 },
@@ -43,8 +43,8 @@ describe("production runtime configuration", () => {
         "practice-start": { maxRequests: 20, windowSeconds: 60 },
         "practice-submit": { maxRequests: 120, windowSeconds: 60 },
       },
-      telemetryNamespace: "CertQuiz/prod",
-      telemetryService: "certquiz-api",
+      telemetryNamespace: "CertForge/prod",
+      telemetryService: "certforge-api",
     });
   });
 

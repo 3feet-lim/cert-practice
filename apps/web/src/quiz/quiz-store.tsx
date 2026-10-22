@@ -1,4 +1,4 @@
-import type { LanguageMode, Uuid } from "@cert-quiz/contracts";
+import type { LanguageMode, Uuid } from "@cert-forge/contracts";
 import { createContext, useContext } from "react";
 import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";

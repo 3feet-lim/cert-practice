@@ -1,10 +1,10 @@
 import { HttpResponse, http, type HttpHandler } from "msw";
 
-import type { CertQuizFixtures } from "./fixtures";
+import type { CertForgeFixtures } from "./fixtures";
 
 export type FixtureActor = "unauthenticated" | "pending" | "approved" | "admin";
 
-export interface CertQuizFixtureScenario {
+export interface CertForgeFixtureScenario {
   actor?: FixtureActor;
   catalog?: "empty" | "valid" | "invalid";
   practice?: "active" | "submitted";
@@ -15,7 +15,7 @@ export interface CertQuizFixtureScenario {
   dryRun?: "valid" | "invalid";
 }
 
-function success(data: unknown, fixtures: CertQuizFixtures, requestId: string) {
+function success(data: unknown, fixtures: CertForgeFixtures, requestId: string) {
   return HttpResponse.json({
     data,
     meta: { requestId, serverNow: fixtures.clock.iso() },
@@ -94,9 +94,9 @@ function adminGuard(
  * rollback, stale writes, and idempotency scenarios intentionally belong to
  * task 1.6 rather than these read-only fixture handlers.
  */
-export function createCertQuizFixtureHandlers(
-  fixtures: CertQuizFixtures,
-  scenario: CertQuizFixtureScenario = {},
+export function createCertForgeFixtureHandlers(
+  fixtures: CertForgeFixtures,
+  scenario: CertForgeFixtureScenario = {},
 ): HttpHandler[] {
   const actor = scenario.actor ?? "approved";
   const catalog = scenario.catalog ?? "valid";

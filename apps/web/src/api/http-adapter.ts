@@ -26,12 +26,12 @@ import {
   successEnvelopeSchema,
   updateScoreVisibilityResponseSchema,
   type ResponseMeta,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 import type {
-  CertQuizApi,
-  CertQuizApiError,
-  CertQuizApiResult,
+  CertForgeApi,
+  CertForgeApiError,
+  CertForgeApiResult,
   GetHistoryInput,
 } from "./port";
 
@@ -39,7 +39,7 @@ export type HttpFetch = (input: string, init?: RequestInit) => Promise<Response>
 export type BearerTokenProvider = () =>
   string | undefined | Promise<string | undefined>;
 
-export interface HttpCertQuizApiOptions {
+export interface HttpCertForgeApiOptions {
   /** Origin or base path of the Hono API, such as https://api.example.test. */
   baseUrl: string;
   fetch?: HttpFetch;
@@ -63,7 +63,7 @@ type HttpRequest = {
   idempotencyKey?: string;
 };
 
-const apiErrorCodes = new Set<CertQuizApiError["code"]>([
+const apiErrorCodes = new Set<CertForgeApiError["code"]>([
   "authentication-invalid",
   "google-identity-missing",
   "approval-required",
@@ -90,11 +90,11 @@ const apiErrorCodes = new Set<CertQuizApiError["code"]>([
 ]);
 
 function adapterFailure<Output>(
-  code: CertQuizApiError["code"],
+  code: CertForgeApiError["code"],
   message: string,
   requestId: string,
   retryable: boolean,
-): CertQuizApiResult<Output> {
+): CertForgeApiResult<Output> {
   return { ok: false, error: { code, message, requestId, retryable } };
 }
 
@@ -114,7 +114,7 @@ function requestIdFrom(response: Response, fallback: string): string {
 function authorizerFallbackFailure<Output>(
   operation: string,
   response: Response,
-): CertQuizApiResult<Output> | undefined {
+): CertForgeApiResult<Output> | undefined {
   if (response.status === 401) {
     return adapterFailure(
       "authentication-invalid",
@@ -126,7 +126,7 @@ function authorizerFallbackFailure<Output>(
   if (response.status === 403) {
     return adapterFailure(
       "approval-required",
-      "Access to the CertQuiz API is not authorized.",
+      "Access to the CertForge API is not authorized.",
       requestIdFrom(response, `http:${operation}:authorizer-403`),
       false,
     );
@@ -137,46 +137,46 @@ function authorizerFallbackFailure<Output>(
 function unavailableFailure<Output>(
   operation: string,
   response: Response,
-): CertQuizApiResult<Output> {
+): CertForgeApiResult<Output> {
   return adapterFailure(
     "dependency-unavailable",
     operation === "health"
-      ? "The CertQuiz health service returned an unavailable response."
-      : "The CertQuiz API returned an unavailable response.",
+      ? "The CertForge health service returned an unavailable response."
+      : "The CertForge API returned an unavailable response.",
     requestIdFrom(response, `http:${operation}:unavailable-response`),
     response.status === 429 || response.status >= 500,
   );
 }
 
-function contractFailure<Output>(operation: string): CertQuizApiResult<Output> {
+function contractFailure<Output>(operation: string): CertForgeApiResult<Output> {
   return adapterFailure(
     "internal-error",
     operation === "health"
-      ? "The CertQuiz health response failed shared schema validation."
-      : "The CertQuiz API response failed shared schema validation.",
+      ? "The CertForge health response failed shared schema validation."
+      : "The CertForge API response failed shared schema validation.",
     `http:${operation}:invalid-contract`,
     false,
   );
 }
 
 /**
- * Real transport adapter for the complete CertQuizApi surface. It parses all
+ * Real transport adapter for the complete CertForgeApi surface. It parses all
  * successful payloads and expected errors against shared strict contracts.
  */
-export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuizApi {
+export function createHttpCertForgeApi(options: HttpCertForgeApiOptions): CertForgeApi {
   const fetchImplementation = options.fetch ?? globalThis.fetch.bind(globalThis);
 
   const request = async <Output>(
     request: HttpRequest,
     schema: SuccessEnvelopeSchema<Output>,
-  ): Promise<CertQuizApiResult<Output>> => {
+  ): Promise<CertForgeApiResult<Output>> => {
     let token: string | undefined;
     try {
       token = await options.getBearerToken?.();
     } catch {
       return adapterFailure(
         "dependency-unavailable",
-        "The CertQuiz authentication token is unavailable.",
+        "The CertForge authentication token is unavailable.",
         `http:${request.operation}:token`,
         true,
       );
@@ -199,8 +199,8 @@ export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuiz
       return adapterFailure(
         "dependency-unavailable",
         request.operation === "health"
-          ? "The CertQuiz health service is unavailable."
-          : "The CertQuiz API is unavailable.",
+          ? "The CertForge health service is unavailable."
+          : "The CertForge API is unavailable.",
         `http:${request.operation}:network`,
         true,
       );
@@ -213,7 +213,7 @@ export function createHttpCertQuizApi(options: HttpCertQuizApiOptions): CertQuiz
         parsedError.success &&
         apiErrorCodes.has(parsedError.data.error.code as never)
       ) {
-        return { ok: false, error: parsedError.data.error as CertQuizApiError };
+        return { ok: false, error: parsedError.data.error as CertForgeApiError };
       }
       return (
         authorizerFallbackFailure(request.operation, response) ??

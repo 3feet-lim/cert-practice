@@ -5,8 +5,8 @@
   "run": {
     "region": "ap-northeast-2",
     "endpoint": "6bub5ifge3eqfufzieojj35dnu.dsql.ap-northeast-2.on.aws",
-    "functionName": "certquiz-dev-dsql-spike-20260907",
-    "functionArn": "arn:aws:lambda:ap-northeast-2:370489250264:function:certquiz-dev-dsql-spike-20260907",
+    "functionName": "certforge-dev-dsql-spike-20260907",
+    "functionArn": "arn:aws:lambda:ap-northeast-2:370489250264:function:certforge-dev-dsql-spike-20260907",
     "runtime": "nodejs22.x",
     "nodeVersion": "v22.23.1",
     "handler": "dist/spike/lambda-connector-smoke.handler",
@@ -16,7 +16,7 @@
     "reservedConcurrency": 1
   },
   "iam": {
-    "roleArn": "arn:aws:iam::370489250264:role/certquiz/spike/certquiz-dev-dsql-spike-20260907",
+    "roleArn": "arn:aws:iam::370489250264:role/certforge/spike/certforge-dev-dsql-spike-20260907",
     "connectAction": "dsql:DbConnectAdmin",
     "connectResource": "arn:aws:dsql:ap-northeast-2:370489250264:cluster/6bub5ifge3eqfufzieojj35dnu"
   },

@@ -1,4 +1,4 @@
-import type { PracticeSessionDto, Uuid } from "@cert-quiz/contracts";
+import type { PracticeSessionDto, Uuid } from "@cert-forge/contracts";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 

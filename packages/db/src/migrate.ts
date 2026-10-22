@@ -245,10 +245,9 @@ async function ensureDatabaseRoleExists(
   database: MigrationQueryable,
   roleName: string,
 ): Promise<void> {
-  const existing = await database.query(
-    "SELECT 1 FROM pg_roles WHERE rolname = $1",
-    [roleName],
-  );
+  const existing = await database.query("SELECT 1 FROM pg_roles WHERE rolname = $1", [
+    roleName,
+  ]);
   if (existing.rows.length > 0) return;
   await database.query(`CREATE ROLE ${roleName} WITH LOGIN`);
 }

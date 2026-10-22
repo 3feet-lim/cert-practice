@@ -1,22 +1,26 @@
-// Feature: cert-quiz-mvp, Property 10
+// Feature: cert-forge-mvp, Property 10
 import type {
   ExamStateResponse,
   GetExamResponse,
   PracticeSessionDto,
   PracticeStateResponse,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import { act, renderHook } from "@testing-library/react";
 import fc from "fast-check";
 import type { PropsWithChildren } from "react";
 import { describe, expect, it } from "vitest";
 
-import type { CertQuizApi, CertQuizApiFailure, CertQuizApiResult } from "../api/port";
-import { CertQuizRequestError } from "../api/query-result";
-import { createUnavailableCertQuizApi } from "../api/unavailable-adapter";
-import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
-import { createCertQuizQueryClient } from "../app/query-client";
+import type {
+  CertForgeApi,
+  CertForgeApiFailure,
+  CertForgeApiResult,
+} from "../api/port";
+import { CertForgeRequestError } from "../api/query-result";
+import { createUnavailableCertForgeApi } from "../api/unavailable-adapter";
+import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";
+import { createCertForgeQueryClient } from "../app/query-client";
 import { certQuizQueryKeys } from "../app/query-keys";
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import { createQuizStore, type QuizQuestionTarget } from "./quiz-store";
 import { useExamFlagMutation, usePracticeFlagMutation } from "./quiz-queries";
 
@@ -32,19 +36,19 @@ const OUTCOMES: readonly FlagOutcome[] = [
 ];
 
 function wrapperFor(
-  api: CertQuizApi,
-  queryClient = createCertQuizQueryClient(),
+  api: CertForgeApi,
+  queryClient = createCertForgeQueryClient(),
   quizStore = createQuizStore(),
 ) {
   return function Wrapper({ children }: PropsWithChildren) {
     return (
-      <CertQuizCompositionRoot
+      <CertForgeCompositionRoot
         api={api}
         queryClient={queryClient}
         quizStore={quizStore}
       >
         {children}
-      </CertQuizCompositionRoot>
+      </CertForgeCompositionRoot>
     );
   };
 }
@@ -64,7 +68,7 @@ async function flushMutation(): Promise<void> {
   });
 }
 
-function failedSave(outcome: Exclude<FlagOutcome, "success">): CertQuizApiFailure {
+function failedSave(outcome: Exclude<FlagOutcome, "success">): CertForgeApiFailure {
   return {
     ok: false,
     error:
@@ -113,23 +117,23 @@ async function exercisePracticeFlag(
   outcome: FlagOutcome,
   initialFlagged: boolean,
 ): Promise<void> {
-  const fixtures = createCertQuizFixtures();
+  const fixtures = createCertForgeFixtures();
   const sessionId = fixtures.ids.practiceSessionId;
   const initial = practiceWithFlag(fixtures.practice.active, initialFlagged);
   const question = initial.questions[0];
   if (!question) throw new Error("Expected a practice question fixture.");
 
-  const queryClient = createCertQuizQueryClient();
+  const queryClient = createCertForgeQueryClient();
   const quizStore = createQuizStore();
   const key = certQuizQueryKeys.practice(sessionId);
   const target = `practice:${sessionId}:${question.id}` as QuizQuestionTarget;
   queryClient.setQueryData(key, initial);
   quizStore.getState().setDraftChoiceIds(target, question.selectedChoiceIds);
 
-  const response = deferred<CertQuizApiResult<PracticeStateResponse>>();
+  const response = deferred<CertForgeApiResult<PracticeStateResponse>>();
   let expectedVersion: number | undefined;
-  const api: CertQuizApi = {
-    ...createUnavailableCertQuizApi(),
+  const api: CertForgeApi = {
+    ...createUnavailableCertForgeApi(),
     patchPracticeState: async (input) => {
       expectedVersion = input.expectedVersion;
       return response.promise;
@@ -176,7 +180,7 @@ async function exercisePracticeFlag(
     } else {
       response.resolve(failedSave(outcome));
 
-      await expect(mutation).rejects.toBeInstanceOf(CertQuizRequestError);
+      await expect(mutation).rejects.toBeInstanceOf(CertForgeRequestError);
       expect(queryClient.getQueryData<PracticeSessionDto>(key)).toEqual(initial);
       expect(quizStore.getState().draftChoiceIdsByQuestion[target]).toEqual(
         question.selectedChoiceIds,
@@ -195,7 +199,7 @@ async function exerciseExamFlag(
   outcome: FlagOutcome,
   initialFlagged: boolean,
 ): Promise<void> {
-  const fixtures = createCertQuizFixtures();
+  const fixtures = createCertForgeFixtures();
   const sessionId = fixtures.ids.activeExamSessionId;
   const initial = examWithFlag(fixtures.exam.active, initialFlagged);
   if (initial.kind !== "exam-active-session") {
@@ -204,17 +208,17 @@ async function exerciseExamFlag(
   const question = initial.questions[0];
   if (!question) throw new Error("Expected an exam question fixture.");
 
-  const queryClient = createCertQuizQueryClient();
+  const queryClient = createCertForgeQueryClient();
   const quizStore = createQuizStore();
   const key = certQuizQueryKeys.exam(sessionId);
   const target = `exam:${sessionId}:${question.id}` as QuizQuestionTarget;
   queryClient.setQueryData(key, initial);
   quizStore.getState().setDraftChoiceIds(target, question.selectedChoiceIds);
 
-  const response = deferred<CertQuizApiResult<ExamStateResponse>>();
+  const response = deferred<CertForgeApiResult<ExamStateResponse>>();
   let expectedVersion: number | undefined;
-  const api: CertQuizApi = {
-    ...createUnavailableCertQuizApi(),
+  const api: CertForgeApi = {
+    ...createUnavailableCertForgeApi(),
     patchExamState: async (input) => {
       expectedVersion = input.expectedVersion;
       return response.promise;
@@ -273,7 +277,7 @@ async function exerciseExamFlag(
     } else {
       response.resolve(failedSave(outcome));
 
-      await expect(mutation).rejects.toBeInstanceOf(CertQuizRequestError);
+      await expect(mutation).rejects.toBeInstanceOf(CertForgeRequestError);
       expect(queryClient.getQueryData<GetExamResponse>(key)).toEqual(initial);
       expect(quizStore.getState().draftChoiceIdsByQuestion[target]).toEqual(
         question.selectedChoiceIds,

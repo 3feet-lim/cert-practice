@@ -1,4 +1,4 @@
-import type { ActiveQuestion, LanguageMode, Uuid } from "@cert-quiz/contracts";
+import type { ActiveQuestion, LanguageMode, Uuid } from "@cert-forge/contracts";
 
 import type { QuestionNavigatorItem } from "../components/StaticPresentation";
 import type { QuizQuestionTarget, QuizTarget } from "./quiz-store";

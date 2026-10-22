@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
-import { CertQuizCompositionRoot } from "./app/CertQuizCompositionRoot";
+import { CertForgeCompositionRoot } from "./app/CertForgeCompositionRoot";
 import { App } from "./App";
 import { RuntimeConfigurationErrorScreen } from "./components/RuntimeConfigurationErrorScreen";
 import {
@@ -18,7 +18,7 @@ import "./styles.css";
 const rootElement = document.getElementById("root");
 
 if (!rootElement) {
-  throw new Error("CertQuiz root element was not found");
+  throw new Error("CertForge root element was not found");
 }
 
 const root = createRoot(rootElement);
@@ -51,14 +51,14 @@ async function bootstrap() {
   root.render(
     <StrictMode>
       <BrowserRouter>
-        <CertQuizCompositionRoot
+        <CertForgeCompositionRoot
           api={runtime.api}
           runtimeMode={configuration.mode}
           browserAuthSession={runtime.browserAuthSession}
           authCallbackCapability={runtime.authCallbackCapability}
         >
           <App />
-        </CertQuizCompositionRoot>
+        </CertForgeCompositionRoot>
       </BrowserRouter>
     </StrictMode>,
   );

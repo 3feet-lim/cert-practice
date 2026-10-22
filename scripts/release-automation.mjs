@@ -16,8 +16,8 @@ function usage() {
     "  node scripts/release-automation.mjs rollback --stage <dev|prod> --release-id <id> --catalog-file <path> --confirm-rollback",
     "",
     "Required environment for release/catalog operations:",
-    "  CERTQUIZ_ADMIN_TOKEN (approved administrator Cognito ID token)",
-    "  CERTQUIZ_API_ORIGIN (optional HTTPS API origin; discovered from API Gateway when omitted)",
+    "  CERTFORGE_ADMIN_TOKEN (approved administrator Cognito ID token)",
+    "  CERTFORGE_API_ORIGIN (optional HTTPS API origin; discovered from API Gateway when omitted)",
     "  SERVERLESS_ACCESS_KEY (Serverless v4 CLI credential)",
   ].join("\n");
 }
@@ -126,7 +126,7 @@ function ssmParameter(stage, name) {
     "ssm",
     "get-parameter",
     "--name",
-    `/certquiz/${stage}/${name}`,
+    `/certforge/${stage}/${name}`,
     "--query",
     "Parameter.Value",
     "--output",
@@ -135,11 +135,11 @@ function ssmParameter(stage, name) {
 }
 
 function apiName(stage) {
-  return `certquiz-api-${stage}`;
+  return `certforge-api-${stage}`;
 }
 
 function functionName(stage) {
-  return `certquiz-${stage}-api`;
+  return `certforge-${stage}-api`;
 }
 
 function discoverApi(stage, region) {
@@ -212,7 +212,7 @@ function invokeUnpublishedVersion(stage, region, version, webOrigin) {
         path: "/v1/health",
         protocol: "HTTP/1.1",
         sourceIp: "127.0.0.1",
-        userAgent: "certquiz-release-smoke",
+        userAgent: "certforge-release-smoke",
       },
       requestId: "release-smoke",
       routeKey: "GET /v1/health",
@@ -292,7 +292,7 @@ function ensureLiveAlias(stage, region, version) {
       "--function-version",
       version,
       "--description",
-      "CertQuiz live release alias",
+      "CertForge live release alias",
       "--region",
       region,
     ]);
@@ -458,7 +458,7 @@ function invalidateWeb(distributionId, region) {
 }
 
 async function catalogCommit(apiOrigin, catalogFile) {
-  const adminToken = requiredEnvironment("CERTQUIZ_ADMIN_TOKEN");
+  const adminToken = requiredEnvironment("CERTFORGE_ADMIN_TOKEN");
   const content = await readFile(catalogFile, "utf8");
   const request = async (path, payload) => {
     const response = await fetch(`${apiOrigin}${path}`, {
@@ -491,7 +491,7 @@ async function catalogCommit(apiOrigin, catalogFile) {
 }
 
 async function writeManifest(bucket, region, id, manifest) {
-  const directory = await mkdtemp(join(tmpdir(), "certquiz-release-"));
+  const directory = await mkdtemp(join(tmpdir(), "certforge-release-"));
   const file = join(directory, "release-manifest.json");
   try {
     await writeFile(file, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
@@ -511,7 +511,7 @@ async function writeManifest(bucket, region, id, manifest) {
 }
 
 async function readManifest(bucket, region, id) {
-  const directory = await mkdtemp(join(tmpdir(), "certquiz-rollback-"));
+  const directory = await mkdtemp(join(tmpdir(), "certforge-rollback-"));
   const file = join(directory, "release-manifest.json");
   try {
     aws([
@@ -569,14 +569,14 @@ function restoreWebAssets(bucket, region, previousVersions) {
 function runDeployedSmoke(apiOrigin, webOrigin) {
   run("node", ["scripts/deployed-infrastructure-smoke.mjs"], {
     env: {
-      CERTQUIZ_DEPLOYED_API_ORIGIN: apiOrigin,
-      CERTQUIZ_DEPLOYED_WEB_ORIGIN: webOrigin,
+      CERTFORGE_DEPLOYED_API_ORIGIN: apiOrigin,
+      CERTFORGE_DEPLOYED_WEB_ORIGIN: webOrigin,
     },
   });
 }
 
 function runMigrations(endpoint, region) {
-  run("pnpm", ["--filter", "@cert-quiz/db", "run", "migrate:deploy"], {
+  run("pnpm", ["--filter", "@cert-forge/db", "run", "migrate:deploy"], {
     env: { DSQL_ENDPOINT: endpoint, AWS_REGION: region },
   });
 }
@@ -609,10 +609,10 @@ async function release(options) {
     ssmParameter(options.stage, "cloudfront-distribution-id"),
     httpsOrigin(ssmParameter(options.stage, "web-origin"), "web-origin SSM parameter"),
   ];
-  const api = process.env.CERTQUIZ_API_ORIGIN
+  const api = process.env.CERTFORGE_API_ORIGIN
     ? {
         ...discoverApi(options.stage, region),
-        origin: httpsOrigin(process.env.CERTQUIZ_API_ORIGIN, "CERTQUIZ_API_ORIGIN"),
+        origin: httpsOrigin(process.env.CERTFORGE_API_ORIGIN, "CERTFORGE_API_ORIGIN"),
       }
     : discoverApi(options.stage, region);
 
@@ -620,15 +620,15 @@ async function release(options) {
   runMigrations(endpoint, region);
   run("pnpm", ["build"], {
     env: {
-      VITE_CERTQUIZ_RUNTIME_MODE: "http",
-      VITE_CERTQUIZ_API_BASE_URL: api.origin,
-      VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL: ssmParameter(
+      VITE_CERTFORGE_RUNTIME_MODE: "http",
+      VITE_CERTFORGE_API_BASE_URL: api.origin,
+      VITE_CERTFORGE_COGNITO_HOSTED_UI_BASE_URL: ssmParameter(
         options.stage,
         "cognito-hosted-ui-base-url",
       ),
-      VITE_CERTQUIZ_COGNITO_CLIENT_ID: ssmParameter(options.stage, "cognito-client-id"),
-      VITE_CERTQUIZ_AUTH_REDIRECT_PATH: "/auth/callback",
-      VITE_CERTQUIZ_AUTH_LOGOUT_PATH: "/login",
+      VITE_CERTFORGE_COGNITO_CLIENT_ID: ssmParameter(options.stage, "cognito-client-id"),
+      VITE_CERTFORGE_AUTH_REDIRECT_PATH: "/auth/callback",
+      VITE_CERTFORGE_AUTH_LOGOUT_PATH: "/login",
     },
   });
   run("node", ["scripts/verify-web-bundle.mjs"]);
@@ -673,10 +673,10 @@ async function rollback(options) {
     ssmParameter(options.stage, "web-origin"),
     "web-origin SSM parameter",
   );
-  const api = process.env.CERTQUIZ_API_ORIGIN
+  const api = process.env.CERTFORGE_API_ORIGIN
     ? {
         ...discoverApi(options.stage, region),
-        origin: httpsOrigin(process.env.CERTQUIZ_API_ORIGIN, "CERTQUIZ_API_ORIGIN"),
+        origin: httpsOrigin(process.env.CERTFORGE_API_ORIGIN, "CERTFORGE_API_ORIGIN"),
       }
     : discoverApi(options.stage, region);
   const alias = ensureLiveAlias(

@@ -6,7 +6,7 @@ import { successEnvelopeSchema } from "./common.js";
 export const healthDtoSchema = z
   .object({
     status: z.literal("ok"),
-    service: z.literal("cert-quiz-api"),
+    service: z.literal("cert-forge-api"),
     contractVersion: z.literal("v1"),
   })
   .strict();

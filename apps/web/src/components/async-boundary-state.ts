@@ -1,4 +1,4 @@
-import { CertQuizRequestError } from "../api/query-result";
+import { CertForgeRequestError } from "../api/query-result";
 import type { AsyncState } from "./AsyncBoundary";
 
 /**
@@ -41,7 +41,7 @@ function errorState<T>(
   error: unknown,
   options: Pick<AsyncBoundaryStateOptions<T>, "nextAction" | "retry">,
 ): AsyncState<T> {
-  if (error instanceof CertQuizRequestError) {
+  if (error instanceof CertForgeRequestError) {
     const { detail } = error;
     if (detail.retryable) {
       return {

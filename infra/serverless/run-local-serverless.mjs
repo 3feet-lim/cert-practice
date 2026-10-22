@@ -1,18 +1,18 @@
 import { spawn } from "node:child_process";
 
-const stage = process.env.CERTQUIZ_STAGE ?? "dev";
-const region = process.env.CERTQUIZ_REGION ?? "ap-northeast-2";
+const stage = process.env.CERTFORGE_STAGE ?? "dev";
+const region = process.env.CERTFORGE_REGION ?? "ap-northeast-2";
 const localDefaults = {
-  CERTQUIZ_LAMBDA_ROLE_ARN: "arn:aws:iam::000000000000:role/certquiz-local",
-  CERTQUIZ_DSQL_ENDPOINT: "local.dsql.ap-northeast-2.on.aws",
-  CERTQUIZ_COGNITO_ISSUER: "https://cognito.localhost",
-  CERTQUIZ_COGNITO_CLIENT_ID: "certquiz-local",
-  CERTQUIZ_WEB_ORIGIN: "http://localhost:5173",
-  CERTQUIZ_MARKDOWN_IMAGE_ORIGINS: "https://images.localhost",
-  CERTQUIZ_RATE_LIMIT_TABLE: "certquiz-local-rate-limit",
-  CERTQUIZ_RATE_LIMIT_POLICIES: "{}",
-  CERTQUIZ_TELEMETRY_NAMESPACE: `CertQuiz/${stage}`,
-  CERTQUIZ_TELEMETRY_SERVICE: "certquiz-api",
+  CERTFORGE_LAMBDA_ROLE_ARN: "arn:aws:iam::000000000000:role/certforge-local",
+  CERTFORGE_DSQL_ENDPOINT: "local.dsql.ap-northeast-2.on.aws",
+  CERTFORGE_COGNITO_ISSUER: "https://cognito.localhost",
+  CERTFORGE_COGNITO_CLIENT_ID: "certforge-local",
+  CERTFORGE_WEB_ORIGIN: "http://localhost:5173",
+  CERTFORGE_MARKDOWN_IMAGE_ORIGINS: "https://images.localhost",
+  CERTFORGE_RATE_LIMIT_TABLE: "certforge-local-rate-limit",
+  CERTFORGE_RATE_LIMIT_POLICIES: "{}",
+  CERTFORGE_TELEMETRY_NAMESPACE: `CertForge/${stage}`,
+  CERTFORGE_TELEMETRY_SERVICE: "certforge-api",
 };
 
 const child = spawn(
@@ -23,7 +23,7 @@ const child = spawn(
       ...localDefaults,
       ...process.env,
       AWS_REGION: region,
-      CERTQUIZ_LOCAL_EMULATION: "true",
+      CERTFORGE_LOCAL_EMULATION: "true",
     },
     stdio: "inherit",
   },

@@ -1,5 +1,5 @@
 {
-  "name": "@cert-quiz/domain",
+  "name": "@cert-forge/domain",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -18,7 +18,7 @@
     "typecheck": "tsc6 -b --pretty false"
   },
   "dependencies": {
-    "@cert-quiz/contracts": "workspace:*"
+    "@cert-forge/contracts": "workspace:*"
   },
   "devDependencies": {
     "fast-check": "4.9.0",

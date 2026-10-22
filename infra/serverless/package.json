@@ -1,5 +1,5 @@
 {
-  "name": "@cert-quiz/serverless",
+  "name": "@cert-forge/serverless",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "remove:dev": "serverless remove --stage dev --region ap-northeast-2"
   },
   "dependencies": {
-    "@cert-quiz/api": "workspace:*"
+    "@cert-forge/api": "workspace:*"
   },
   "devDependencies": {
     "serverless": "4.41.1",

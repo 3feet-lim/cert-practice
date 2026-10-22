@@ -35,7 +35,7 @@ import {
   updateScoreVisibilityRequestSchema,
   updateScoreVisibilityResponseSchema,
   uuidSchema,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import {
   domainFailure,
   isDomainFailure,
@@ -45,7 +45,7 @@ import {
   type LifecycleServices,
   type TransactionRepositories,
   type UserProfile,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import { Hono, type Context, type MiddlewareHandler } from "hono";
 
 import {
@@ -153,10 +153,9 @@ async function parseImportRequest<Schema extends { parse(input: unknown): unknow
  * code/constraint/table). Never the free-text message or SQL detail, which
  * can embed literal row values.
  */
-function describeUnexpectedError(error: unknown): Pick<
-  ApiTelemetryEvent,
-  "errorName" | "dbErrorCode" | "dbConstraint" | "dbTable"
-> {
+function describeUnexpectedError(
+  error: unknown,
+): Pick<ApiTelemetryEvent, "errorName" | "dbErrorCode" | "dbConstraint" | "dbTable"> {
   if (!(error instanceof Error)) return {};
   const candidate = error as Error & {
     code?: unknown;
@@ -273,7 +272,7 @@ export function createApp(
       healthSuccessEnvelopeSchema.parse({
         data: {
           status: "ok",
-          service: "cert-quiz-api",
+          service: "cert-forge-api",
           contractVersion: "v1",
         },
         meta: responseMeta(context),

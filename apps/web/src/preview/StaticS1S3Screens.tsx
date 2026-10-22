@@ -3,7 +3,7 @@ import type {
   CatalogDto,
   ExamActiveSessionDto,
   PracticeSessionDto,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 import {
   AppShell,

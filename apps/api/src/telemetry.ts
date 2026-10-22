@@ -1,4 +1,4 @@
-import type { RequestId } from "@cert-quiz/contracts";
+import type { RequestId } from "@cert-forge/contracts";
 
 export type ApiTelemetryEvent = Readonly<{
   event:

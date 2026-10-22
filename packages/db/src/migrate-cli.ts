@@ -6,10 +6,10 @@ function required(name: string): string {
   return value;
 }
 
-const lambdaRoleArn = process.env.CERTQUIZ_LAMBDA_ROLE_ARN || undefined;
+const lambdaRoleArn = process.env.CERTFORGE_LAMBDA_ROLE_ARN || undefined;
 if (!lambdaRoleArn) {
   process.stdout.write(
-    "CERTQUIZ_LAMBDA_ROLE_ARN is not set; skipping application database role provisioning.\n",
+    "CERTFORGE_LAMBDA_ROLE_ARN is not set; skipping application database role provisioning.\n",
   );
 }
 
@@ -23,7 +23,7 @@ const schema = await migrateAndVerifyApplicationSchema(
   },
   lambdaRoleArn
     ? {
-        roleName: process.env.CERTQUIZ_APP_DB_ROLE || "app",
+        roleName: process.env.CERTFORGE_APP_DB_ROLE || "app",
         iamRoleArn: lambdaRoleArn,
       }
     : undefined,

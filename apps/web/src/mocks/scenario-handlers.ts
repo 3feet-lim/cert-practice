@@ -4,14 +4,14 @@ import type {
   PatchExamStateRequest,
   PatchPracticeStateRequest,
   SubmitPracticeQuestionRequest,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import { delay, http, HttpResponse, type HttpHandler } from "msw";
 
 import {
-  createCertQuizMockStateMachine,
+  createCertForgeMockStateMachine,
   MOCK_IDS,
   MockStateError,
-  type CertQuizMockStateMachine,
+  type CertForgeMockStateMachine,
 } from "./state-machine";
 
 /**
@@ -43,7 +43,7 @@ export type MockScenario = (typeof MOCK_SCENARIOS)[number];
 
 export type CreateMockScenarioHandlersOptions = {
   scenario?: MockScenario;
-  state?: CertQuizMockStateMachine;
+  state?: CertForgeMockStateMachine;
   delayMs?: number;
 };
 
@@ -110,9 +110,9 @@ function actorRole(request: Request): string {
 
 export function createMockScenarioHandlers(
   options: CreateMockScenarioHandlersOptions = {},
-): { handlers: HttpHandler[]; state: CertQuizMockStateMachine } {
+): { handlers: HttpHandler[]; state: CertForgeMockStateMachine } {
   const scenario = options.scenario ?? "default";
-  const state = options.state ?? createCertQuizMockStateMachine();
+  const state = options.state ?? createCertForgeMockStateMachine();
   const loadingDelayMs = options.delayMs ?? 250;
   let sequence = 0;
   const nextRequestId = () => `msw-ui-${scenario}-${++sequence}`;

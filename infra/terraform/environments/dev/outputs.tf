@@ -34,7 +34,7 @@ output "api_lambda_execution_role_name" {
 }
 
 output "github_actions_dev_deploy_role_arn" {
-  description = "Copy into GitHub environment release-dev as CERTQUIZ_RELEASE_ROLE_ARN."
+  description = "Copy into GitHub environment release-dev as CERTFORGE_RELEASE_ROLE_ARN."
   value       = aws_iam_role.github_actions_dev_deploy.arn
 }
 

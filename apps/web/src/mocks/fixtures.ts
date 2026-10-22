@@ -1,4 +1,4 @@
-import * as contracts from "@cert-quiz/contracts";
+import * as contracts from "@cert-forge/contracts";
 
 import type {
   ActivePracticeSessionsDto,
@@ -23,7 +23,7 @@ import type {
   PracticeUnsubmittedQuestion,
   ReviewQuestion,
   StartExamResponse,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 import { HEALTH_FIXTURE } from "./health-fixture";
 import {
@@ -267,7 +267,7 @@ function createImportDocument(sources: readonly QuestionSource[]): ImportDocumen
   };
 }
 
-export interface CertQuizFixtureOptions {
+export interface CertForgeFixtureOptions {
   seed?: number;
   clock?: FakeServerClock;
 }
@@ -277,7 +277,7 @@ export interface CertQuizFixtureOptions {
  * contract providers. It models UI data only; it is not an auth, transaction,
  * ownership, or concurrency implementation.
  */
-export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
+export function createCertForgeFixtures(options: CertForgeFixtureOptions = {}) {
   const seed = options.seed ?? DEFAULT_FIXTURE_SEED;
   const clock = options.clock ?? new FakeServerClock();
   const ids = new SeededIdFactory(seed);
@@ -856,4 +856,4 @@ export function createCertQuizFixtures(options: CertQuizFixtureOptions = {}) {
   };
 }
 
-export type CertQuizFixtures = ReturnType<typeof createCertQuizFixtures>;
+export type CertForgeFixtures = ReturnType<typeof createCertForgeFixtures>;

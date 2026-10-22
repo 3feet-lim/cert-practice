@@ -1,4 +1,4 @@
-import { InMemoryUnitOfWork } from "@cert-quiz/db";
+import { InMemoryUnitOfWork } from "@cert-forge/db";
 import {
   FixedClock,
   Fraction,
@@ -8,14 +8,14 @@ import {
   SessionFactory,
   type FullCatalogGenerationSource,
   type UserProfile,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import { describe, expect, it } from "vitest";
 
 import { createApp, type CreateAppDependencies } from "./app.js";
 import { CognitoJwksTokenVerifier } from "./cognito-jwks-verifier.js";
 
 const ISSUER = "https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_local";
-const CLIENT_ID = "cert-quiz-local-client";
+const CLIENT_ID = "cert-forge-local-client";
 const NOW = new Date("2026-01-01T12:00:00.000Z");
 const id = (value: number) =>
   `00000000-0000-4000-8000-${String(value).padStart(12, "0")}`;

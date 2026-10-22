@@ -1,11 +1,11 @@
-import { CertQuizRequestError } from "../api/query-result";
-import type { CertQuizApiError } from "../api/port";
+import { CertForgeRequestError } from "../api/query-result";
+import type { CertForgeApiError } from "../api/port";
 
 /**
  * Korean copy for the quiz-facing failures. The server message stays canonical
  * for diagnostics, but learners should never read raw English API text.
  */
-const quizErrorMessages: Partial<Record<CertQuizApiError["code"], string>> = {
+const quizErrorMessages: Partial<Record<CertForgeApiError["code"], string>> = {
   "answer-locked": "이미 제출한 답변은 변경할 수 없습니다.",
   "stale-version": "다른 곳에서 변경된 내용이 있습니다. 새로 고친 뒤 다시 시도하세요.",
   "content-changed": "문제 내용이 변경되었습니다. 새로 고친 뒤 다시 시도하세요.",
@@ -21,7 +21,7 @@ const quizErrorMessages: Partial<Record<CertQuizApiError["code"], string>> = {
 };
 
 export function quizErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof CertQuizRequestError) {
+  if (error instanceof CertForgeRequestError) {
     return quizErrorMessages[error.detail.code] ?? fallback;
   }
   return fallback;

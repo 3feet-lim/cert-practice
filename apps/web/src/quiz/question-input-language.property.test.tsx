@@ -1,8 +1,8 @@
-import type { ActiveQuestion, LanguageMode, Uuid } from "@cert-quiz/contracts";
+import type { ActiveQuestion, LanguageMode, Uuid } from "@cert-forge/contracts";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import {
   createQuestionNavigatorItems,
   localizedQuestionText,
@@ -17,7 +17,7 @@ import {
 const PROPERTY_RUNS = 200;
 const PROPERTY_SEED = 8052008;
 const PROPERTY_PATH = "";
-const fixtures = createCertQuizFixtures();
+const fixtures = createCertForgeFixtures();
 
 type InputMode = "single" | "multiple";
 

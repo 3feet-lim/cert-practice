@@ -16,9 +16,9 @@ import {
   submissionPreviewDtoSchema,
   transportErrorSchema,
   type TransportError,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
-import { createCertQuizFixtures } from "./fixtures";
+import { createCertForgeFixtures } from "./fixtures";
 
 export interface StaticEmptyCopy {
   title: string;
@@ -97,8 +97,8 @@ function previewError(
  * This module intentionally has no API port, MSW, timer, mutation, or mock state
  * machine dependency.
  */
-export function createCertQuizStaticPreviewFixtures() {
-  const source = createCertQuizFixtures();
+export function createCertForgeStaticPreviewFixtures() {
+  const source = createCertForgeFixtures();
 
   const approvalPending = validated(
     approvalStatusDtoSchema,
@@ -368,8 +368,8 @@ export function createCertQuizStaticPreviewFixtures() {
   });
 }
 
-export const CERT_QUIZ_STATIC_PREVIEW_FIXTURES = createCertQuizStaticPreviewFixtures();
+export const CERT_QUIZ_STATIC_PREVIEW_FIXTURES = createCertForgeStaticPreviewFixtures();
 
-export type CertQuizStaticPreviewFixtures = ReturnType<
-  typeof createCertQuizStaticPreviewFixtures
+export type CertForgeStaticPreviewFixtures = ReturnType<
+  typeof createCertForgeStaticPreviewFixtures
 >;

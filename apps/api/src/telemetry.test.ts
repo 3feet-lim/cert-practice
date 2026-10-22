@@ -10,7 +10,7 @@ describe("CloudWatch Embedded Metric telemetry", () => {
     const lines: string[] = [];
     const telemetry = createCloudWatchEmbeddedMetricsTelemetry(
       (line) => lines.push(line),
-      { namespace: "CertQuiz/dev", service: "certquiz-api", stage: "dev" },
+      { namespace: "CertForge/dev", service: "certforge-api", stage: "dev" },
     );
 
     telemetry.emit({
@@ -26,7 +26,7 @@ describe("CloudWatch Embedded Metric telemetry", () => {
 
     const payload = JSON.parse(lines[0]!) as Record<string, unknown>;
     expect(payload).toMatchObject({
-      service: "certquiz-api",
+      service: "certforge-api",
       stage: "dev",
       ApiRequests: 1,
       Api5xx: 1,
@@ -36,7 +36,7 @@ describe("CloudWatch Embedded Metric telemetry", () => {
     expect(payload._aws).toMatchObject({
       CloudWatchMetrics: [
         {
-          Namespace: "CertQuiz/dev",
+          Namespace: "CertForge/dev",
           Dimensions: [["Service", "Stage"]],
         },
       ],
@@ -48,7 +48,7 @@ describe("CloudWatch Embedded Metric telemetry", () => {
     const lines: string[] = [];
     const telemetry = createCloudWatchEmbeddedMetricsTelemetry(
       (line) => lines.push(line),
-      { namespace: "CertQuiz/prod", service: "certquiz-api", stage: "prod" },
+      { namespace: "CertForge/prod", service: "certforge-api", stage: "prod" },
     );
 
     telemetry.emit({ event: "api.finalize-expired", outcome: "failed" });

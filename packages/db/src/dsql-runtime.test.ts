@@ -6,7 +6,9 @@ const fakePool = { query: vi.fn().mockResolvedValue({ rows: [], rowCount: 0 }) }
 const poolLifecycle = { pool: vi.fn().mockResolvedValue(fakePool), close: vi.fn() };
 const migrateMock = vi.fn().mockResolvedValue(undefined);
 const provisionApplicationDatabaseRoleMock = vi.fn().mockResolvedValue(undefined);
-const assertApplicationSchemaMock = vi.fn().mockResolvedValue({ minimum: 1, maximum: 4 });
+const assertApplicationSchemaMock = vi
+  .fn()
+  .mockResolvedValue({ minimum: 1, maximum: 4 });
 const loadApplicationMigrationsMock = vi.fn().mockResolvedValue([]);
 
 vi.mock("./dsql-pool.js", async (importOriginal) => {
@@ -43,7 +45,12 @@ describe("request-safe DSQL runtime", () => {
     };
 
     const runtime = await initializeDsqlRuntime(
-      { pool: { endpoint: "cluster.dsql.ap-northeast-2.on.aws", region: "ap-northeast-2" } },
+      {
+        pool: {
+          endpoint: "cluster.dsql.ap-northeast-2.on.aws",
+          region: "ap-northeast-2",
+        },
+      },
       { createPoolLifecycle: () => lifecycle },
     );
 
@@ -65,7 +72,12 @@ describe("request-safe DSQL runtime", () => {
 
     await expect(
       initializeDsqlRuntime(
-        { pool: { endpoint: "cluster.dsql.ap-northeast-2.on.aws", region: "ap-northeast-2" } },
+        {
+          pool: {
+            endpoint: "cluster.dsql.ap-northeast-2.on.aws",
+            region: "ap-northeast-2",
+          },
+        },
         { createPoolLifecycle: () => lifecycle },
       ),
     ).rejects.toThrow(queryFailure);
@@ -95,13 +107,19 @@ describe("deployment-only application schema migration", () => {
 
     await migrateAndVerifyApplicationSchema(
       { endpoint: "cluster.dsql.ap-northeast-2.on.aws", region: "ap-northeast-2" },
-      { roleName: "app", iamRoleArn: "arn:aws:iam::370489250264:role/lambda-execution" },
+      {
+        roleName: "app",
+        iamRoleArn: "arn:aws:iam::370489250264:role/lambda-execution",
+      },
     );
 
-    expect(provisionApplicationDatabaseRoleMock).toHaveBeenCalledExactlyOnceWith(fakePool, {
-      roleName: "app",
-      iamRoleArn: "arn:aws:iam::370489250264:role/lambda-execution",
-    });
+    expect(provisionApplicationDatabaseRoleMock).toHaveBeenCalledExactlyOnceWith(
+      fakePool,
+      {
+        roleName: "app",
+        iamRoleArn: "arn:aws:iam::370489250264:role/lambda-execution",
+      },
+    );
     expect(migrateMock.mock.invocationCallOrder[0]).toBeLessThan(
       provisionApplicationDatabaseRoleMock.mock.invocationCallOrder[0]!,
     );

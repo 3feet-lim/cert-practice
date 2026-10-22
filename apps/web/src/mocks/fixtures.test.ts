@@ -1,4 +1,4 @@
-import * as contracts from "@cert-quiz/contracts";
+import * as contracts from "@cert-forge/contracts";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
@@ -8,12 +8,12 @@ import {
   FakeServerClock,
   SeededIdFactory,
   SeededRandomSource,
-  createCertQuizFixtureHandlers,
-  createCertQuizFixtures,
+  createCertForgeFixtureHandlers,
+  createCertForgeFixtures,
 } from "./index";
 
-const fixtures = createCertQuizFixtures();
-const server = setupServer(...createCertQuizFixtureHandlers(fixtures));
+const fixtures = createCertForgeFixtures();
+const server = setupServer(...createCertForgeFixtureHandlers(fixtures));
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
@@ -24,7 +24,7 @@ function expectParses(schema: { parse: (value: unknown) => unknown }, value: unk
 }
 
 async function requestData(path: string, init?: RequestInit): Promise<unknown> {
-  const response = await globalThis.fetch(`http://certquiz.test${path}`, init);
+  const response = await globalThis.fetch(`http://certforge.test${path}`, init);
   expect(response.status).toBe(200);
   const body = (await response.json()) as { data: unknown };
   return body.data;
@@ -62,11 +62,11 @@ describe("deterministic fixture primitives", () => {
   });
 });
 
-describe("deterministic CertQuiz fixture corpus", () => {
+describe("deterministic CertForge fixture corpus", () => {
   it("builds the same corpus for the same seed and different IDs for another seed", () => {
-    const first = createCertQuizFixtures({ seed: 100 });
-    const replay = createCertQuizFixtures({ seed: 100 });
-    const other = createCertQuizFixtures({ seed: 101 });
+    const first = createCertForgeFixtures({ seed: 100 });
+    const replay = createCertForgeFixtures({ seed: 100 });
+    const other = createCertForgeFixtures({ seed: 101 });
 
     expect(first.ids).toEqual(replay.ids);
     expect(first.catalog.valid).toEqual(replay.catalog.valid);
@@ -268,7 +268,7 @@ describe("MSW fixture handlers", () => {
 
   it("selects pending/unauthenticated and alternate catalog/quiz scenarios", async () => {
     server.use(
-      ...createCertQuizFixtureHandlers(fixtures, {
+      ...createCertForgeFixtureHandlers(fixtures, {
         actor: "pending",
         catalog: "invalid",
         practice: "submitted",
@@ -280,11 +280,11 @@ describe("MSW fixture handlers", () => {
     await expect(requestData("/v1/me/approval")).resolves.toEqual(
       fixtures.auth.pending.approval,
     );
-    const pendingCatalog = await globalThis.fetch("http://certquiz.test/v1/catalog");
+    const pendingCatalog = await globalThis.fetch("http://certforge.test/v1/catalog");
     expect(pendingCatalog.status).toBe(403);
 
     server.use(
-      ...createCertQuizFixtureHandlers(fixtures, {
+      ...createCertForgeFixtureHandlers(fixtures, {
         actor: "approved",
         catalog: "invalid",
         practice: "submitted",
@@ -305,17 +305,17 @@ describe("MSW fixture handlers", () => {
     await expect(requestData("/v1/history")).resolves.toEqual(fixtures.history.empty);
 
     server.use(
-      ...createCertQuizFixtureHandlers(fixtures, { actor: "unauthenticated" }),
+      ...createCertForgeFixtureHandlers(fixtures, { actor: "unauthenticated" }),
     );
     const unauthenticated = await globalThis.fetch(
-      "http://certquiz.test/v1/me/approval",
+      "http://certforge.test/v1/me/approval",
     );
     expect(unauthenticated.status).toBe(401);
   });
 
   it("serves admin pending-user and dry-run/commit fixture variants", async () => {
     server.use(
-      ...createCertQuizFixtureHandlers(fixtures, {
+      ...createCertForgeFixtureHandlers(fixtures, {
         actor: "admin",
         pendingUsers: "populated",
         dryRun: "valid",
@@ -332,7 +332,7 @@ describe("MSW fixture handlers", () => {
     ).resolves.toEqual(fixtures.import.commitResponse);
 
     server.use(
-      ...createCertQuizFixtureHandlers(fixtures, {
+      ...createCertForgeFixtureHandlers(fixtures, {
         actor: "admin",
         pendingUsers: "empty",
         dryRun: "invalid",
@@ -348,7 +348,7 @@ describe("MSW fixture handlers", () => {
 
   it("serves finalized exam redirects and safe not-found errors", async () => {
     server.use(
-      ...createCertQuizFixtureHandlers(fixtures, {
+      ...createCertForgeFixtureHandlers(fixtures, {
         actor: "approved",
         exam: "finalized",
       }),
@@ -358,7 +358,7 @@ describe("MSW fixture handlers", () => {
     ).resolves.toEqual(fixtures.exam.finalized);
 
     const missing = await globalThis.fetch(
-      "http://certquiz.test/v1/attempts/00000000-0000-4000-8000-000000000000",
+      "http://certforge.test/v1/attempts/00000000-0000-4000-8000-000000000000",
     );
     expect(missing.status).toBe(404);
     const body = (await missing.json()) as { error: Record<string, unknown> };

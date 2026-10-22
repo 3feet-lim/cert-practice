@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "baseUrl": "${env:CERTQUIZ_RUNBOOK_BASE_URL, 'https://github.com/certquiz/cert-practice/blob/main/infra/serverless/runbooks'}",
+  "baseUrl": "${env:CERTFORGE_RUNBOOK_BASE_URL, 'https://github.com/certforge/cert-practice/blob/main/infra/serverless/runbooks'}",
   "runbooks": {
     "api-5xx": {
       "href": "api-5xx.md",

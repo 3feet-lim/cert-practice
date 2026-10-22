@@ -7,8 +7,8 @@ import {
   SessionFactory,
   type FullCatalogGenerationSource,
   type UserProfile,
-} from "@cert-quiz/domain";
-import { InMemoryUnitOfWork } from "@cert-quiz/db";
+} from "@cert-forge/domain";
+import { InMemoryUnitOfWork } from "@cert-forge/db";
 import { describe, expect, it, vi } from "vitest";
 
 import {

@@ -5,7 +5,7 @@ import { basename, join } from "node:path";
 const root = new URL("..", import.meta.url);
 const input = (relativePath) => new URL(relativePath, root);
 const output = input("artifacts/release-candidate/db-adapter-evidence.json");
-const notBefore = requiredIsoDate("CERTQUIZ_DSQL_SPIKE_NOT_BEFORE");
+const notBefore = requiredIsoDate("CERTFORGE_DSQL_SPIKE_NOT_BEFORE");
 const report = await json(input("artifacts/dsql-spike/live-report.json"));
 const selection = await json(input("artifacts/dsql-spike/database-adapter.json"));
 
@@ -20,7 +20,7 @@ if (selection.adapter !== "dsql" || selection.reportSha256 !== reportSha256) {
 const migrationManifest = await applicationMigrationManifest();
 const evidence = {
   schemaVersion: 1,
-  kind: "certquiz-dsql-adapter-release-evidence",
+  kind: "certforge-dsql-adapter-release-evidence",
   generatedAt: new Date().toISOString(),
   sourceCommit: process.env.GITHUB_SHA ?? null,
   liveSpike: {

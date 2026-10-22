@@ -1,4 +1,4 @@
-import type { DryRunImportResponse, PendingUsersDto } from "@cert-quiz/contracts";
+import type { DryRunImportResponse, PendingUsersDto } from "@cert-forge/contracts";
 import { Route, Routes, useSearchParams } from "react-router-dom";
 
 import { ImportStaticPage, PendingUsersStaticPage } from "../admin/StaticAdminPages";
@@ -50,7 +50,7 @@ function StaticArtifactNavigation({ entry }: { entry: StaticPreviewExportEntry }
   return (
     <>
       <header>
-        <a href={navigation.galleryHref}>CERTQUIZ UI gallery</a>
+        <a href={navigation.galleryHref}>CERTFORGE UI gallery</a>
         <nav aria-label="주요 정적 화면">
           {navigation.primary.map((item) => (
             <a href={item.href} key={item.targetId}>
@@ -380,7 +380,7 @@ function StaticPreviewGallery() {
     <main>
       <section aria-labelledby="preview-gallery-title">
         <p>DETERMINISTIC STATIC REVIEW</p>
-        <h1 id="preview-gallery-title">CertQuiz S1-S10 UI gallery</h1>
+        <h1 id="preview-gallery-title">CertForge S1-S10 UI gallery</h1>
         <ul>
           {STATIC_PREVIEW_GALLERY_LINKS.map((item) => (
             <li key={item.id}>

@@ -3,13 +3,13 @@ import { serialize } from "node:v8";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import type { ImportDocument } from "@cert-quiz/contracts";
+import type { ImportDocument } from "@cert-forge/contracts";
 import {
   ImportService,
   SequenceRandomSource,
   SequenceUuidFactory,
   sha256Hex,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 
 import { InMemoryUnitOfWork } from "./in-memory-unit-of-work.js";
 
@@ -236,7 +236,7 @@ async function activeCatalogSnapshot(database: InMemoryUnitOfWork) {
   });
 }
 
-// Feature: cert-quiz-mvp, Property 23: Import dry-run purity, limits, and independent errors
+// Feature: cert-forge-mvp, Property 23: Import dry-run purity, limits, and independent errors
 // **Validates: Requirements 15.1-15.19**
 describe("Property 23: persisted import dry-run purity", () => {
   it("keeps a committed active catalog and revision byte/deep equal across generated valid and invalid dry runs", async () => {

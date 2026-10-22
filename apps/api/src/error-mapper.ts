@@ -2,8 +2,8 @@ import {
   errorEnvelopeSchema,
   type ErrorEnvelope,
   type RequestId,
-} from "@cert-quiz/contracts";
-import { isDomainFailure } from "@cert-quiz/domain";
+} from "@cert-forge/contracts";
+import { isDomainFailure } from "@cert-forge/domain";
 import { isRateLimitExceeded } from "./rate-limit.js";
 export type HttpErrorStatus = 400 | 401 | 403 | 404 | 409 | 410 | 422 | 429 | 500 | 503;
 export type MappedHttpError = {
@@ -26,7 +26,8 @@ const messages = {
   "invalid-scoring-configuration": "The scoring configuration is invalid.",
   "dependency-unavailable": "The service is temporarily unavailable. Please retry.",
   "submission-failed": "Submission could not be completed. Please retry.",
-  "content-already-active": "This exact content is already the active revision. No import is needed.",
+  "content-already-active":
+    "This exact content is already the active revision. No import is needed.",
 } as const;
 const statuses = {
   unauthenticated: 401,

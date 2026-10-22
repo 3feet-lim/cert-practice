@@ -13,7 +13,7 @@ import type {
   StartPracticeResponse,
   SubmissionPreviewDto,
   SubmitPracticeQuestionResponse,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import {
   activePracticeSessionsDtoSchema,
   examActiveSessionDtoSchema,
@@ -27,7 +27,7 @@ import {
   startPracticeResponseSchema,
   submissionPreviewDtoSchema,
   submitPracticeQuestionResponseSchema,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 import { domainFailure } from "./errors.js";
 import { catalogChoiceId } from "./import-service.js";

@@ -248,7 +248,7 @@ describe("fixture-only static React Router skeleton", () => {
     renderPreview("/");
 
     expect(
-      screen.getByRole("heading", { name: "CertQuiz S1-S10 UI gallery" }),
+      screen.getByRole("heading", { name: "CertForge S1-S10 UI gallery" }),
     ).toBeVisible();
     expect(screen.getAllByRole("link")).toHaveLength(
       STATIC_PREVIEW_EXPORT_MANIFEST.length,

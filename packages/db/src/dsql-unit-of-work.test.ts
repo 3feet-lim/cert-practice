@@ -1,4 +1,4 @@
-import { Fraction, type ImportCommitCommand } from "@cert-quiz/domain";
+import { Fraction, type ImportCommitCommand } from "@cert-forge/domain";
 import { describe, expect, it } from "vitest";
 
 import { DsqlUnitOfWork } from "./dsql-unit-of-work.js";
@@ -84,7 +84,13 @@ function commitCommand(): ImportCommitCommand {
         revisionId,
         certificationKey: "CERT",
         providers: [
-          { id: providerId, revisionId, externalKey: "provider", name: "Provider", logoUrl: null },
+          {
+            id: providerId,
+            revisionId,
+            externalKey: "provider",
+            name: "Provider",
+            logoUrl: null,
+          },
         ],
         certifications: [
           {

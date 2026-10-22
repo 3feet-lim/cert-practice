@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createCertQuizFixtures } from "../mocks/fixtures";
-import { createHttpCertQuizApi } from "./http-adapter";
+import { createCertForgeFixtures } from "../mocks/fixtures";
+import { createHttpCertForgeApi } from "./http-adapter";
 
 const healthEnvelope = {
   data: {
     status: "ok" as const,
-    service: "cert-quiz-api" as const,
+    service: "cert-forge-api" as const,
     contractVersion: "v1" as const,
   },
   meta: { requestId: "api:health" },
 };
 
-describe("createHttpCertQuizApi", () => {
+describe("createHttpCertForgeApi", () => {
   it("unwraps the strict shared health envelope", async () => {
     const fetch = vi.fn(
       async () =>
@@ -21,7 +21,7 @@ describe("createHttpCertQuizApi", () => {
           headers: { "content-type": "application/json" },
         }),
     );
-    const api = createHttpCertQuizApi({
+    const api = createHttpCertForgeApi({
       baseUrl: "https://api.example.test/base-path",
       fetch,
     });
@@ -37,7 +37,7 @@ describe("createHttpCertQuizApi", () => {
   });
 
   it("rejects malformed strict health responses as a safe adapter failure", async () => {
-    const api = createHttpCertQuizApi({
+    const api = createHttpCertForgeApi({
       baseUrl: "https://api.example.test",
       fetch: async () =>
         new Response(
@@ -53,7 +53,7 @@ describe("createHttpCertQuizApi", () => {
       ok: false,
       error: {
         code: "internal-error",
-        message: "The CertQuiz health response failed shared schema validation.",
+        message: "The CertForge health response failed shared schema validation.",
         requestId: "http:health:invalid-contract",
         retryable: false,
       },
@@ -61,7 +61,7 @@ describe("createHttpCertQuizApi", () => {
   });
 
   it("converts a network failure into a retryable provider result", async () => {
-    const api = createHttpCertQuizApi({
+    const api = createHttpCertForgeApi({
       baseUrl: "https://api.example.test",
       fetch: async () => Promise.reject(new Error("offline")),
     });
@@ -70,7 +70,7 @@ describe("createHttpCertQuizApi", () => {
       ok: false,
       error: {
         code: "dependency-unavailable",
-        message: "The CertQuiz health service is unavailable.",
+        message: "The CertForge health service is unavailable.",
         requestId: "http:health:network",
         retryable: true,
       },
@@ -91,7 +91,7 @@ describe("createHttpCertQuizApi", () => {
           headers: { "content-type": "application/json", "x-request-id": "gw:403" },
         }),
       );
-    const api = createHttpCertQuizApi({ baseUrl: "https://api.example.test", fetch });
+    const api = createHttpCertForgeApi({ baseUrl: "https://api.example.test", fetch });
 
     await expect(api.getApprovalStatus()).resolves.toEqual({
       ok: false,
@@ -106,7 +106,7 @@ describe("createHttpCertQuizApi", () => {
       ok: false,
       error: {
         code: "approval-required",
-        message: "Access to the CertQuiz API is not authorized.",
+        message: "Access to the CertForge API is not authorized.",
         requestId: "gw:403",
         retryable: false,
       },
@@ -114,7 +114,7 @@ describe("createHttpCertQuizApi", () => {
   });
 
   it("preserves a valid authorization error envelope over the status fallback", async () => {
-    const api = createHttpCertQuizApi({
+    const api = createHttpCertForgeApi({
       baseUrl: "https://api.example.test",
       fetch: async () =>
         new Response(
@@ -149,9 +149,9 @@ function success(data: unknown, requestId = "api:request"): Response {
   });
 }
 
-describe("complete CertQuizApi HTTP surface", () => {
+describe("complete CertForgeApi HTTP surface", () => {
   it("maps every port operation to its route with strict response parsing and bearer authentication", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const createdPractice = {
       kind: "created" as const,
       practiceSessionId: fixtures.ids.replacementPracticeSessionId,
@@ -215,7 +215,7 @@ describe("complete CertQuizApi HTTP surface", () => {
       void init;
       return Promise.resolve(success(responses.shift()));
     });
-    const api = createHttpCertQuizApi({
+    const api = createHttpCertForgeApi({
       baseUrl: "https://api.example.test/base-path",
       fetch,
       getBearerToken: async () => "cognito-token",
@@ -348,7 +348,7 @@ describe("complete CertQuizApi HTTP surface", () => {
   });
 
   it("preserves strict stale-version metadata from an API error envelope", async () => {
-    const api = createHttpCertQuizApi({
+    const api = createHttpCertForgeApi({
       baseUrl: "https://api.example.test",
       fetch: async () =>
         new Response(

@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "service_name" {
   description = "Service name used for tags and SSM paths."
   type        = string
-  default     = "certquiz"
+  default     = "certforge"
 
   validation {
     condition     = can(regex("^[a-z][a-z0-9-]{1,30}$", var.service_name))
@@ -21,6 +21,12 @@ variable "force_destroy" {
   default     = false
 }
 
+variable "serverless_stack_exists" {
+  description = "Whether the Serverless certforge-api-dev stack already exists. False on the bootstrap apply (before the first Serverless deploy); set true afterwards to scope the deploy role to the real deployment bucket."
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Additional tags for dev resources."
   type        = map(string)
@@ -30,7 +36,7 @@ variable "tags" {
 variable "cognito_hosted_ui_domain_prefix" {
   description = "Unique Cognito Hosted UI domain prefix for dev."
   type        = string
-  default     = "certquiz-dev"
+  default     = "certforge-dev"
 
   validation {
     condition     = can(regex("^[a-z0-9-]{1,63}$", var.cognito_hosted_ui_domain_prefix))

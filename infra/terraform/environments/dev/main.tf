@@ -16,7 +16,7 @@ module "dsql" {
   service_name                = var.service_name
   environment                 = "dev"
   aws_region                  = var.aws_region
-  deletion_protection_enabled = true
+  deletion_protection_enabled = false
   force_destroy               = var.force_destroy
   kms_encryption_key          = "AWS_OWNED_KMS_KEY"
   tags                        = var.tags

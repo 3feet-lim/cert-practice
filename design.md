@@ -483,7 +483,7 @@ S1 로그인
 - **주의(비대칭의 트레이드오프)**: 로컬이 안 거치는 부분(API Gateway 실제 설정, IAM 권한 경계, CloudFront 동작)은 prod에서 처음 드러날 수 있음 → prod 첫 배포 시 이 부분 집중 점검
 
 **격리 방식(공통)**
-- 단일 AWS 계정 + 환경 접두어: `certquiz-dev-*`, `certquiz-prod-*`
+- 단일 AWS 계정 + 환경 접두어: `certforge-dev-*`, `certforge-prod-*`
 - Cognito: 환경별 별도 User Pool / DSQL: 환경별 별도 클러스터
 - Terraform 변수(`var.env`)로 어떤 환경 리소스를 만들지 제어(dev는 Cognito·DSQL만, prod는 전체)
 - Serverless Framework `stage`: 로컬(offline)/prod 중심. dev 스테이지 클라우드 배포는 기본 생략

@@ -1,13 +1,13 @@
-import type { UpdateScoreVisibilityResponse } from "@cert-quiz/contracts";
+import type { UpdateScoreVisibilityResponse } from "@cert-forge/contracts";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
-import { createCertQuizQueryClient } from "../app/query-client";
-import { createMockCertQuizApi } from "./mock-adapter";
-import type { CertQuizApiResult } from "./port";
+import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";
+import { createCertForgeQueryClient } from "../app/query-client";
+import { createMockCertForgeApi } from "./mock-adapter";
+import type { CertForgeApiResult } from "./port";
 import { useCurrentUserQuery, useScoreVisibilityMutation } from "./queries";
 
 afterEach(cleanup);
@@ -37,17 +37,17 @@ function VisibilityProbe() {
 
 describe("useScoreVisibilityMutation", () => {
   it("rolls the current-user cache back when the visibility save is rejected", async () => {
-    const response = deferred<CertQuizApiResult<UpdateScoreVisibilityResponse>>();
-    const mockApi = createMockCertQuizApi();
+    const response = deferred<CertForgeApiResult<UpdateScoreVisibilityResponse>>();
+    const mockApi = createMockCertForgeApi();
     const updateScoreVisibility = vi.fn(() => response.promise);
     const api = { ...mockApi, updateScoreVisibility };
-    const queryClient: QueryClient = createCertQuizQueryClient();
+    const queryClient: QueryClient = createCertForgeQueryClient();
     const user = userEvent.setup();
 
     render(
-      <CertQuizCompositionRoot api={api} queryClient={queryClient}>
+      <CertForgeCompositionRoot api={api} queryClient={queryClient}>
         <VisibilityProbe />
-      </CertQuizCompositionRoot>,
+      </CertForgeCompositionRoot>,
     );
 
     expect(await screen.findByText("public")).toBeVisible();

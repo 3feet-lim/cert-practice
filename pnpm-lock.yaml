@@ -41,13 +41,13 @@ importers:
       '@aws-sdk/client-dynamodb':
         specifier: 3.1127.0
         version: 3.1127.0
-      '@cert-quiz/contracts':
+      '@cert-forge/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@cert-quiz/db':
+      '@cert-forge/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@cert-quiz/domain':
+      '@cert-forge/domain':
         specifier: workspace:*
         version: link:../../packages/domain
       hono:
@@ -63,7 +63,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@cert-quiz/contracts':
+      '@cert-forge/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@radix-ui/react-dialog':
@@ -136,7 +136,7 @@ importers:
 
   infra/serverless:
     dependencies:
-      '@cert-quiz/api':
+      '@cert-forge/api':
         specifier: workspace:*
         version: link:../../apps/api
     devDependencies:
@@ -165,7 +165,7 @@ importers:
       '@aws/aurora-dsql-node-postgres-connector':
         specifier: 0.1.9
         version: 0.1.9(pg-connection-string@2.14.0)(pg@8.23.0)
-      '@cert-quiz/domain':
+      '@cert-forge/domain':
         specifier: workspace:*
         version: link:../domain
       pg:
@@ -190,7 +190,7 @@ importers:
 
   packages/domain:
     dependencies:
-      '@cert-quiz/contracts':
+      '@cert-forge/contracts':
         specifier: workspace:*
         version: link:../contracts
     devDependencies:

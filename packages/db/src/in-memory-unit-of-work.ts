@@ -1,4 +1,4 @@
-import { constantTimeEqual, findGenerationSource } from "@cert-quiz/domain";
+import { constantTimeEqual, findGenerationSource } from "@cert-forge/domain";
 import type {
   Attempt,
   CatalogGenerationSource,
@@ -24,7 +24,7 @@ import type {
   UnitOfWork,
   UserProfile,
   UserRepository,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 
 export type InMemoryFaultPoint =
   | "profile-write"

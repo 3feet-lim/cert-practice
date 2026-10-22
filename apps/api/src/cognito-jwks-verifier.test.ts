@@ -4,7 +4,7 @@ import { CognitoJwksTokenVerifier } from "./cognito-jwks-verifier.js";
 
 const ISSUER =
   "https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_example";
-const CLIENT_ID = "cert-quiz-client";
+const CLIENT_ID = "cert-forge-client";
 const NOW_MS = Date.parse("2026-01-01T12:00:00.000Z");
 
 type SigningMaterial = Readonly<{

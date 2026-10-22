@@ -2,7 +2,9 @@ import { createContext, useContext } from "react";
 
 import type { BrowserAuthSession } from "../auth/cognito-pkce-session";
 
-const BrowserAuthSessionContext = createContext<BrowserAuthSession | undefined>(undefined);
+const BrowserAuthSessionContext = createContext<BrowserAuthSession | undefined>(
+  undefined,
+);
 
 export const BrowserAuthSessionProvider = BrowserAuthSessionContext.Provider;
 

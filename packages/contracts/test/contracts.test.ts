@@ -99,13 +99,13 @@ describe("transport primitives and envelopes", () => {
   it("parses a strict shared health contract", () => {
     expectParses(contracts.healthDtoSchema, {
       status: "ok",
-      service: "cert-quiz-api",
+      service: "cert-forge-api",
       contractVersion: "v1",
     });
     expect(
       contracts.healthDtoSchema.safeParse({
         status: "ok",
-        service: "cert-quiz-api",
+        service: "cert-forge-api",
         contractVersion: "v1",
         implementation: "hono",
       }).success,

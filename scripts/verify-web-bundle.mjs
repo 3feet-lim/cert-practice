@@ -9,7 +9,7 @@ const forbiddenMarkers = [
   "@testing-library",
   "fast-check",
   "msw",
-  "createMockCertQuizApi",
+  "createMockCertForgeApi",
   "createMockAuthController",
   "mockActor",
   "CERT_QUIZ_STATIC_PREVIEW_FIXTURES",

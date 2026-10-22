@@ -29,8 +29,10 @@ export async function initializeDsqlRuntime(
   options: DsqlRuntimeOptions,
   dependencies: DsqlRuntimeDependencies = {},
 ): Promise<DsqlRuntime> {
-  const lifecycle = (dependencies.createPoolLifecycle ??
-    ((config: DsqlPoolConfig) => new DsqlPoolLifecycle(config)))(options.pool);
+  const lifecycle = (
+    dependencies.createPoolLifecycle ??
+    ((config: DsqlPoolConfig) => new DsqlPoolLifecycle(config))
+  )(options.pool);
   try {
     const pool = await lifecycle.pool();
     await pool.query("SELECT 1");
