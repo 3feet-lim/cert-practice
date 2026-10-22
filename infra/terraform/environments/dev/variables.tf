@@ -76,29 +76,17 @@ variable "google_oauth_client_secret" {
 }
 
 variable "web_domain_name" {
-  description = "Optional custom DNS name for the dev SPA."
+  description = "Custom DNS name for the dev SPA."
   type        = string
-  default     = null
+  default     = "certforge.stellan.in"
   nullable    = true
 }
 
-variable "route53_zone_id" {
-  description = "Optional Route 53 zone ID for the dev SPA DNS alias."
+variable "web_hosted_zone_name" {
+  description = "Route 53 public hosted zone that owns web_domain_name (e.g. stellan.in)."
   type        = string
-  default     = null
+  default     = "stellan.in"
   nullable    = true
-}
-
-variable "acm_certificate_arn" {
-  description = "Optional issued us-east-1 ACM certificate ARN for the dev custom domain."
-  type        = string
-  default     = null
-  nullable    = true
-
-  validation {
-    condition     = var.acm_certificate_arn == null || can(regex("^arn:[^:]+:acm:us-east-1:[0-9]{12}:certificate/.+$", var.acm_certificate_arn))
-    error_message = "acm_certificate_arn must be an issued us-east-1 ACM certificate ARN for CloudFront."
-  }
 }
 
 variable "api_origin" {
