@@ -1,4 +1,4 @@
-import { requestIdSchema, type RequestId } from "@cert-quiz/contracts";
+import { requestIdSchema, type RequestId } from "@cert-forge/contracts";
 import type { MiddlewareHandler } from "hono";
 
 export function createRequestId(): RequestId {

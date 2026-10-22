@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { provisionApplicationDatabaseRole } from "./migrate.js";
 
-const roleArn = "arn:aws:iam::370489250264:role/certquiz-dev-api-lambda-execution";
+const roleArn = "arn:aws:iam::370489250264:role/certforge-dev-api-lambda-execution";
 
 function fakeQueryable(overrides: {
   roleExists?: boolean;

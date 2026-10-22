@@ -16,14 +16,14 @@ describe("production SPA asset paths", () => {
     const assetReferences = [
       ...html.matchAll(/(?:src|href)="((?:\.\/)?\/?assets\/[^"?]+)"/g),
     ].flatMap((match) => (match[1] ? [match[1]] : []));
-    const directAppDeepLink = new URL("https://certquiz.example.test/app/admin/users");
+    const directAppDeepLink = new URL("https://certforge.example.test/app/admin/users");
 
     expect(assetReferences).not.toHaveLength(0);
     expect(html).not.toContain("./assets/");
     for (const assetReference of assetReferences) {
       expect(assetReference).toMatch(/^\/assets\//);
       expect(new URL(assetReference, directAppDeepLink).pathname).toBe(
-        new URL(assetReference, "https://certquiz.example.test/").pathname,
+        new URL(assetReference, "https://certforge.example.test/").pathname,
       );
     }
   });

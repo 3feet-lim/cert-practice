@@ -7,17 +7,17 @@ import type {
   PracticeSessionDto,
   PracticeStateResponse,
   SubmitPracticeQuestionResponse,
-} from "@cert-quiz/contracts";
-import { createMockCertQuizApi } from "../api/mock-adapter";
-import type { CertQuizApi, CertQuizApiResult } from "../api/port";
-import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
-import { createCertQuizFixtures } from "../mocks/fixtures";
+} from "@cert-forge/contracts";
+import { createMockCertForgeApi } from "../api/mock-adapter";
+import type { CertForgeApi, CertForgeApiResult } from "../api/port";
+import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import { PracticePage } from "./PracticePage";
 import { localizedQuestionText } from "./quiz-presentation";
 
 afterEach(cleanup);
 
-async function currentPractice(api: CertQuizApi) {
+async function currentPractice(api: CertForgeApi) {
   const active = await api.listActivePracticeSessions();
   if (!active.ok) throw new Error("Expected active mock practice.");
   const sessionId = active.data.sessions[0]?.practiceSessionId;
@@ -29,15 +29,15 @@ async function currentPractice(api: CertQuizApi) {
   return { sessionId, question };
 }
 
-function renderPractice(api: CertQuizApi, sessionId: string) {
+function renderPractice(api: CertForgeApi, sessionId: string) {
   return render(
     <MemoryRouter initialEntries={[`/app/practice/${sessionId}`]}>
-      <CertQuizCompositionRoot api={api}>
+      <CertForgeCompositionRoot api={api}>
         <Routes>
           <Route path="/app/practice/:sessionId" element={<PracticePage />} />
           <Route path="/app/practice-results/:id" element={<h1>연습 결과로 이동</h1>} />
         </Routes>
-      </CertQuizCompositionRoot>
+      </CertForgeCompositionRoot>
     </MemoryRouter>,
   );
 }
@@ -55,9 +55,9 @@ async function selectRequiredChoices(requiredChoiceCount: number) {
 
 function practiceApi(
   session: PracticeSessionDto,
-  overrides: Partial<CertQuizApi> = {},
-): CertQuizApi {
-  const mockApi = createMockCertQuizApi();
+  overrides: Partial<CertForgeApi> = {},
+): CertForgeApi {
+  const mockApi = createMockCertForgeApi();
   return {
     ...mockApi,
     resumePractice: async () => ({ ok: true, data: structuredClone(session) }),
@@ -74,7 +74,7 @@ function practiceApi(
 }
 
 function sessionWithQuestionCount(requiredChoiceCount: number): PracticeSessionDto {
-  const fixtures = createCertQuizFixtures();
+  const fixtures = createCertForgeFixtures();
   const question = fixtures.practice.active.questions.find(
     (candidate) => candidate.requiredChoiceCount === requiredChoiceCount,
   );
@@ -96,7 +96,7 @@ function deferred<T>() {
 
 describe("PracticePage", () => {
   it("persists a draft through the typed mock port and reveals feedback only after submit", async () => {
-    const api = createMockCertQuizApi();
+    const api = createMockCertForgeApi();
     const { sessionId, question } = await currentPractice(api);
     renderPractice(api, sessionId);
 
@@ -129,10 +129,10 @@ describe("PracticePage", () => {
   });
 
   it("navigates to S6 when the canonical submit response completes practice", async () => {
-    const mockApi = createMockCertQuizApi();
-    const completedPracticeResultId = createCertQuizFixtures().ids.practiceResultId;
+    const mockApi = createMockCertForgeApi();
+    const completedPracticeResultId = createCertForgeFixtures().ids.practiceResultId;
     const submitPracticeQuestion = vi.fn(
-      async (input: Parameters<CertQuizApi["submitPracticeQuestion"]>[0]) => {
+      async (input: Parameters<CertForgeApi["submitPracticeQuestion"]>[0]) => {
         const response = await mockApi.submitPracticeQuestion(input);
         return response.ok
           ? {
@@ -142,7 +142,7 @@ describe("PracticePage", () => {
           : response;
       },
     );
-    const api: CertQuizApi = {
+    const api: CertForgeApi = {
       ...mockApi,
       submitPracticeQuestion,
     };
@@ -196,7 +196,7 @@ describe("PracticePage", () => {
   );
 
   it("renders submitted explanations through SafeMarkdown, including XSS, unsafe URLs, and failed images", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const session = structuredClone(fixtures.practice.submitted);
     session.currentIndex = 0;
     const question = session.questions[0];
@@ -226,7 +226,7 @@ describe("PracticePage", () => {
 
   it("rolls an optimistic flag change back and displays the stale-version error", async () => {
     const session = sessionWithQuestionCount(1);
-    const response = deferred<CertQuizApiResult<PracticeStateResponse>>();
+    const response = deferred<CertForgeApiResult<PracticeStateResponse>>();
     const patchPracticeState = vi.fn(() => response.promise);
     const api = practiceApi(session, { patchPracticeState });
     renderPractice(api, session.practiceSessionId);
@@ -269,13 +269,13 @@ describe("PracticePage", () => {
   it("locks duplicate submit clicks until the canonical response returns", async () => {
     const session = sessionWithQuestionCount(1);
     const activeQuestion = session.questions[0];
-    const submittedFixture = createCertQuizFixtures().practice.submitted.questions[0];
+    const submittedFixture = createCertForgeFixtures().practice.submitted.questions[0];
     if (!activeQuestion || submittedFixture?.kind !== "practice-submitted") {
       throw new Error("Expected active and submitted practice question fixtures.");
     }
     const selectedChoiceIds = [activeQuestion.choices[0]?.id ?? ""];
     session.questions[0] = { ...activeQuestion, selectedChoiceIds };
-    const response = deferred<CertQuizApiResult<SubmitPracticeQuestionResponse>>();
+    const response = deferred<CertForgeApiResult<SubmitPracticeQuestionResponse>>();
     const submitPracticeQuestion = vi.fn(() => response.promise);
     const api = practiceApi(session, { submitPracticeQuestion });
     renderPractice(api, session.practiceSessionId);

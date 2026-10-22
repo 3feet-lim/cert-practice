@@ -1,5 +1,5 @@
-import { errorEnvelopeSchema, requestIdSchema } from "@cert-quiz/contracts";
-import { domainFailure } from "@cert-quiz/domain";
+import { errorEnvelopeSchema, requestIdSchema } from "@cert-forge/contracts";
+import { domainFailure } from "@cert-forge/domain";
 import { describe, expect, it } from "vitest";
 
 import { mapError } from "./error-mapper.js";

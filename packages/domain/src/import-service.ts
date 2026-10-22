@@ -4,7 +4,7 @@ import {
   type ImportDocument,
   type ImportSummaryValue,
   type ImportValidationError,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 import {
   allocateLargestRemainder,

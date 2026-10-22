@@ -1,11 +1,11 @@
-// Feature: cert-quiz-mvp, Properties 1, 2, and 3
+// Feature: cert-forge-mvp, Properties 1, 2, and 3
 import {
   errorEnvelopeSchema,
   pendingUsersDtoSchema,
   successEnvelopeSchema,
-} from "@cert-quiz/contracts";
-import { InMemoryUnitOfWork } from "@cert-quiz/db";
-import { domainFailure, type UserProfile } from "@cert-quiz/domain";
+} from "@cert-forge/contracts";
+import { InMemoryUnitOfWork } from "@cert-forge/db";
+import { domainFailure, type UserProfile } from "@cert-forge/domain";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 

@@ -6,13 +6,13 @@ import { createMockWebRuntime } from "./runtime-mock";
 const browserOrigin = "https://quiz.dev.example.com";
 const httpEnvironment = {
   PROD: true,
-  VITE_CERTQUIZ_RUNTIME_MODE: "http",
-  VITE_CERTQUIZ_API_BASE_URL: "https://api.dev.example.com/v1-base",
-  VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL:
-    "https://certquiz-dev.auth.ap-northeast-2.amazoncognito.com",
-  VITE_CERTQUIZ_COGNITO_CLIENT_ID: "public-client_123",
-  VITE_CERTQUIZ_AUTH_REDIRECT_PATH: "/auth/callback",
-  VITE_CERTQUIZ_AUTH_LOGOUT_PATH: "/login",
+  VITE_CERTFORGE_RUNTIME_MODE: "http",
+  VITE_CERTFORGE_API_BASE_URL: "https://api.dev.example.com/v1-base",
+  VITE_CERTFORGE_COGNITO_HOSTED_UI_BASE_URL:
+    "https://certforge-dev.auth.ap-northeast-2.amazoncognito.com",
+  VITE_CERTFORGE_COGNITO_CLIENT_ID: "public-client_123",
+  VITE_CERTFORGE_AUTH_REDIRECT_PATH: "/auth/callback",
+  VITE_CERTFORGE_AUTH_LOGOUT_PATH: "/login",
 } as const;
 
 describe("web runtime configuration", () => {
@@ -21,7 +21,7 @@ describe("web runtime configuration", () => {
       mode: "http",
       apiBaseUrl: "https://api.dev.example.com/v1-base",
       cognitoHostedUiBaseUrl:
-        "https://certquiz-dev.auth.ap-northeast-2.amazoncognito.com",
+        "https://certforge-dev.auth.ap-northeast-2.amazoncognito.com",
       cognitoClientId: "public-client_123",
       redirectUri: "https://quiz.dev.example.com/auth/callback",
       logoutUri: "https://quiz.dev.example.com/login",
@@ -30,16 +30,16 @@ describe("web runtime configuration", () => {
 
   it.each([
     [
-      { ...httpEnvironment, VITE_CERTQUIZ_RUNTIME_MODE: undefined },
-      "VITE_CERTQUIZ_RUNTIME_MODE must be configured.",
+      { ...httpEnvironment, VITE_CERTFORGE_RUNTIME_MODE: undefined },
+      "VITE_CERTFORGE_RUNTIME_MODE must be configured.",
     ],
     [
-      { ...httpEnvironment, VITE_CERTQUIZ_API_BASE_URL: "http://api.dev.example.com" },
-      "VITE_CERTQUIZ_API_BASE_URL must be an HTTPS origin or base URL",
+      { ...httpEnvironment, VITE_CERTFORGE_API_BASE_URL: "http://api.dev.example.com" },
+      "VITE_CERTFORGE_API_BASE_URL must be an HTTPS origin or base URL",
     ],
     [
-      { ...httpEnvironment, VITE_CERTQUIZ_AUTH_REDIRECT_PATH: "//outside.example.com" },
-      "VITE_CERTQUIZ_AUTH_REDIRECT_PATH must be a same-origin absolute path.",
+      { ...httpEnvironment, VITE_CERTFORGE_AUTH_REDIRECT_PATH: "//outside.example.com" },
+      "VITE_CERTFORGE_AUTH_REDIRECT_PATH must be a same-origin absolute path.",
     ],
   ])("fails closed for invalid HTTP configuration", (environment, message) => {
     expect(() => resolveWebRuntimeConfiguration(environment, browserOrigin)).toThrow(
@@ -50,13 +50,13 @@ describe("web runtime configuration", () => {
   it("permits mocks only when explicitly configured outside production", () => {
     expect(
       resolveWebRuntimeConfiguration(
-        { PROD: false, VITE_CERTQUIZ_RUNTIME_MODE: "mock" },
+        { PROD: false, VITE_CERTFORGE_RUNTIME_MODE: "mock" },
         "http://127.0.0.1:4173",
       ),
     ).toEqual({ mode: "mock" });
     expect(() =>
       resolveWebRuntimeConfiguration(
-        { PROD: true, VITE_CERTQUIZ_RUNTIME_MODE: "mock" },
+        { PROD: true, VITE_CERTFORGE_RUNTIME_MODE: "mock" },
         browserOrigin,
       ),
     ).toThrow("Mock runtime mode is unavailable in a production build");

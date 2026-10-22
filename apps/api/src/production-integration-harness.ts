@@ -7,7 +7,7 @@ import {
   DsqlPoolLifecycle,
   DsqlUnitOfWork,
   loadApplicationMigrations,
-} from "@cert-quiz/db";
+} from "@cert-forge/db";
 import {
   ImportService,
   LifecycleServices,
@@ -15,7 +15,7 @@ import {
   type RandomSource,
   type UuidFactory,
   type UserProfile,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import type { Hono } from "hono";
 
 type QueryResultRow = Record<string, unknown>;
@@ -45,7 +45,7 @@ import { createApiSecurityConfiguration } from "./security.js";
 
 const DEFAULT_ISSUER =
   "https://cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_integration";
-const DEFAULT_CLIENT_ID = "cert-quiz-production-integration";
+const DEFAULT_CLIENT_ID = "cert-forge-production-integration";
 const DEFAULT_NOW = new Date("2026-03-20T12:00:00.000Z");
 
 export type ProductionIntegrationHarnessOptions = Readonly<{

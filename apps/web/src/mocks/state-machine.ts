@@ -15,7 +15,7 @@ import type {
   SubmissionPreviewDto,
   SubmitPracticeQuestionResponse,
   TransportError,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 /**
  * This in-memory model exists only to make frontend UI states reproducible.
@@ -302,7 +302,7 @@ function decimalPercentage(correctCount: number, questionCount: number): string 
   return Number.isInteger(value) ? String(value) : String(value).replace(/0+$/, "");
 }
 
-export class CertQuizMockStateMachine {
+export class CertForgeMockStateMachine {
   private nowMilliseconds: number;
   private practice: PracticeState;
   private readonly exam: ExamState;
@@ -885,8 +885,8 @@ export class CertQuizMockStateMachine {
   }
 }
 
-export function createCertQuizMockStateMachine(
+export function createCertForgeMockStateMachine(
   options?: MockStateMachineOptions,
-): CertQuizMockStateMachine {
-  return new CertQuizMockStateMachine(options);
+): CertForgeMockStateMachine {
+  return new CertForgeMockStateMachine(options);
 }

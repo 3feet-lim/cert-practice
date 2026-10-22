@@ -39,7 +39,7 @@ test("Task 23.5 binds generated live spike evidence to this run and current migr
     source("scripts/verify-dsql-spike-evidence.mjs"),
   ]);
 
-  assert.match(workflow, /CERTQUIZ_DSQL_SPIKE_NOT_BEFORE/);
+  assert.match(workflow, /CERTFORGE_DSQL_SPIKE_NOT_BEFORE/);
   assert.match(workflow, /db-adapter-evidence/);
   assert.match(script, /DSQL live spike report predates this CI gate/);
   assert.match(script, /reportSha256/);

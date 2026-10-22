@@ -43,8 +43,8 @@ export interface CognitoPkceSessionOptions {
   readonly dependencies?: Partial<BrowserDependencies>;
 }
 
-const PENDING_TRANSACTION_KEY = "certquiz.auth.pending.v1";
-const TOKEN_SESSION_KEY = "certquiz.auth.tokens.v1";
+const PENDING_TRANSACTION_KEY = "certforge.auth.pending.v1";
+const TOKEN_SESSION_KEY = "certforge.auth.tokens.v1";
 const REFRESH_LEEWAY_MS = 60_000;
 
 function browserDependencies(): BrowserDependencies {

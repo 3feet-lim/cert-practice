@@ -1,4 +1,4 @@
-import type { ExamStateResponse, SubmitExamResponse } from "@cert-quiz/contracts";
+import type { ExamStateResponse, SubmitExamResponse } from "@cert-forge/contracts";
 import {
   cleanup,
   fireEvent,
@@ -10,25 +10,25 @@ import {
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createMockCertQuizApi } from "../api/mock-adapter";
-import type { CertQuizApi, CertQuizApiResult } from "../api/port";
-import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
-import { createCertQuizMockStateMachine, MOCK_IDS } from "../mocks/state-machine";
+import { createMockCertForgeApi } from "../api/mock-adapter";
+import type { CertForgeApi, CertForgeApiResult } from "../api/port";
+import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";
+import { createCertForgeMockStateMachine, MOCK_IDS } from "../mocks/state-machine";
 import { ExamPage } from "./ExamPage";
 /**
  * These deterministic component tests cover the client/mock contract only. They do not
  * prove a real server clock, durable persistence, or concurrent finalization behavior.
  */
 afterEach(cleanup);
-function renderExam(api: CertQuizApi = createMockCertQuizApi()) {
+function renderExam(api: CertForgeApi = createMockCertForgeApi()) {
   return render(
     <MemoryRouter initialEntries={[`/app/exams/${MOCK_IDS.exam}`]}>
-      <CertQuizCompositionRoot api={api}>
+      <CertForgeCompositionRoot api={api}>
         <Routes>
           <Route path="/app/exams/:sessionId" element={<ExamPage />} />
           <Route path="/app/attempts/:id" element={<h1>모의고사 결과</h1>} />
         </Routes>
-      </CertQuizCompositionRoot>
+      </CertForgeCompositionRoot>
     </MemoryRouter>,
   );
 }
@@ -41,9 +41,9 @@ function deferred<T>() {
 }
 describe("ExamPage", () => {
   it("restores server state and presents authoritative preview counts before submitting", async () => {
-    const mockApi = createMockCertQuizApi();
+    const mockApi = createMockCertForgeApi();
     const getExamSubmissionPreview = vi.fn(mockApi.getExamSubmissionPreview);
-    const api: CertQuizApi = { ...mockApi, getExamSubmissionPreview };
+    const api: CertForgeApi = { ...mockApi, getExamSubmissionPreview };
     renderExam(api);
     const [answer] = await screen.findAllByRole("radio");
     if (!answer) throw new Error("Expected an exam answer choice.");
@@ -74,7 +74,7 @@ describe("ExamPage", () => {
     expect(await screen.findByRole("heading", { name: "모의고사 결과" })).toBeVisible();
   });
   it("never serializes or renders answers and explanations while an exam is active", async () => {
-    const api = createMockCertQuizApi();
+    const api = createMockCertForgeApi();
     const { container } = renderExam(api);
     const active = await api.getExam({ examSessionId: MOCK_IDS.exam });
     if (!active.ok || active.data.kind !== "exam-active-session") {
@@ -103,10 +103,10 @@ describe("ExamPage", () => {
     ).not.toBeInTheDocument();
   });
   it("rolls an optimistic exam flag change back and displays a stale-version error", async () => {
-    const response = deferred<CertQuizApiResult<ExamStateResponse>>();
-    const mockApi = createMockCertQuizApi();
+    const response = deferred<CertForgeApiResult<ExamStateResponse>>();
+    const mockApi = createMockCertForgeApi();
     const patchExamState = vi.fn(() => response.promise);
-    const api: CertQuizApi = { ...mockApi, patchExamState };
+    const api: CertForgeApi = { ...mockApi, patchExamState };
     renderExam(api);
     await userEvent
       .setup()
@@ -141,11 +141,11 @@ describe("ExamPage", () => {
     );
   });
   it("locks duplicate exam submission clicks until the canonical result returns", async () => {
-    const response = deferred<CertQuizApiResult<SubmitExamResponse>>();
-    const mockApi = createMockCertQuizApi();
+    const response = deferred<CertForgeApiResult<SubmitExamResponse>>();
+    const mockApi = createMockCertForgeApi();
     const submitExam = vi.fn(() => response.promise);
-    const api: CertQuizApi = { ...mockApi, submitExam };
-    const resultState = createCertQuizMockStateMachine();
+    const api: CertForgeApi = { ...mockApi, submitExam };
+    const resultState = createCertForgeMockStateMachine();
     renderExam(api);
     await userEvent
       .setup()
@@ -163,11 +163,11 @@ describe("ExamPage", () => {
     expect(await screen.findByRole("heading", { name: "모의고사 결과" })).toBeVisible();
   });
   it("finalizes after the restored server timer expires and locks interaction while pending", async () => {
-    const state = createCertQuizMockStateMachine({ now: "2026-03-23T15:00:00.000Z" });
-    const response = deferred<CertQuizApiResult<SubmitExamResponse>>();
-    const mockApi = createMockCertQuizApi({ examState: state });
+    const state = createCertForgeMockStateMachine({ now: "2026-03-23T15:00:00.000Z" });
+    const response = deferred<CertForgeApiResult<SubmitExamResponse>>();
+    const mockApi = createMockCertForgeApi({ examState: state });
     const submitExam = vi.fn(() => response.promise);
-    const api: CertQuizApi = { ...mockApi, submitExam };
+    const api: CertForgeApi = { ...mockApi, submitExam };
     renderExam(api);
     expect(
       await screen.findByText(
@@ -184,9 +184,9 @@ describe("ExamPage", () => {
     expect(state.snapshot().exam.attemptCount).toBe(1);
   });
   it("redirects a restored finalized session to its server-owned attempt", async () => {
-    const state = createCertQuizMockStateMachine();
+    const state = createCertForgeMockStateMachine();
     state.submitExam(MOCK_IDS.exam, MOCK_IDS.user);
-    renderExam(createMockCertQuizApi({ examState: state }));
+    renderExam(createMockCertForgeApi({ examState: state }));
     expect(await screen.findByRole("heading", { name: "모의고사 결과" })).toBeVisible();
   });
 });

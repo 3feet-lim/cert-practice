@@ -6,7 +6,7 @@ import type {
   HistoryTrendsDto,
   LeaderboardDto,
   PracticeResultDto,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import { Link } from "react-router-dom";
 
 import {

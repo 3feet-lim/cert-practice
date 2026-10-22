@@ -1,4 +1,4 @@
-import type { JsonValue } from "@cert-quiz/contracts";
+import type { JsonValue } from "@cert-forge/contracts";
 
 import {
   allocateLargestRemainder,

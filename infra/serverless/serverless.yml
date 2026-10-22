@@ -1,5 +1,8 @@
-service: certquiz-api
-frameworkVersion: "4"
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: 3feetlim
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: certforge
+service: certforge-api
 configValidationMode: error
 
 # pg's CommonJS dynamic requires must remain executable in the Lambda bundle.
@@ -18,14 +21,14 @@ plugins:
   - serverless-offline
 
 custom:
-  telemetryNamespace: ${env:CERTQUIZ_TELEMETRY_NAMESPACE, 'CertQuiz/${sls:stage}'}
-  telemetryService: ${env:CERTQUIZ_TELEMETRY_SERVICE, 'certquiz-api'}
+  telemetryNamespace: ${env:CERTFORGE_TELEMETRY_NAMESPACE, 'CertForge/${sls:stage}'}
+  telemetryService: ${env:CERTFORGE_TELEMETRY_SERVICE, 'certforge-api'}
   serverless-offline:
     host: 127.0.0.1
     httpPort: 3000
     noPrependStageInUrl: true
     ignoreJWTSignature: true
-  runbookBaseUrl: ${env:CERTQUIZ_RUNBOOK_BASE_URL, 'https://github.com/certquiz/cert-practice/blob/main/infra/serverless/runbooks'}
+  runbookBaseUrl: ${env:CERTFORGE_RUNBOOK_BASE_URL, 'https://github.com/certforge/cert-practice/blob/main/infra/serverless/runbooks'}
   runbooks:
     api5xx: ${self:custom.runbookBaseUrl}/api-5xx.md
     finalizeFailure: ${self:custom.runbookBaseUrl}/finalize-failure.md
@@ -47,13 +50,13 @@ provider:
   logRetentionInDays: 30
   iam:
     # Terraform owns this permanent role; the local runner injects harmless stand-ins.
-    role: ${env:CERTQUIZ_LAMBDA_ROLE_ARN, ssm:/certquiz/${sls:stage}/lambda-role-arn}
+    role: ${env:CERTFORGE_LAMBDA_ROLE_ARN, ssm:/certforge/${sls:stage}/lambda-role-arn}
   httpApi:
     # API Gateway applies this to authorizer rejections before requests reach Hono.
     # WEB_ORIGIN is the exact Terraform-published SPA origin; never use wildcards.
     cors:
       allowedOrigins:
-        - ${env:CERTQUIZ_WEB_ORIGIN, ssm:/certquiz/${sls:stage}/web-origin}
+        - ${env:CERTFORGE_WEB_ORIGIN, ssm:/certforge/${sls:stage}/web-origin}
       allowedHeaders:
         - authorization
         - content-type
@@ -68,35 +71,35 @@ provider:
       cognitoJwt:
         type: jwt
         identitySource: $request.header.authorization
-        issuerUrl: ${env:CERTQUIZ_COGNITO_ISSUER, ssm:/certquiz/${sls:stage}/cognito-issuer}
+        issuerUrl: ${env:CERTFORGE_COGNITO_ISSUER, ssm:/certforge/${sls:stage}/cognito-issuer}
         audience:
-          - ${env:CERTQUIZ_COGNITO_CLIENT_ID, ssm:/certquiz/${sls:stage}/cognito-client-id}
+          - ${env:CERTFORGE_COGNITO_CLIENT_ID, ssm:/certforge/${sls:stage}/cognito-client-id}
   environment:
     STAGE: ${sls:stage}
-    CERTQUIZ_LOCAL_EMULATION: ${env:CERTQUIZ_LOCAL_EMULATION, 'false'}
+    CERTFORGE_LOCAL_EMULATION: ${env:CERTFORGE_LOCAL_EMULATION, 'false'}
     # Dev infrastructure is the Terraform-owned Aurora DSQL target; deployment does not depend on a historical report artifact.
     CERT_QUIZ_DATABASE_ADAPTER: dsql
-    DSQL_ENDPOINT: ${env:CERTQUIZ_DSQL_ENDPOINT, ssm:/certquiz/${sls:stage}/dsql-endpoint}
+    DSQL_ENDPOINT: ${env:CERTFORGE_DSQL_ENDPOINT, ssm:/certforge/${sls:stage}/dsql-endpoint}
     DSQL_DATABASE: ${param:dsqlDatabase}
     DSQL_USER: ${param:dsqlUser}
-    COGNITO_ISSUER: ${env:CERTQUIZ_COGNITO_ISSUER, ssm:/certquiz/${sls:stage}/cognito-issuer}
-    COGNITO_CLIENT_ID: ${env:CERTQUIZ_COGNITO_CLIENT_ID, ssm:/certquiz/${sls:stage}/cognito-client-id}
+    COGNITO_ISSUER: ${env:CERTFORGE_COGNITO_ISSUER, ssm:/certforge/${sls:stage}/cognito-issuer}
+    COGNITO_CLIENT_ID: ${env:CERTFORGE_COGNITO_CLIENT_ID, ssm:/certforge/${sls:stage}/cognito-client-id}
     # Terraform publishes exact stage origins; Hono performs the final exact-origin check.
-    WEB_ORIGIN: ${env:CERTQUIZ_WEB_ORIGIN, ssm:/certquiz/${sls:stage}/web-origin}
-    MARKDOWN_IMAGE_ORIGINS: ${env:CERTQUIZ_MARKDOWN_IMAGE_ORIGINS, ssm:/certquiz/${sls:stage}/markdown-image-origins}
+    WEB_ORIGIN: ${env:CERTFORGE_WEB_ORIGIN, ssm:/certforge/${sls:stage}/web-origin}
+    MARKDOWN_IMAGE_ORIGINS: ${env:CERTFORGE_MARKDOWN_IMAGE_ORIGINS, ssm:/certforge/${sls:stage}/markdown-image-origins}
     # DynamoDB supplies a shared durable limit across all Lambda instances.
-    RATE_LIMIT_TABLE: ${env:CERTQUIZ_RATE_LIMIT_TABLE, ssm:/certquiz/${sls:stage}/rate-limit-table-name}
-    RATE_LIMIT_POLICIES: ${env:CERTQUIZ_RATE_LIMIT_POLICIES, ssm:/certquiz/${sls:stage}/rate-limit-policies}
+    RATE_LIMIT_TABLE: ${env:CERTFORGE_RATE_LIMIT_TABLE, ssm:/certforge/${sls:stage}/rate-limit-table-name}
+    RATE_LIMIT_POLICIES: ${env:CERTFORGE_RATE_LIMIT_POLICIES, ssm:/certforge/${sls:stage}/rate-limit-policies}
     # CloudWatch Embedded Metric Format is emitted through the existing Lambda log permission.
     TELEMETRY_NAMESPACE: ${self:custom.telemetryNamespace}
     TELEMETRY_SERVICE: ${self:custom.telemetryService}
     NODE_OPTIONS: --enable-source-maps
   stackTags:
-    Service: certquiz
+    Service: certforge
     Environment: ${sls:stage}
     ManagedBy: serverless-framework
   tags:
-    Service: certquiz
+    Service: certforge
     Environment: ${sls:stage}
     ManagedBy: serverless-framework
 
@@ -105,8 +108,8 @@ package:
 
 functions:
   api:
-    name: certquiz-${sls:stage}-api
-    description: CertQuiz Hono API
+    name: certforge-${sls:stage}-api
+    description: CertForge Hono API
     handler: handler.handler
     events:
       # Health and browser preflight are public. API Gateway CORS adds the
@@ -124,7 +127,7 @@ functions:
           authorizer:
             name: cognitoJwt
   practiceRetention:
-    name: certquiz-${sls:stage}-practice-retention
+    name: certforge-${sls:stage}-practice-retention
     description: Deletes expired completed practice results; it never finalizes exams.
     handler: handler.practiceRetentionHandler
     timeout: 29
@@ -138,7 +141,7 @@ resources:
     OperationsDashboard:
       Type: AWS::CloudWatch::Dashboard
       Properties:
-        DashboardName: certquiz-${sls:stage}-operations
+        DashboardName: certforge-${sls:stage}-operations
         DashboardBody:
           Fn::Sub: |
             {"widgets":[
@@ -152,7 +155,7 @@ resources:
       Metadata:
         RunbookUrl: ${self:custom.runbooks.api5xx}
       Properties:
-        AlarmName: certquiz-${sls:stage}-api-5xx
+        AlarmName: certforge-${sls:stage}-api-5xx
         AlarmDescription: '{"runbook":"${self:custom.runbooks.api5xx}","firstResponse":"Correlate request IDs and consider Lambda alias rollback."}'
         Namespace: ${self:custom.telemetryNamespace}
         MetricName: Api5xx
@@ -173,7 +176,7 @@ resources:
       Metadata:
         RunbookUrl: ${self:custom.runbooks.finalizeFailure}
       Properties:
-        AlarmName: certquiz-${sls:stage}-finalize-failure
+        AlarmName: certforge-${sls:stage}-finalize-failure
         AlarmDescription: '{"runbook":"${self:custom.runbooks.finalizeFailure}","firstResponse":"Verify Attempt cardinality and retryable session state."}'
         Namespace: ${self:custom.telemetryNamespace}
         MetricName: FinalizeFailures
@@ -194,7 +197,7 @@ resources:
       Metadata:
         RunbookUrl: ${self:custom.runbooks.cleanupFailure}
       Properties:
-        AlarmName: certquiz-${sls:stage}-cleanup-failure
+        AlarmName: certforge-${sls:stage}-cleanup-failure
         AlarmDescription: '{"runbook":"${self:custom.runbooks.cleanupFailure}","firstResponse":"Check EventBridge, Lambda permissions, and rerun bounded cleanup."}'
         Namespace: ${self:custom.telemetryNamespace}
         MetricName: CleanupFailures
@@ -215,7 +218,7 @@ resources:
       Metadata:
         RunbookUrl: ${self:custom.runbooks.importRollback}
       Properties:
-        AlarmName: certquiz-${sls:stage}-import-rollback
+        AlarmName: certforge-${sls:stage}-import-rollback
         AlarmDescription: '{"runbook":"${self:custom.runbooks.importRollback}","firstResponse":"Confirm catalog head and validation-token state before retrying."}'
         Namespace: ${self:custom.telemetryNamespace}
         MetricName: ImportRollbacks
@@ -236,7 +239,7 @@ resources:
       Metadata:
         RunbookUrl: ${self:custom.runbooks.projectionLeak}
       Properties:
-        AlarmName: certquiz-${sls:stage}-projection-leak-guard
+        AlarmName: certforge-${sls:stage}-projection-leak-guard
         AlarmDescription: '{"runbook":"${self:custom.runbooks.projectionLeak}","firstResponse":"Stop deployment progression and roll back without collecting response payloads."}'
         Namespace: ${self:custom.telemetryNamespace}
         MetricName: ProjectionSchemaFailures
@@ -257,7 +260,7 @@ resources:
       Metadata:
         RunbookUrl: ${self:custom.runbooks.dbLatency}
       Properties:
-        AlarmName: certquiz-${sls:stage}-db-latency
+        AlarmName: certforge-${sls:stage}-db-latency
         AlarmDescription: '{"runbook":"${self:custom.runbooks.dbLatency}","firstResponse":"Inspect connector pool and query-plan evidence against the 500 ms gate."}'
         Namespace: ${self:custom.telemetryNamespace}
         MetricName: DbConnectLatencyMs
@@ -278,7 +281,7 @@ resources:
       Metadata:
         RunbookUrl: ${self:custom.runbooks.budget}
       Properties:
-        AlarmName: certquiz-${sls:stage}-budget
+        AlarmName: certforge-${sls:stage}-budget
         AlarmDescription: '{"runbook":"${self:custom.runbooks.budget}","firstResponse":"Review traffic, log retention, and DSQL consumption."}'
         Namespace: AWS/Billing
         MetricName: EstimatedCharges

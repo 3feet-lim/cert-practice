@@ -2,9 +2,9 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { createMockCertQuizApi } from "../api/mock-adapter";
-import type { CertQuizApi } from "../api/port";
-import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
+import { createMockCertForgeApi } from "../api/mock-adapter";
+import type { CertForgeApi } from "../api/port";
+import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";
 import { ImportPage } from "./ImportPage";
 
 const validContent = '{"provider":{"id":"aws"}}';
@@ -16,12 +16,12 @@ function importFile(name: string, content = validContent): File {
 }
 
 function renderImportPage(
-  api: CertQuizApi = createMockCertQuizApi({ authActor: "admin" }),
+  api: CertForgeApi = createMockCertForgeApi({ authActor: "admin" }),
 ) {
   return render(
-    <CertQuizCompositionRoot api={api}>
+    <CertForgeCompositionRoot api={api}>
       <ImportPage />
-    </CertQuizCompositionRoot>,
+    </CertForgeCompositionRoot>,
   );
 }
 
@@ -73,8 +73,8 @@ describe("ImportPage", () => {
 
   it("surfaces a safe replay error and requires revalidation while preserving the selected file", async () => {
     const user = userEvent.setup();
-    const mockApi = createMockCertQuizApi({ authActor: "admin" });
-    const api: CertQuizApi = {
+    const mockApi = createMockCertForgeApi({ authActor: "admin" });
+    const api: CertForgeApi = {
       ...mockApi,
       commitImport: async () => ({
         ok: false,

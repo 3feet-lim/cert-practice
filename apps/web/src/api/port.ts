@@ -35,10 +35,10 @@ import type {
   UpdateScoreVisibilityRequest,
   UpdateScoreVisibilityResponse,
   Uuid,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 /** Expected transport-safe error codes exposed to frontend callers. */
-export type CertQuizApiErrorCode =
+export type CertForgeApiErrorCode =
   | "authentication-invalid"
   | "google-identity-missing"
   | "approval-required"
@@ -63,35 +63,35 @@ export type CertQuizApiErrorCode =
   | "transaction-conflict"
   | "internal-error";
 
-type ErrorWithCode<Code extends CertQuizApiErrorCode> = Omit<TransportError, "code"> & {
+type ErrorWithCode<Code extends CertForgeApiErrorCode> = Omit<TransportError, "code"> & {
   code: Code;
 };
 
-export type CertQuizApiError = {
-  [Code in CertQuizApiErrorCode]: ErrorWithCode<Code>;
-}[CertQuizApiErrorCode];
+export type CertForgeApiError = {
+  [Code in CertForgeApiErrorCode]: ErrorWithCode<Code>;
+}[CertForgeApiErrorCode];
 
-export type CertQuizApiSuccess<Data> = {
+export type CertForgeApiSuccess<Data> = {
   ok: true;
   data: Data;
   meta?: ResponseMeta;
 };
 
-export type CertQuizApiFailure = {
+export type CertForgeApiFailure = {
   ok: false;
-  error: CertQuizApiError;
+  error: CertForgeApiError;
 };
 
 /**
  * Every expected adapter outcome is a value. Adapters may reject only for
  * programming defects that cannot be represented by the safe error contract.
  */
-export type CertQuizApiResult<Data> = CertQuizApiSuccess<Data> | CertQuizApiFailure;
+export type CertForgeApiResult<Data> = CertForgeApiSuccess<Data> | CertForgeApiFailure;
 
-export type CertQuizQuery<Output> = () => Promise<CertQuizApiResult<Output>>;
-export type CertQuizOperation<Input, Output> = (
+export type CertForgeQuery<Output> = () => Promise<CertForgeApiResult<Output>>;
+export type CertForgeOperation<Input, Output> = (
   input: Input,
-) => Promise<CertQuizApiResult<Output>>;
+) => Promise<CertForgeApiResult<Output>>;
 
 export type StartPracticeInput = { certificationId: Uuid };
 export type ResumePracticeInput = { practiceSessionId: Uuid };
@@ -125,58 +125,58 @@ export type ApproveUserInput = { userId: Uuid };
  * Implementations map these commands to MSW-backed fixtures or real HTTP,
  * while components and stores depend only on this interface.
  */
-export interface CertQuizApi {
+export interface CertForgeApi {
   // Public bootstrap
-  readonly getHealth: CertQuizQuery<HealthDto>;
+  readonly getHealth: CertForgeQuery<HealthDto>;
 
   // S1 and approval routing
-  readonly getApprovalStatus: CertQuizQuery<ApprovalStatusDto>;
-  readonly getCurrentUser: CertQuizQuery<CurrentUserDto>;
+  readonly getApprovalStatus: CertForgeQuery<ApprovalStatusDto>;
+  readonly getCurrentUser: CertForgeQuery<CurrentUserDto>;
 
   // S2-S3 catalog and mode selection
-  readonly getCatalog: CertQuizQuery<CatalogDto>;
-  readonly listActivePracticeSessions: CertQuizQuery<ActivePracticeSessionsDto>;
-  readonly startPractice: CertQuizOperation<StartPracticeInput, StartPracticeResponse>;
-  readonly startExam: CertQuizOperation<StartExamInput, StartExamResponse>;
+  readonly getCatalog: CertForgeQuery<CatalogDto>;
+  readonly listActivePracticeSessions: CertForgeQuery<ActivePracticeSessionsDto>;
+  readonly startPractice: CertForgeOperation<StartPracticeInput, StartPracticeResponse>;
+  readonly startExam: CertForgeOperation<StartExamInput, StartExamResponse>;
 
   // S4 practice
-  readonly resumePractice: CertQuizOperation<ResumePracticeInput, PracticeSessionDto>;
-  readonly replacePractice: CertQuizOperation<ReplacePracticeInput, PracticeSessionDto>;
-  readonly patchPracticeState: CertQuizOperation<
+  readonly resumePractice: CertForgeOperation<ResumePracticeInput, PracticeSessionDto>;
+  readonly replacePractice: CertForgeOperation<ReplacePracticeInput, PracticeSessionDto>;
+  readonly patchPracticeState: CertForgeOperation<
     PatchPracticeStateInput,
     PracticeStateResponse
   >;
-  readonly submitPracticeQuestion: CertQuizOperation<
+  readonly submitPracticeQuestion: CertForgeOperation<
     SubmitPracticeQuestionInput,
     SubmitPracticeQuestionResponse
   >;
 
   // S5 exam
-  readonly getExam: CertQuizOperation<GetExamInput, GetExamResponse>;
-  readonly patchExamState: CertQuizOperation<PatchExamStateInput, ExamStateResponse>;
-  readonly getExamSubmissionPreview: CertQuizOperation<
+  readonly getExam: CertForgeOperation<GetExamInput, GetExamResponse>;
+  readonly patchExamState: CertForgeOperation<PatchExamStateInput, ExamStateResponse>;
+  readonly getExamSubmissionPreview: CertForgeOperation<
     GetExamSubmissionPreviewInput,
     SubmissionPreviewDto
   >;
-  readonly submitExam: CertQuizOperation<SubmitExamInput, SubmitExamResponse>;
+  readonly submitExam: CertForgeOperation<SubmitExamInput, SubmitExamResponse>;
 
   // S6-S9 results, history, preferences, and leaderboard
-  readonly getPracticeResult: CertQuizOperation<
+  readonly getPracticeResult: CertForgeOperation<
     GetPracticeResultInput,
     PracticeResultDto
   >;
-  readonly getAttempt: CertQuizOperation<GetAttemptInput, ExamResultDto>;
-  readonly getHistory: CertQuizOperation<GetHistoryInput, HistoryPageDto>;
-  readonly getHistoryTrends: CertQuizQuery<HistoryTrendsDto>;
-  readonly updateScoreVisibility: CertQuizOperation<
+  readonly getAttempt: CertForgeOperation<GetAttemptInput, ExamResultDto>;
+  readonly getHistory: CertForgeOperation<GetHistoryInput, HistoryPageDto>;
+  readonly getHistoryTrends: CertForgeQuery<HistoryTrendsDto>;
+  readonly updateScoreVisibility: CertForgeOperation<
     UpdateScoreVisibilityRequest,
     UpdateScoreVisibilityResponse
   >;
-  readonly getLeaderboard: CertQuizOperation<GetLeaderboardInput, LeaderboardDto>;
+  readonly getLeaderboard: CertForgeOperation<GetLeaderboardInput, LeaderboardDto>;
 
   // Admin approval and S10 import
-  readonly getPendingUsers: CertQuizQuery<PendingUsersDto>;
-  readonly approveUser: CertQuizOperation<ApproveUserInput, ApproveUserResponse>;
-  readonly dryRunImport: CertQuizOperation<DryRunImportRequest, DryRunImportResponse>;
-  readonly commitImport: CertQuizOperation<CommitImportRequest, CommitImportResponse>;
+  readonly getPendingUsers: CertForgeQuery<PendingUsersDto>;
+  readonly approveUser: CertForgeOperation<ApproveUserInput, ApproveUserResponse>;
+  readonly dryRunImport: CertForgeOperation<DryRunImportRequest, DryRunImportResponse>;
+  readonly commitImport: CertForgeOperation<CommitImportRequest, CommitImportResponse>;
 }

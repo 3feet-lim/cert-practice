@@ -1,8 +1,8 @@
-# CertQuiz MVP 설계 문서
+# CertForge MVP 설계 문서
 
 ## Overview
 
-CertQuiz MVP는 승인된 소수 사용자가 클라우드 자격증 문제를 연습 또는 모의고사 모드로 풀고, 모의고사 이력과 공개 리더보드를 확인하는 비공개 웹 애플리케이션이다. 이 설계는 `.kiro/specs/cert-quiz-mvp/requirements.md`를 유일한 규범적 제품 요구사항으로 사용한다. 루트의 `design.md`와 `wireframes.html`은 배경과 화면 흐름 참고 자료이며, 충돌할 경우 스펙 요구사항이 우선한다.
+CertForge MVP는 승인된 소수 사용자가 클라우드 자격증 문제를 연습 또는 모의고사 모드로 풀고, 모의고사 이력과 공개 리더보드를 확인하는 비공개 웹 애플리케이션이다. 이 설계는 `.kiro/specs/cert-forge-mvp/requirements.md`를 유일한 규범적 제품 요구사항으로 사용한다. 루트의 `design.md`와 `wireframes.html`은 배경과 화면 흐름 참고 자료이며, 충돌할 경우 스펙 요구사항이 우선한다.
 
 첫 릴리스의 실제 콘텐츠는 AWS DOP-C02 하나지만, Provider → Certification → Domain → Question 계층과 자격증별 채점 설정을 데이터로 관리한다. 신규 자격증은 애플리케이션 분기 추가가 아니라 검증된 JSON 임포트로 제공한다.
 
@@ -216,7 +216,7 @@ Terraform은 `/<service>/<stage>/dsql-endpoint`, `region`, `cognito-user-pool-id
 
 ### Aurora DSQL compatibility spike and decision gate
 
-구현의 첫 기술 spike는 실제 `certquiz-dev-*` DSQL cluster와 Lambda와 동일한 Node.js 버전에서 수행한다. 아래 항목을 versioned SQL migration과 실제 repository query로 검증한다.
+구현의 첫 기술 spike는 실제 `certforge-dev-*` DSQL cluster와 Lambda와 동일한 Node.js 버전에서 수행한다. 아래 항목을 versioned SQL migration과 실제 repository query로 검증한다.
 
 1. AWS node-postgres connector의 IAM token 자동 갱신, TLS hostname/CA 검증, Lambda freeze/thaw 후 pool 재사용
 2. 앱 생성 UUID의 `uuid` 저장, `timestamptz`, `numeric`, JSON/JSONB 후보 타입 및 필요한 index
@@ -1244,7 +1244,7 @@ CloudWatch log retention은 dev 14일, prod 30일을 기본으로 하고 보안/
 TypeScript PBT는 `fast-check`를 사용하고 임의 구현하지 않는다. 각 property는 기본 `numRuns: 200`(최소 100), 재현 가능한 seed/path를 실패 출력에 남긴다. 하나의 설계 property는 하나의 top-level property test로 구현하되 내부 assertion은 그 속성의 결합 불변식을 함께 검증한다. 테스트 바로 위에 다음 형식의 comment를 둔다.
 
 ```ts
-// Feature: cert-quiz-mvp, Property 19: exact 채점 의미
+// Feature: cert-forge-mvp, Property 19: exact 채점 의미
 fc.assert(fc.property(scoringCaseArbitrary, (input) => { /* ... */ }), { numRuns: 200 });
 ```
 

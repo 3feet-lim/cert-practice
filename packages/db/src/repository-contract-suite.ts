@@ -4,7 +4,7 @@ import {
   type NewPracticeSession,
   type PersistedQuestionSnapshot,
   type UnitOfWork,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 
 export type RepositoryContractHarness = {
   unitOfWork: UnitOfWork;

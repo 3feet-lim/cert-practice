@@ -106,11 +106,11 @@ test("Task 23.6 is restricted to protected, serialized manual deployments", asyn
   assert.match(workflow, /environment: release-\$\{\{ inputs\.stage \}\}/);
   assert.match(
     workflow,
-    /concurrency:[\s\S]*?certquiz-\$\{\{ inputs\.stage \}\}-release[\s\S]*?cancel-in-progress: false/,
+    /concurrency:[\s\S]*?certforge-\$\{\{ inputs\.stage \}\}-release[\s\S]*?cancel-in-progress: false/,
   );
   assert.match(workflow, /configure-aws-credentials@v4/);
   assert.match(workflow, /pnpm ci:db-adapter/);
   assert.match(workflow, /pnpm release:apply/);
   assert.match(workflow, /pnpm release:rollback/);
-  assert.match(workflow, /CERTQUIZ_RELEASE_ADMIN_TOKEN/);
+  assert.match(workflow, /CERTFORGE_RELEASE_ADMIN_TOKEN/);
 });

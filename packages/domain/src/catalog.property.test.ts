@@ -84,7 +84,7 @@ function source(input: {
   };
 }
 
-// Feature: cert-quiz-mvp, Property 4: 카탈로그 관계 폐쇄성과 노출 안전성
+// Feature: cert-forge-mvp, Property 4: 카탈로그 관계 폐쇄성과 노출 안전성
 describe("Property 4: catalog relationship closure and safe exposure", () => {
   it("matches the independent closure/pool oracle and never returns cross-revision generation sources", () => {
     fc.assert(

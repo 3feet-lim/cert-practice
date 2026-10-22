@@ -1,8 +1,8 @@
-import type { DryRunImportResponse, ImportSummaryValue } from "@cert-quiz/contracts";
+import type { DryRunImportResponse, ImportSummaryValue } from "@cert-forge/contracts";
 import { useRef, useState } from "react";
 
 import { useCommitImportMutation, useDryRunImportMutation } from "../api/queries";
-import { CertQuizRequestError } from "../api/query-result";
+import { CertForgeRequestError } from "../api/query-result";
 import {
   Badge,
   Button,
@@ -30,7 +30,7 @@ function summaryValue(value: ImportSummaryValue): string {
 }
 
 function safeImportFeedback(error: unknown): ImportFeedback {
-  if (!(error instanceof CertQuizRequestError)) {
+  if (!(error instanceof CertForgeRequestError)) {
     return {
       message: "임포트 요청을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.",
       retryable: true,

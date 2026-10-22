@@ -31,7 +31,7 @@ async function expectsRestrictedImport(name, source, filePath) {
 
 test("allows shared contracts and the local frontend API port", async () => {
   const messages = await restrictedMessages(`
-    import type {} from "@cert-quiz/contracts";
+    import type {} from "@cert-forge/contracts";
     import type {} from "./api/port";
   `);
 
@@ -41,14 +41,14 @@ test("allows shared contracts and the local frontend API port", async () => {
 for (const [name, source] of [
   [
     "web imports of database rows",
-    'import type { UserRow } from "@cert-quiz/db/rows";',
+    'import type { UserRow } from "@cert-forge/db/rows";',
   ],
   ["web imports of AWS SDK", 'import { S3Client } from "@aws-sdk/client-s3";'],
   ["web imports of Hono", 'import { Hono } from "hono";'],
   ["web imports of Hono implementation", 'import "../../api/src/app";'],
   [
     "web imports of domain implementation",
-    'import { score } from "@cert-quiz/domain/scoring";',
+    'import { score } from "@cert-forge/domain/scoring";',
   ],
 ]) {
   await expectsRestrictedImport(name, source, webFilePath);
@@ -72,7 +72,7 @@ test("allows network adapters inside the frontend API layer", async () => {
 
 test("allows db to depend on domain", async () => {
   const messages = await restrictedMessages(
-    'import type {} from "@cert-quiz/domain";',
+    'import type {} from "@cert-forge/domain";',
     dbFilePath,
   );
 
@@ -89,7 +89,7 @@ for (const [name, source] of [
 }
 
 for (const [name, source] of [
-  ["API workspace imports in db", 'import "@cert-quiz/api";'],
+  ["API workspace imports in db", 'import "@cert-forge/api";'],
   ["web source imports in db", 'import "../../../apps/web/src/main";'],
 ]) {
   await expectsRestrictedImport(name, source, dbFilePath);
@@ -98,9 +98,9 @@ for (const [name, source] of [
 test("allows API imports of its declared backend boundaries", async () => {
   const messages = await restrictedMessages(
     `
-      import type {} from "@cert-quiz/contracts";
-      import type {} from "@cert-quiz/domain";
-      import type {} from "@cert-quiz/db";
+      import type {} from "@cert-forge/contracts";
+      import type {} from "@cert-forge/domain";
+      import type {} from "@cert-forge/db";
       import { Hono } from "hono";
     `,
     apiFilePath,
@@ -111,6 +111,6 @@ test("allows API imports of its declared backend boundaries", async () => {
 
 await expectsRestrictedImport(
   "web workspace imports in api",
-  'import "@cert-quiz/web";',
+  'import "@cert-forge/web";',
   apiFilePath,
 );

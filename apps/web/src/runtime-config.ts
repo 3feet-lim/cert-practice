@@ -1,9 +1,9 @@
-import { createHttpCertQuizApi } from "./api/http-adapter";
+import { createHttpCertForgeApi } from "./api/http-adapter";
 import {
   createCognitoPkceSession,
   type BrowserAuthSession,
 } from "./auth/cognito-pkce-session";
-import type { CertQuizApi } from "./api/port";
+import type { CertForgeApi } from "./api/port";
 import type { MockAuthCallbackCapability } from "./app/mock-auth-capability";
 export type WebRuntimeMode = "http" | "mock";
 export interface HttpWebRuntimeConfiguration {
@@ -26,12 +26,12 @@ export type WebRuntimeConfiguration =
   HttpWebRuntimeConfiguration | MockWebRuntimeConfiguration;
 export interface BrowserRuntimeEnvironment {
   readonly PROD?: boolean;
-  readonly VITE_CERTQUIZ_RUNTIME_MODE?: string;
-  readonly VITE_CERTQUIZ_API_BASE_URL?: string;
-  readonly VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL?: string;
-  readonly VITE_CERTQUIZ_COGNITO_CLIENT_ID?: string;
-  readonly VITE_CERTQUIZ_AUTH_REDIRECT_PATH?: string;
-  readonly VITE_CERTQUIZ_AUTH_LOGOUT_PATH?: string;
+  readonly VITE_CERTFORGE_RUNTIME_MODE?: string;
+  readonly VITE_CERTFORGE_API_BASE_URL?: string;
+  readonly VITE_CERTFORGE_COGNITO_HOSTED_UI_BASE_URL?: string;
+  readonly VITE_CERTFORGE_COGNITO_CLIENT_ID?: string;
+  readonly VITE_CERTFORGE_AUTH_REDIRECT_PATH?: string;
+  readonly VITE_CERTFORGE_AUTH_LOGOUT_PATH?: string;
 }
 export class RuntimeConfigurationError extends Error {
   constructor(message: string) {
@@ -111,35 +111,35 @@ export function resolveWebRuntimeConfiguration(
   environment: BrowserRuntimeEnvironment,
   browserOrigin: string,
 ): WebRuntimeConfiguration {
-  const mode = required(environment, "VITE_CERTQUIZ_RUNTIME_MODE");
+  const mode = required(environment, "VITE_CERTFORGE_RUNTIME_MODE");
   if (mode === "mock") {
     if (environment.PROD) {
       throw new RuntimeConfigurationError(
-        "Mock runtime mode is unavailable in a production build. Configure VITE_CERTQUIZ_RUNTIME_MODE=http.",
+        "Mock runtime mode is unavailable in a production build. Configure VITE_CERTFORGE_RUNTIME_MODE=http.",
       );
     }
     return { mode: "mock" };
   }
   if (mode !== "http") {
     throw new RuntimeConfigurationError(
-      "VITE_CERTQUIZ_RUNTIME_MODE must be either http or mock.",
+      "VITE_CERTFORGE_RUNTIME_MODE must be either http or mock.",
     );
   }
   const origin = parseBrowserOrigin(browserOrigin);
   const apiBaseUrl = parseUrl(
-    "VITE_CERTQUIZ_API_BASE_URL",
-    required(environment, "VITE_CERTQUIZ_API_BASE_URL"),
+    "VITE_CERTFORGE_API_BASE_URL",
+    required(environment, "VITE_CERTFORGE_API_BASE_URL"),
     true,
   ).toString();
   const cognitoHostedUiBaseUrl = parseUrl(
-    "VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL",
-    required(environment, "VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL"),
+    "VITE_CERTFORGE_COGNITO_HOSTED_UI_BASE_URL",
+    required(environment, "VITE_CERTFORGE_COGNITO_HOSTED_UI_BASE_URL"),
     false,
   ).origin;
-  const cognitoClientId = required(environment, "VITE_CERTQUIZ_COGNITO_CLIENT_ID");
+  const cognitoClientId = required(environment, "VITE_CERTFORGE_COGNITO_CLIENT_ID");
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(cognitoClientId)) {
     throw new RuntimeConfigurationError(
-      "VITE_CERTQUIZ_COGNITO_CLIENT_ID must be a public Cognito client identifier.",
+      "VITE_CERTFORGE_COGNITO_CLIENT_ID must be a public Cognito client identifier.",
     );
   }
   return {
@@ -148,19 +148,19 @@ export function resolveWebRuntimeConfiguration(
     cognitoHostedUiBaseUrl,
     cognitoClientId,
     redirectUri: parseSameOriginPath(
-      "VITE_CERTQUIZ_AUTH_REDIRECT_PATH",
-      required(environment, "VITE_CERTQUIZ_AUTH_REDIRECT_PATH"),
+      "VITE_CERTFORGE_AUTH_REDIRECT_PATH",
+      required(environment, "VITE_CERTFORGE_AUTH_REDIRECT_PATH"),
       origin,
     ),
     logoutUri: parseSameOriginPath(
-      "VITE_CERTQUIZ_AUTH_LOGOUT_PATH",
-      required(environment, "VITE_CERTQUIZ_AUTH_LOGOUT_PATH"),
+      "VITE_CERTFORGE_AUTH_LOGOUT_PATH",
+      required(environment, "VITE_CERTFORGE_AUTH_LOGOUT_PATH"),
       origin,
     ),
   };
 }
 export interface WebRuntime {
-  readonly api: CertQuizApi;
+  readonly api: CertForgeApi;
   readonly browserAuthSession?: BrowserAuthSession;
   readonly authCallbackCapability?: MockAuthCallbackCapability;
 }
@@ -178,7 +178,7 @@ export function createWebRuntime(
     logoutUri: configuration.logoutUri,
   });
   return {
-    api: createHttpCertQuizApi({
+    api: createHttpCertForgeApi({
       baseUrl: configuration.apiBaseUrl,
       getBearerToken: () => browserAuthSession.getIdToken(),
     }),

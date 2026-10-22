@@ -1,10 +1,10 @@
-import type { StartPracticeResponse, Uuid } from "@cert-quiz/contracts";
+import type { StartPracticeResponse, Uuid } from "@cert-forge/contracts";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { resolveCertQuizResult } from "../api/query-result";
-import { useCertQuizApi } from "../api/useCertQuizApi";
+import { resolveCertForgeResult } from "../api/query-result";
+import { useCertForgeApi } from "../api/useCertForgeApi";
 import { certQuizQueryKeys } from "./query-keys";
 import { providerLogoSrc } from "./provider-logos";
 import {
@@ -468,7 +468,7 @@ export function CatalogHomePage() {
 export function ModeSelectPage() {
   const { id: certificationId } = useParams();
   const navigate = useNavigate();
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const catalog = useCatalogQuery();
   const [practiceDecision, setPracticeDecision] = useState<PracticeDecision | null>(
@@ -489,7 +489,7 @@ export function ModeSelectPage() {
   const startPractice = useMutation({
     mutationFn: () => {
       if (!certification) throw new Error("A selected certification is required.");
-      return resolveCertQuizResult(
+      return resolveCertForgeResult(
         api.startPractice({ certificationId: certification.id }),
       );
     },
@@ -506,7 +506,7 @@ export function ModeSelectPage() {
 
   const resumePractice = useMutation({
     mutationFn: (practiceSessionId: string) =>
-      resolveCertQuizResult(api.resumePractice({ practiceSessionId })),
+      resolveCertForgeResult(api.resumePractice({ practiceSessionId })),
     onSuccess: (session) => {
       setCommandError(null);
       setPracticeDecision(null);
@@ -517,7 +517,7 @@ export function ModeSelectPage() {
 
   const replacePractice = useMutation({
     mutationFn: (practiceSessionId: string) =>
-      resolveCertQuizResult(
+      resolveCertForgeResult(
         api.replacePractice({
           practiceSessionId,
           confirmationNonce: `replace:${practiceSessionId}`,
@@ -537,7 +537,7 @@ export function ModeSelectPage() {
   const startExam = useMutation({
     mutationFn: () => {
       if (!certification) throw new Error("A selected certification is required.");
-      return resolveCertQuizResult(
+      return resolveCertForgeResult(
         api.startExam({
           certificationId: certification.id,
           idempotencyKey: examIdempotencyKey.current,

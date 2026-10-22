@@ -10,7 +10,7 @@ import {
   type PracticeUnsubmittedQuestion,
   type ReviewQuestion,
   type Uuid,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 export type SnapshotChoice = {
   id: Uuid;

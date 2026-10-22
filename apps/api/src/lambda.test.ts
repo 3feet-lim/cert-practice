@@ -5,7 +5,7 @@ const deploymentEnvironment = {
   STAGE: "dev",
   WEB_ORIGIN: "https://quiz.dev.example.test",
   MARKDOWN_IMAGE_ORIGINS: "https://images.dev.example.test",
-  CERTQUIZ_LOCAL_EMULATION: "false",
+  CERTFORGE_LOCAL_EMULATION: "false",
 } as const;
 
 function setDeploymentEnvironment() {
@@ -72,7 +72,7 @@ describe("deployed Lambda routing", () => {
 
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
-      data: { status: "ok", service: "cert-quiz-api" },
+      data: { status: "ok", service: "cert-forge-api" },
     });
     expect(response.headers["access-control-allow-origin"]).toBe(
       deploymentEnvironment.WEB_ORIGIN,

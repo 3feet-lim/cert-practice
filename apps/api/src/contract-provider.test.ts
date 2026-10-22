@@ -4,14 +4,14 @@ import {
   practiceUnsubmittedQuestionSchema,
   reviewQuestionSchema,
   type Uuid,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import {
   projectExamActive,
   projectPracticeSubmitted,
   projectPracticeUnsubmitted,
   projectReview,
   type QuestionSnapshot,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import { describe, expect, it } from "vitest";
 
 const id = (value: string) => value as Uuid;

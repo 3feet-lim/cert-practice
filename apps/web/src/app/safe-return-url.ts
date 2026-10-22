@@ -29,7 +29,7 @@ export function getSafeReturnUrl(search: string): string {
   }
 
   try {
-    const base = new URL("https://certquiz.invalid");
+    const base = new URL("https://certforge.invalid");
     const parsed = new URL(candidate, base);
     const decodedPath = decodeURIComponent(parsed.pathname);
 

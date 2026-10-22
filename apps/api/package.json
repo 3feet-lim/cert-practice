@@ -1,5 +1,5 @@
 {
-  "name": "@cert-quiz/api",
+  "name": "@cert-forge/api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -25,9 +25,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.1127.0",
-    "@cert-quiz/contracts": "workspace:*",
-    "@cert-quiz/db": "workspace:*",
-    "@cert-quiz/domain": "workspace:*",
+    "@cert-forge/contracts": "workspace:*",
+    "@cert-forge/db": "workspace:*",
+    "@cert-forge/domain": "workspace:*",
     "hono": "4.13.7"
   },
   "devDependencies": {

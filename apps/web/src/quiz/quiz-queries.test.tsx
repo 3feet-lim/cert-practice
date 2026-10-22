@@ -4,18 +4,18 @@ import type {
   PracticeSessionDto,
   PracticeStateResponse,
   SubmitPracticeQuestionResponse,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { CertQuizApi, CertQuizApiResult } from "../api/port";
+import type { CertForgeApi, CertForgeApiResult } from "../api/port";
 import { useApprovalStatusQuery, useCatalogQuery } from "../api/queries";
-import { createUnavailableCertQuizApi } from "../api/unavailable-adapter";
-import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
-import { createCertQuizQueryClient, purgeCertQuizSession } from "../app/query-client";
+import { createUnavailableCertForgeApi } from "../api/unavailable-adapter";
+import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";
+import { createCertForgeQueryClient, purgeCertForgeSession } from "../app/query-client";
 import { certQuizQueryKeys } from "../app/query-keys";
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import { createQuizStore, type QuizQuestionTarget } from "./quiz-store";
 import { usePracticeFlagMutation, usePracticeQuestionSubmit } from "./quiz-queries";
 
@@ -28,19 +28,19 @@ function deferred<T>() {
 }
 
 function wrapperFor(
-  api: CertQuizApi,
-  queryClient = createCertQuizQueryClient(),
+  api: CertForgeApi,
+  queryClient = createCertForgeQueryClient(),
   quizStore = createQuizStore(),
 ) {
   return function Wrapper({ children }: PropsWithChildren) {
     return (
-      <CertQuizCompositionRoot
+      <CertForgeCompositionRoot
         api={api}
         queryClient={queryClient}
         quizStore={quizStore}
       >
         {children}
-      </CertQuizCompositionRoot>
+      </CertForgeCompositionRoot>
     );
   };
 }
@@ -57,12 +57,12 @@ const retryableFailure = {
 
 describe("TanStack Query API state", () => {
   it("tracks independent loading and error state for concurrent queries", async () => {
-    const pendingApproval = deferred<CertQuizApiResult<ApprovalStatusDto>>();
-    const api: CertQuizApi = {
-      ...createUnavailableCertQuizApi(),
+    const pendingApproval = deferred<CertForgeApiResult<ApprovalStatusDto>>();
+    const api: CertForgeApi = {
+      ...createUnavailableCertForgeApi(),
       getApprovalStatus: vi.fn(() => pendingApproval.promise),
       getCatalog: vi.fn(
-        async (): Promise<CertQuizApiResult<CatalogDto>> => retryableFailure,
+        async (): Promise<CertForgeApiResult<CatalogDto>> => retryableFailure,
       ),
     };
 
@@ -84,12 +84,12 @@ describe("TanStack Query API state", () => {
   });
 
   it("reconciles successful flag mutations and rolls failed mutations back without losing input", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const sessionId = fixtures.ids.practiceSessionId;
     const question = fixtures.practice.active.questions[0];
     if (!question) throw new Error("Expected a practice question fixture.");
 
-    const queryClient = createCertQuizQueryClient();
+    const queryClient = createCertForgeQueryClient();
     const quizStore = createQuizStore();
     queryClient.setQueryData(
       certQuizQueryKeys.practice(sessionId),
@@ -99,7 +99,7 @@ describe("TanStack Query API state", () => {
     quizStore.getState().setDraftChoiceIds(questionTarget, question.selectedChoiceIds);
 
     const patchPracticeState = vi
-      .fn<CertQuizApi["patchPracticeState"]>()
+      .fn<CertForgeApi["patchPracticeState"]>()
       .mockResolvedValueOnce({
         ok: true,
         data: {
@@ -109,8 +109,8 @@ describe("TanStack Query API state", () => {
         } satisfies PracticeStateResponse,
       })
       .mockResolvedValueOnce(retryableFailure);
-    const api: CertQuizApi = {
-      ...createUnavailableCertQuizApi(),
+    const api: CertForgeApi = {
+      ...createUnavailableCertForgeApi(),
       patchPracticeState,
     };
     const { result } = renderHook(() => usePracticeFlagMutation(sessionId), {
@@ -140,20 +140,20 @@ describe("TanStack Query API state", () => {
   });
 
   it("locks duplicate question submits and applies the one canonical result", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const sessionId = fixtures.ids.practiceSessionId;
     const submittedQuestion = fixtures.practice.submitted.questions[0];
     if (submittedQuestion?.kind !== "practice-submitted") {
       throw new Error("Expected a submitted practice question fixture.");
     }
     const selectedChoiceIds = submittedQuestion.selectedChoiceIds;
-    const pendingSubmit = deferred<CertQuizApiResult<SubmitPracticeQuestionResponse>>();
+    const pendingSubmit = deferred<CertForgeApiResult<SubmitPracticeQuestionResponse>>();
     const submitPracticeQuestion = vi.fn(() => pendingSubmit.promise);
-    const api: CertQuizApi = {
-      ...createUnavailableCertQuizApi(),
+    const api: CertForgeApi = {
+      ...createUnavailableCertForgeApi(),
       submitPracticeQuestion,
     };
-    const queryClient = createCertQuizQueryClient();
+    const queryClient = createCertForgeQueryClient();
     queryClient.setQueryData(
       certQuizQueryKeys.practice(sessionId),
       fixtures.practice.active,
@@ -196,9 +196,9 @@ describe("TanStack Query API state", () => {
     expect(submitPracticeQuestion).toHaveBeenCalledOnce();
   });
 
-  it("purges all CertQuiz query and transient state on logout", async () => {
-    const fixtures = createCertQuizFixtures();
-    const queryClient = createCertQuizQueryClient();
+  it("purges all CertForge query and transient state on logout", async () => {
+    const fixtures = createCertForgeFixtures();
+    const queryClient = createCertForgeQueryClient();
     const quizStore = createQuizStore();
     queryClient.setQueryData(certQuizQueryKeys.catalog(), fixtures.catalog.valid);
     queryClient.setQueryData(
@@ -212,7 +212,7 @@ describe("TanStack Query API state", () => {
     quizStore.getState().setDraftChoiceIds(target, question.selectedChoiceIds);
     quizStore.getState().acquireSubmitLock(target);
 
-    await purgeCertQuizSession(queryClient, quizStore);
+    await purgeCertForgeSession(queryClient, quizStore);
 
     expect(
       queryClient.getQueryCache().findAll({ queryKey: certQuizQueryKeys.all }),

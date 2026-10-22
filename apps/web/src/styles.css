@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * CertQuiz light tokens. Pretendard is self-hosted (bundled from the
+ * CertForge light tokens. Pretendard is self-hosted (bundled from the
  * `pretendard` package in main.tsx), so no font CDN request is made.
  */
 :root {

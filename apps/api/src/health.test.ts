@@ -1,4 +1,4 @@
-import { healthSuccessEnvelopeSchema } from "@cert-quiz/contracts";
+import { healthSuccessEnvelopeSchema } from "@cert-forge/contracts";
 import { describe, expect, it } from "vitest";
 
 import { app } from "./app.js";
@@ -15,7 +15,7 @@ describe("GET /v1/health", () => {
     expect(body).toMatchObject({
       data: {
         status: "ok",
-        service: "cert-quiz-api",
+        service: "cert-forge-api",
         contractVersion: "v1",
       },
       meta: { requestId: response.headers.get("x-request-id") },

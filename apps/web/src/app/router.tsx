@@ -11,7 +11,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-import type { CertQuizApiError } from "../api/port";
+import type { CertForgeApiError } from "../api/port";
 import { FullPageState, LoadingMessage } from "../components/FullPageState";
 import { Button } from "../components/ui/Button";
 import { buttonClassName } from "../components/ui/button-styles";
@@ -72,12 +72,12 @@ function LoadingRoute() {
     </FullPageState>
   );
 }
-const errorTitles: Partial<Record<CertQuizApiError["code"], string>> = {
+const errorTitles: Partial<Record<CertForgeApiError["code"], string>> = {
   "admin-required": "접근 권한이 없습니다.",
   "authentication-invalid": "로그인을 완료하지 못했습니다.",
   "google-identity-missing": "로그인을 완료하지 못했습니다.",
 };
-const reLoginCodes: ReadonlySet<CertQuizApiError["code"]> = new Set([
+const reLoginCodes: ReadonlySet<CertForgeApiError["code"]> = new Set([
   "authentication-invalid",
   "google-identity-missing",
 ]);
@@ -85,7 +85,7 @@ function CanonicalError({
   error,
   onRetry,
 }: {
-  error: CertQuizApiError;
+  error: CertForgeApiError;
   onRetry?: () => void;
 }) {
   const title = errorTitles[error.code] ?? "요청을 계속할 수 없습니다.";
@@ -278,7 +278,7 @@ function CallbackRoute() {
 
   if (runtimeMode === "mock") {
     if (hasCallbackError) {
-      const error: CertQuizApiError = {
+      const error: CertForgeApiError = {
         code: "authentication-invalid",
         message: "로그인을 완료하지 못했습니다.",
         requestId: "frontend-auth-callback",

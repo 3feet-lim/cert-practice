@@ -11,85 +11,85 @@ import type {
   PendingUsersDto,
   PracticeResultDto,
   Uuid,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 
 import { certQuizQueryKeys } from "../app/query-keys";
-import { purgeCertQuizSession } from "../app/query-client";
+import { purgeCertForgeSession } from "../app/query-client";
 import { useQuizStoreApi } from "../quiz/quiz-store";
-import { resolveCertQuizResult } from "./query-result";
-import { useCertQuizApi } from "./useCertQuizApi";
+import { resolveCertForgeResult } from "./query-result";
+import { useCertForgeApi } from "./useCertForgeApi";
 
 /** Each hook owns an independent TanStack Query loading/error state. */
 export function useHealthQuery() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery({
     queryKey: certQuizQueryKeys.health(),
-    queryFn: () => resolveCertQuizResult(api.getHealth()),
+    queryFn: () => resolveCertForgeResult(api.getHealth()),
   });
 }
 
 export function useApprovalStatusQuery() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery({
     queryKey: certQuizQueryKeys.approval(),
-    queryFn: () => resolveCertQuizResult(api.getApprovalStatus()),
+    queryFn: () => resolveCertForgeResult(api.getApprovalStatus()),
   });
 }
 
 export function useCurrentUserQuery() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery({
     queryKey: certQuizQueryKeys.currentUser(),
-    queryFn: () => resolveCertQuizResult(api.getCurrentUser()),
+    queryFn: () => resolveCertForgeResult(api.getCurrentUser()),
   });
 }
 
 export function usePracticeResultQuery(resultId: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery<PracticeResultDto>({
     queryKey: certQuizQueryKeys.practiceResult(resultId),
-    queryFn: () => resolveCertQuizResult(api.getPracticeResult({ resultId })),
+    queryFn: () => resolveCertForgeResult(api.getPracticeResult({ resultId })),
   });
 }
 
 export function useAttemptQuery(attemptId: Uuid, options: { enabled?: boolean } = {}) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery<ExamResultDto>({
     queryKey: certQuizQueryKeys.attempt(attemptId),
-    queryFn: () => resolveCertQuizResult(api.getAttempt({ attemptId })),
+    queryFn: () => resolveCertForgeResult(api.getAttempt({ attemptId })),
     enabled: options.enabled ?? true,
   });
 }
 
 export function useHistoryQuery(cursor?: HistoryCursor) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery<HistoryPageDto>({
     queryKey: certQuizQueryKeys.history(cursor),
     queryFn: () =>
-      resolveCertQuizResult(api.getHistory({ ...(cursor ? { cursor } : {}) })),
+      resolveCertForgeResult(api.getHistory({ ...(cursor ? { cursor } : {}) })),
   });
 }
 
 export function useHistoryTrendsQuery() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery<HistoryTrendsDto>({
     queryKey: certQuizQueryKeys.historyTrends(),
-    queryFn: () => resolveCertQuizResult(api.getHistoryTrends()),
+    queryFn: () => resolveCertForgeResult(api.getHistoryTrends()),
   });
 }
 
 export function useLeaderboardQuery(certificationId?: Uuid) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery<LeaderboardDto>({
     queryKey: certificationId
       ? certQuizQueryKeys.leaderboard(certificationId)
-      : ["cert-quiz", "leaderboard", "unselected"],
+      : ["cert-forge", "leaderboard", "unselected"],
     enabled: certificationId !== undefined,
     queryFn: () => {
       if (!certificationId) throw new Error("A certification must be selected first.");
-      return resolveCertQuizResult(api.getLeaderboard({ certificationId }));
+      return resolveCertForgeResult(api.getLeaderboard({ certificationId }));
     },
   });
 }
@@ -98,7 +98,7 @@ type VisibilityMutationContext = { previous: CurrentUserDto };
 
 /** Optimistically updates the profile cache and restores it if the server rejects the change. */
 export function useScoreVisibilityMutation() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const currentUserKey = certQuizQueryKeys.currentUser();
 
@@ -112,7 +112,7 @@ export function useScoreVisibilityMutation() {
       const currentUser = queryClient.getQueryData<CurrentUserDto>(currentUserKey);
       if (!currentUser)
         throw new Error("Current user must be loaded before changing visibility.");
-      return resolveCertQuizResult(
+      return resolveCertForgeResult(
         api.updateScoreVisibility({
           scorePublic,
           expectedVersion: currentUser.stateVersion,
@@ -140,7 +140,7 @@ export function useScoreVisibilityMutation() {
             }
           : currentUser,
       );
-      void queryClient.invalidateQueries({ queryKey: ["cert-quiz", "leaderboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["cert-forge", "leaderboard"] });
     },
     onError: (_error, _variables, context) => {
       if (context) queryClient.setQueryData(currentUserKey, context.previous);
@@ -149,37 +149,37 @@ export function useScoreVisibilityMutation() {
 }
 
 export function useCatalogQuery() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery({
     queryKey: certQuizQueryKeys.catalog(),
-    queryFn: () => resolveCertQuizResult(api.getCatalog()),
+    queryFn: () => resolveCertForgeResult(api.getCatalog()),
   });
 }
 
 export function useActivePracticeSessionsQuery() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery({
     queryKey: certQuizQueryKeys.activePracticeSessions(),
-    queryFn: () => resolveCertQuizResult(api.listActivePracticeSessions()),
+    queryFn: () => resolveCertForgeResult(api.listActivePracticeSessions()),
   });
 }
 
 export function usePendingUsersQuery() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useQuery({
     queryKey: certQuizQueryKeys.pendingUsers(),
-    queryFn: () => resolveCertQuizResult(api.getPendingUsers()),
+    queryFn: () => resolveCertForgeResult(api.getPendingUsers()),
   });
 }
 
 export function useApproveUserMutation() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const queryClient = useQueryClient();
   const key = certQuizQueryKeys.pendingUsers();
 
   return useMutation({
     mutationFn: ({ userId }: { userId: Uuid }) =>
-      resolveCertQuizResult(api.approveUser({ userId })),
+      resolveCertForgeResult(api.approveUser({ userId })),
     onSuccess: async ({ userId }: ApproveUserResponse) => {
       queryClient.setQueryData<PendingUsersDto>(key, (pendingUsers) =>
         pendingUsers
@@ -196,18 +196,18 @@ export function useApproveUserMutation() {
 
 /** S10 mutations deliberately keep import contents and credentials out of the query cache. */
 export function useDryRunImportMutation() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useMutation({
     mutationFn: (input: DryRunImportRequest) =>
-      resolveCertQuizResult(api.dryRunImport(input)),
+      resolveCertForgeResult(api.dryRunImport(input)),
   });
 }
 
 export function useCommitImportMutation() {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   return useMutation({
     mutationFn: (input: CommitImportRequest) =>
-      resolveCertQuizResult(api.commitImport(input)),
+      resolveCertForgeResult(api.commitImport(input)),
   });
 }
 
@@ -216,7 +216,7 @@ export function useLogoutStatePurge() {
   const queryClient = useQueryClient();
   const quizStore = useQuizStoreApi();
   return useCallback(
-    () => purgeCertQuizSession(queryClient, quizStore),
+    () => purgeCertForgeSession(queryClient, quizStore),
     [queryClient, quizStore],
   );
 }

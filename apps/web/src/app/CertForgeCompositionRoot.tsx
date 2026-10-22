@@ -2,9 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
 
-import { CertQuizApiProvider } from "../api/CertQuizApiProvider";
+import { CertForgeApiProvider } from "../api/CertForgeApiProvider";
 import type { BrowserAuthSession } from "../auth/cognito-pkce-session";
-import type { CertQuizApi } from "../api/port";
+import type { CertForgeApi } from "../api/port";
 import { type QuizStoreApi } from "../quiz/quiz-store";
 import { QuizStoreProvider } from "../quiz/quiz-store-provider";
 import { BrowserAuthSessionProvider } from "./browser-auth-session";
@@ -12,12 +12,12 @@ import {
   MockAuthCallbackProvider,
   type MockAuthCallbackCapability,
 } from "./mock-auth-capability";
-import { createCertQuizQueryClient } from "./query-client";
+import { createCertForgeQueryClient } from "./query-client";
 import { RuntimeModeProvider } from "./runtime-mode";
 import type { WebRuntimeMode } from "../runtime-config";
 
-export type CertQuizCompositionRootProps = PropsWithChildren<{
-  api: CertQuizApi;
+export type CertForgeCompositionRootProps = PropsWithChildren<{
+  api: CertForgeApi;
   /** Mock is the test default; browser bootstrap always supplies an explicit mode. */
   runtimeMode?: WebRuntimeMode;
   browserAuthSession?: BrowserAuthSession;
@@ -27,7 +27,7 @@ export type CertQuizCompositionRootProps = PropsWithChildren<{
 }>;
 
 /** The only application boundary that selects adapters and owns request/transient state. */
-export function CertQuizCompositionRoot({
+export function CertForgeCompositionRoot({
   api,
   runtimeMode = "mock",
   browserAuthSession,
@@ -35,11 +35,11 @@ export function CertQuizCompositionRoot({
   queryClient,
   quizStore,
   children,
-}: CertQuizCompositionRootProps) {
-  const [ownedQueryClient] = useState(createCertQuizQueryClient);
+}: CertForgeCompositionRootProps) {
+  const [ownedQueryClient] = useState(createCertForgeQueryClient);
 
   return (
-    <CertQuizApiProvider api={api}>
+    <CertForgeApiProvider api={api}>
       <RuntimeModeProvider value={runtimeMode}>
         <BrowserAuthSessionProvider value={browserAuthSession}>
           <MockAuthCallbackProvider value={authCallbackCapability}>
@@ -49,6 +49,6 @@ export function CertQuizCompositionRoot({
           </MockAuthCallbackProvider>
         </BrowserAuthSessionProvider>
       </RuntimeModeProvider>
-    </CertQuizApiProvider>
+    </CertForgeApiProvider>
   );
 }

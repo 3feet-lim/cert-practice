@@ -3404,7 +3404,7 @@
         "timestamp": 1789091972171
       }
     ],
-    "23.1 frontend real HTTP adapter를 전체 `CertQuizApi`로 확장한다": [
+    "23.1 frontend real HTTP adapter를 전체 `CertForgeApi`로 확장한다": [
       {
         "executionId": "fcf703e7-3041-4d8d-9838-b1dad2aa255d",
         "chatSessionId": "sess_8c7a3077-3ed2-45ca-9977-e59e52359fc9",

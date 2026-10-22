@@ -4,20 +4,20 @@ import { MemoryRouter, useLocation } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createMockAuthController,
-  createMockCertQuizApi,
+  createMockCertForgeApi,
   type MockAuthActor,
 } from "../api/mock-adapter";
 import type { BrowserAuthSession } from "../auth/cognito-pkce-session";
 import type { MockAuthCallbackCapability } from "./mock-auth-capability";
-import type { CertQuizApi } from "../api/port";
+import type { CertForgeApi } from "../api/port";
 import { App } from "../App";
 import { createQuizStore, type QuizQuestionTarget } from "../quiz/quiz-store";
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import { MOCK_IDS } from "../mocks/state-machine";
-import { CertQuizCompositionRoot } from "./CertQuizCompositionRoot";
-import { createCertQuizQueryClient } from "./query-client";
+import { CertForgeCompositionRoot } from "./CertForgeCompositionRoot";
+import { createCertForgeQueryClient } from "./query-client";
 import { certQuizQueryKeys } from "./query-keys";
-const defaultFixtures = createCertQuizFixtures();
+const defaultFixtures = createCertForgeFixtures();
 const { certificationId: defaultCertificationId } = defaultFixtures.ids;
 
 afterEach(cleanup);
@@ -35,21 +35,21 @@ function renderRoute(
   path: string,
   options: {
     actor?: MockAuthActor;
-    api?: CertQuizApi;
+    api?: CertForgeApi;
     authCallbackCapability?: MockAuthCallbackCapability;
     browserAuthSession?: BrowserAuthSession;
     runtimeMode?: "http" | "mock";
-    queryClient?: ReturnType<typeof createCertQuizQueryClient>;
+    queryClient?: ReturnType<typeof createCertForgeQueryClient>;
     quizStore?: ReturnType<typeof createQuizStore>;
   } = {},
 ) {
-  const api = options.api ?? createMockCertQuizApi({ authActor: options.actor });
-  const queryClient = options.queryClient ?? createCertQuizQueryClient();
+  const api = options.api ?? createMockCertForgeApi({ authActor: options.actor });
+  const queryClient = options.queryClient ?? createCertForgeQueryClient();
   const quizStore = options.quizStore ?? createQuizStore();
   return {
     ...render(
       <MemoryRouter initialEntries={[path]}>
-        <CertQuizCompositionRoot
+        <CertForgeCompositionRoot
           api={api}
           runtimeMode={options.runtimeMode}
           browserAuthSession={options.browserAuthSession}
@@ -59,7 +59,7 @@ function renderRoute(
         >
           <App />
           <LocationProbe />
-        </CertQuizCompositionRoot>
+        </CertForgeCompositionRoot>
       </MemoryRouter>,
     ),
     queryClient,
@@ -77,7 +77,7 @@ describe("application route hierarchy", () => {
     [`/app/leaderboards/${defaultCertificationId}`, "S9", "리더보드"],
   ])("renders approved route %s", async (path, screenId, title) => {
     renderRoute(path, {
-      api: createMockCertQuizApi({ e2eScenario: "completed-results" }),
+      api: createMockCertForgeApi({ e2eScenario: "completed-results" }),
     });
     expect(await screen.findByRole("heading", { name: title })).toBeVisible();
     if (["S3", "S4", "S5"].includes(screenId)) {
@@ -104,8 +104,8 @@ describe("application route hierarchy", () => {
     expect(document.querySelector('[data-screen="ADMIN-USERS"]')).toBeNull();
   });
   it("renders the empty pending-user response as a successful state", async () => {
-    const mockApi = createMockCertQuizApi({ authActor: "admin" });
-    const api: CertQuizApi = {
+    const mockApi = createMockCertForgeApi({ authActor: "admin" });
+    const api: CertForgeApi = {
       ...mockApi,
       getPendingUsers: async () => ({
         ok: true,
@@ -124,8 +124,8 @@ describe("application route hierarchy", () => {
     const pendingRequest = new Promise<void>((resolve) => {
       resolvePendingUsers = resolve;
     });
-    const mockApi = createMockCertQuizApi({ authActor: "admin" });
-    const loadingApi: CertQuizApi = {
+    const mockApi = createMockCertForgeApi({ authActor: "admin" });
+    const loadingApi: CertForgeApi = {
       ...mockApi,
       getPendingUsers: async () => {
         await pendingRequest;
@@ -141,7 +141,7 @@ describe("application route hierarchy", () => {
     await screen.findByText("Pending One");
     loadingView.unmount();
 
-    const errorApi: CertQuizApi = {
+    const errorApi: CertForgeApi = {
       ...mockApi,
       getPendingUsers: async () => ({
         ok: false,
@@ -161,18 +161,18 @@ describe("application route hierarchy", () => {
   });
   it("locks only the approving row and removes it after canonical approval", async () => {
     const user = userEvent.setup();
-    const mockApi = createMockCertQuizApi({ authActor: "admin" });
+    const mockApi = createMockCertForgeApi({ authActor: "admin" });
     let releaseApproval: (() => void) | undefined;
     const approvalGate = new Promise<void>((resolve) => {
       releaseApproval = resolve;
     });
     const approveUser = vi.fn(
-      async (input: Parameters<CertQuizApi["approveUser"]>[0]) => {
+      async (input: Parameters<CertForgeApi["approveUser"]>[0]) => {
         await approvalGate;
         return mockApi.approveUser(input);
       },
     );
-    const api: CertQuizApi = { ...mockApi, approveUser };
+    const api: CertForgeApi = { ...mockApi, approveUser };
 
     renderRoute("/app/admin/users", { api });
     const firstApproval = await screen.findByRole("button", {
@@ -191,8 +191,8 @@ describe("application route hierarchy", () => {
   });
   it("keeps the row available and presents a safe approval error", async () => {
     const user = userEvent.setup();
-    const mockApi = createMockCertQuizApi({ authActor: "admin" });
-    const api: CertQuizApi = {
+    const mockApi = createMockCertForgeApi({ authActor: "admin" });
+    const api: CertForgeApi = {
       ...mockApi,
       approveUser: async () => ({
         ok: false,
@@ -237,7 +237,7 @@ describe("application route hierarchy", () => {
   it("starts real HTTP login and completes a safe callback without invoking mock auth", async () => {
     const user = userEvent.setup();
     const authController = createMockAuthController();
-    const api = createMockCertQuizApi({ authController });
+    const api = createMockCertForgeApi({ authController });
     const beginLogin = vi.fn().mockResolvedValue(undefined);
     const completeCallback = vi.fn().mockResolvedValue({ ok: false } as const);
     const browserAuthSession: BrowserAuthSession = {
@@ -295,10 +295,10 @@ describe("application route hierarchy", () => {
   it("restores the protected destination after mock approval refresh", async () => {
     const user = userEvent.setup();
     const authController = createMockAuthController();
-    const mockApi = createMockCertQuizApi({ authController });
+    const mockApi = createMockCertForgeApi({ authController });
     const getApprovalStatus = vi.fn(mockApi.getApprovalStatus);
     const getCurrentUser = vi.fn(mockApi.getCurrentUser);
-    const api: CertQuizApi = { ...mockApi, getApprovalStatus, getCurrentUser };
+    const api: CertForgeApi = { ...mockApi, getApprovalStatus, getCurrentUser };
 
     renderRoute("/app/history?period=recent#trend", {
       api,
@@ -379,8 +379,8 @@ describe("application route hierarchy", () => {
   });
   it("purges authenticated query data and transient quiz state before returning to login", async () => {
     const user = userEvent.setup();
-    const fixtures = createCertQuizFixtures();
-    const queryClient = createCertQuizQueryClient();
+    const fixtures = createCertForgeFixtures();
+    const queryClient = createCertForgeQueryClient();
     const quizStore = createQuizStore();
     const questionId = fixtures.ids.questionIds[0];
     if (!questionId) throw new Error("Expected a deterministic question fixture.");
@@ -431,10 +431,10 @@ describe("application route hierarchy", () => {
   });
 
   it("summarizes pass readiness, weak domains, and per-certification stats on the home dashboard", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const exam = fixtures.exam.immutableResult;
-    const mockApi = createMockCertQuizApi();
-    const api: CertQuizApi = {
+    const mockApi = createMockCertForgeApi();
+    const api: CertForgeApi = {
       ...mockApi,
       getAttempt: async () => ({
         ok: true,
@@ -462,8 +462,8 @@ describe("application route hierarchy", () => {
   });
 
   it("renders a safe catalog error without treating an active session as catalog data", async () => {
-    const api: CertQuizApi = {
-      ...createMockCertQuizApi(),
+    const api: CertForgeApi = {
+      ...createMockCertForgeApi(),
       getCatalog: async () => ({
         ok: false,
         error: {
@@ -485,15 +485,15 @@ describe("application route hierarchy", () => {
 
   it("renders the catalog empty state and keeps catalog content independent from active-session errors", async () => {
     const emptyView = renderRoute("/app", {
-      api: createMockCertQuizApi({ catalog: "empty" }),
+      api: createMockCertForgeApi({ catalog: "empty" }),
     });
     expect(
       await screen.findByRole("heading", { name: "학습 가능한 자격증이 없습니다." }),
     ).toBeVisible();
     emptyView.unmount();
 
-    const mockApi = createMockCertQuizApi();
-    const api: CertQuizApi = {
+    const mockApi = createMockCertForgeApi();
+    const api: CertForgeApi = {
       ...mockApi,
       listActivePracticeSessions: async () => ({
         ok: false,
@@ -516,11 +516,11 @@ describe("application route hierarchy", () => {
 
   it("keeps active practice unchanged until a resume or confirmed replacement is selected", async () => {
     const user = userEvent.setup();
-    const mockApi = createMockCertQuizApi();
+    const mockApi = createMockCertForgeApi();
     const startPractice = vi.fn(mockApi.startPractice);
     const resumePractice = vi.fn(mockApi.resumePractice);
     const replacePractice = vi.fn(mockApi.replacePractice);
-    const api: CertQuizApi = {
+    const api: CertForgeApi = {
       ...mockApi,
       startPractice,
       resumePractice,
@@ -549,10 +549,10 @@ describe("application route hierarchy", () => {
 
   it("replaces practice only after explicit confirmation and starts exams only after confirmation", async () => {
     const user = userEvent.setup();
-    const mockApi = createMockCertQuizApi();
+    const mockApi = createMockCertForgeApi();
     const replacePractice = vi.fn(mockApi.replacePractice);
     const startExam = vi.fn(mockApi.startExam);
-    const api: CertQuizApi = { ...mockApi, replacePractice, startExam };
+    const api: CertForgeApi = { ...mockApi, replacePractice, startExam };
 
     const replacementView = renderRoute(
       `/app/certifications/${defaultCertificationId}`,
@@ -599,8 +599,8 @@ describe("application route hierarchy", () => {
   });
 
   it("uses the API port's canonical authorization error state", async () => {
-    const api: CertQuizApi = {
-      ...createMockCertQuizApi(),
+    const api: CertForgeApi = {
+      ...createMockCertForgeApi(),
       getApprovalStatus: async () => ({
         ok: false,
         error: {

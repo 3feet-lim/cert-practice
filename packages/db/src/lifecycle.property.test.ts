@@ -9,7 +9,7 @@ import {
   SessionFactory,
   type FullCatalogGenerationSource,
   type UserProfile,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import { describe, expect, it } from "vitest";
 
 import { InMemoryUnitOfWork } from "./in-memory-unit-of-work.js";
@@ -355,7 +355,7 @@ function mutateSourceRevision(
 
 // This is an in-memory adapter model test; it does not establish SQL/production transaction semantics.
 describe("offline lifecycle properties", () => {
-  // Feature: cert-quiz-mvp, Property 7: 회차 생성의 all-or-nothing과 snapshot 불변성
+  // Feature: cert-forge-mvp, Property 7: 회차 생성의 all-or-nothing과 snapshot 불변성
   // **Validates: Requirements 4.9-4.12**
   it("P7 gathers every insufficient domain, rolls back every session write fault, and isolates snapshots from source revisions", async () => {
     await fc.assert(
@@ -730,7 +730,7 @@ describe("offline lifecycle properties", () => {
     );
   });
 
-  // Feature: cert-quiz-mvp, Property 21: Attempt 불변성과 이력 정렬
+  // Feature: cert-forge-mvp, Property 21: Attempt 불변성과 이력 정렬
   // **Validates: Requirements 13.1-13.14**
   it("P21 preserves submitted Attempt snapshots across catalog replacement and orders owner history/trends", async () => {
     await fc.assert(
@@ -926,7 +926,7 @@ describe("offline lifecycle properties", () => {
     );
   });
 
-  // Feature: cert-quiz-mvp, Property 22: 리더보드 후보·대표·동률 규칙
+  // Feature: cert-forge-mvp, Property 22: 리더보드 후보·대표·동률 규칙
   // **Validates: Requirements 14.2-14.15**
   it("P22 matches an independent oracle for arbitrary profiles and attempts", async () => {
     await fc.assert(

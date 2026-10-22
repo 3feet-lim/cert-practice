@@ -1,10 +1,10 @@
-import { errorEnvelopeSchema } from "@cert-quiz/contracts";
-import { InMemoryUnitOfWork } from "@cert-quiz/db";
+import { errorEnvelopeSchema } from "@cert-forge/contracts";
+import { InMemoryUnitOfWork } from "@cert-forge/db";
 import {
   ImportService,
   SequenceRandomSource,
   SequenceUuidFactory,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import { describe, expect, it } from "vitest";
 
 import { createApp, type CreateAppDependencies } from "./app.js";

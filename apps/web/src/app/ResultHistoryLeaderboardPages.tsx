@@ -1,4 +1,4 @@
-import type { Uuid } from "@cert-quiz/contracts";
+import type { Uuid } from "@cert-forge/contracts";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {

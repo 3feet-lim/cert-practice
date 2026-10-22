@@ -24,12 +24,12 @@ import {
   submitPracticeQuestionResponseSchema,
   updateScoreVisibilityResponseSchema,
   type UserProfile,
-} from "@cert-quiz/contracts";
-import { InMemoryUnitOfWork } from "@cert-quiz/db";
+} from "@cert-forge/contracts";
+import { InMemoryUnitOfWork } from "@cert-forge/db";
 import { describe, expect, it } from "vitest";
 
-import { createHttpCertQuizApi } from "../../web/src/api/http-adapter.js";
-import { createCertQuizFixtures } from "../../web/src/mocks/fixtures.js";
+import { createHttpCertForgeApi } from "../../web/src/api/http-adapter.js";
+import { createCertForgeFixtures } from "../../web/src/mocks/fixtures.js";
 import { createApp, type CognitoTokenVerifier } from "./app.js";
 import type { VerifiedCognitoClaims } from "./authentication.js";
 
@@ -71,7 +71,7 @@ class AdminVerifier implements CognitoTokenVerifier {
 }
 
 function composedProvider() {
-  const fixtures = createCertQuizFixtures();
+  const fixtures = createCertForgeFixtures();
   const database = new InMemoryUnitOfWork();
   const profile: UserProfile = {
     id: fixtures.auth.admin.user.id,
@@ -98,14 +98,14 @@ function composedProvider() {
 }
 
 /**
- * Consumer fixtures and provider responses must agree on every CertQuizApi
+ * Consumer fixtures and provider responses must agree on every CertForgeApi
  * operation. The provider is composed through the same Hono application used
  * by Lambda, while unavailable lifecycle dependencies deliberately exercise
  * the safe transport-error branch rather than a mocked HTTP response.
  */
 describe("frontend consumer/backend provider compatibility gate", () => {
   it("keeps the complete fixture corpus within each consumer response contract", () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const matrix = [
       ["health", { data: fixtures.health }, healthSuccessEnvelopeSchema],
       ["approval", fixtures.auth.approved.approval, approvalStatusDtoSchema],
@@ -206,7 +206,7 @@ describe("frontend consumer/backend provider compatibility gate", () => {
     const { app, fixtures } = composedProvider();
     const providerResponses: Response[] = [];
     const providerRequests: string[] = [];
-    const api = createHttpCertQuizApi({
+    const api = createHttpCertForgeApi({
       baseUrl: "http://localhost",
       getBearerToken: () => "compatibility-token",
       fetch: async (input, init) => {

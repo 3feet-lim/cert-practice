@@ -1,4 +1,4 @@
-import type { CurrentUserDto } from "@cert-quiz/contracts";
+import type { CurrentUserDto } from "@cert-forge/contracts";
 import {
   type PropsWithChildren,
   useCallback,
@@ -7,8 +7,8 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CertQuizApiError, CertQuizApiResult } from "../api/port";
-import { useCertQuizApi } from "../api/useCertQuizApi";
+import type { CertForgeApiError, CertForgeApiResult } from "../api/port";
+import { useCertForgeApi } from "../api/useCertForgeApi";
 import { useLogoutStatePurge } from "../api/queries";
 import { AuthSessionContext, type AuthSessionState } from "./auth-session-context";
 import { useBrowserAuthSession } from "./browser-auth-session";
@@ -16,7 +16,7 @@ const AUTHENTICATION_ERROR_CODES = new Set([
   "authentication-invalid",
   "google-identity-missing",
 ]);
-function normalizeAuthFailure(error: CertQuizApiError): AuthSessionState {
+function normalizeAuthFailure(error: CertForgeApiError): AuthSessionState {
   if (AUTHENTICATION_ERROR_CODES.has(error.code)) {
     return { status: "unauthenticated" };
   }
@@ -27,9 +27,9 @@ function normalizeAuthFailure(error: CertQuizApiError): AuthSessionState {
 }
 async function resolveAuthSession(
   getApprovalStatus: () => Promise<
-    CertQuizApiResult<{ approvalStatus: "pending" | "approved" }>
+    CertForgeApiResult<{ approvalStatus: "pending" | "approved" }>
   >,
-  getCurrentUser: () => Promise<CertQuizApiResult<CurrentUserDto>>,
+  getCurrentUser: () => Promise<CertForgeApiResult<CurrentUserDto>>,
 ): Promise<AuthSessionState> {
   const approval = await getApprovalStatus();
   if (!approval.ok) {
@@ -48,7 +48,7 @@ async function resolveAuthSession(
   return { status: "approved", user: currentUser.data };
 }
 export function AuthSessionProvider({ children }: PropsWithChildren) {
-  const api = useCertQuizApi();
+  const api = useCertForgeApi();
   const browserAuthSession = useBrowserAuthSession();
   const purgeSession = useLogoutStatePurge();
   const requestGeneration = useRef(0);

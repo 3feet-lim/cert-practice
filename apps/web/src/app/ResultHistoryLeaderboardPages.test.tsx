@@ -1,34 +1,34 @@
-import type { UpdateScoreVisibilityResponse } from "@cert-quiz/contracts";
+import type { UpdateScoreVisibilityResponse } from "@cert-forge/contracts";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createMockCertQuizApi } from "../api/mock-adapter";
-import type { CertQuizApi, CertQuizApiResult } from "../api/port";
-import { CertQuizCompositionRoot } from "./CertQuizCompositionRoot";
+import { createMockCertForgeApi } from "../api/mock-adapter";
+import type { CertForgeApi, CertForgeApiResult } from "../api/port";
+import { CertForgeCompositionRoot } from "./CertForgeCompositionRoot";
 import {
   AttemptResultPage,
   HistoryPage,
   LeaderboardPage,
   PracticeResultPage,
 } from "./ResultHistoryLeaderboardPages";
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 
-const fixtures = createCertQuizFixtures();
+const fixtures = createCertForgeFixtures();
 
 /** These tests exercise runtime route presenters against the deterministic mock port only. */
 afterEach(cleanup);
 
-function renderPage(path: string, api: CertQuizApi, element: ReactNode) {
+function renderPage(path: string, api: CertForgeApi, element: ReactNode) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <CertQuizCompositionRoot api={api}>
+      <CertForgeCompositionRoot api={api}>
         <Routes>
           <Route path="*" element={element} />
         </Routes>
-      </CertQuizCompositionRoot>
+      </CertForgeCompositionRoot>
     </MemoryRouter>,
   );
 }
@@ -43,8 +43,8 @@ function deferred<T>() {
 
 describe("result, history, and leaderboard runtime pages", () => {
   it("formats exact result values only for display and presents the immutable review snapshot", async () => {
-    const mockApi = createMockCertQuizApi();
-    const api: CertQuizApi = {
+    const mockApi = createMockCertForgeApi();
+    const api: CertForgeApi = {
       ...mockApi,
       getAttempt: async () => ({
         ok: true,
@@ -98,7 +98,7 @@ describe("result, history, and leaderboard runtime pages", () => {
   });
 
   it("links history rows to their attempt result", async () => {
-    renderPage("/app/history", createMockCertQuizApi(), <HistoryPage />);
+    renderPage("/app/history", createMockCertForgeApi(), <HistoryPage />);
     const table = await screen.findByRole("table", { name: "모의고사 응시 이력" });
     const links = within(table).getAllByRole("link", { name: /응시 결과 보기/ });
     expect(links.length).toBeGreaterThan(0);
@@ -109,8 +109,8 @@ describe("result, history, and leaderboard runtime pages", () => {
   });
 
   it("renders the canonical expired practice-result state", async () => {
-    const mockApi = createMockCertQuizApi();
-    const api: CertQuizApi = {
+    const mockApi = createMockCertForgeApi();
+    const api: CertForgeApi = {
       ...mockApi,
       getPracticeResult: async () => ({
         ok: false,
@@ -136,13 +136,13 @@ describe("result, history, and leaderboard runtime pages", () => {
   });
 
   it("shows no history count or trend when the mock returns zero exam attempts", async () => {
-    const mockApi = createMockCertQuizApi();
+    const mockApi = createMockCertForgeApi();
     const getHistory = vi.fn(async () => ({
       ok: true as const,
       data: fixtures.history.empty,
       meta: { requestId: "test:history:empty" },
     }));
-    const api: CertQuizApi = {
+    const api: CertForgeApi = {
       ...mockApi,
       getHistory,
       getHistoryTrends: async () => ({
@@ -169,10 +169,10 @@ describe("result, history, and leaderboard runtime pages", () => {
   });
 
   it("rolls visibility back and announces the rejected canonical save", async () => {
-    const response = deferred<CertQuizApiResult<UpdateScoreVisibilityResponse>>();
-    const mockApi = createMockCertQuizApi();
+    const response = deferred<CertForgeApiResult<UpdateScoreVisibilityResponse>>();
+    const mockApi = createMockCertForgeApi();
     const updateScoreVisibility = vi.fn(() => response.promise);
-    const api: CertQuizApi = { ...mockApi, updateScoreVisibility };
+    const api: CertForgeApi = { ...mockApi, updateScoreVisibility };
     const user = userEvent.setup();
 
     renderPage(
@@ -210,7 +210,7 @@ describe("result, history, and leaderboard runtime pages", () => {
   });
 
   it("keeps server tie ranks, marks the current user, and removes only that user when private", async () => {
-    const api = createMockCertQuizApi();
+    const api = createMockCertForgeApi();
     const user = userEvent.setup();
 
     renderPage(

@@ -2,7 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CertQuizRequestError } from "../api/query-result";
+import { CertForgeRequestError } from "../api/query-result";
 import { AsyncBoundary } from "./AsyncBoundary";
 import {
   toMutationAsyncBoundaryState,
@@ -68,7 +68,7 @@ describe("async request state adapters", () => {
         isPending: false,
         isError: true,
         data: undefined,
-        error: new CertQuizRequestError({
+        error: new CertForgeRequestError({
           code: "dependency-unavailable",
           message: "잠시 후 다시 시도해 주세요.",
           requestId: "async-boundary-test:retry",
@@ -100,7 +100,7 @@ describe("async request state adapters", () => {
         isPending: false,
         isError: true,
         data: undefined,
-        error: new CertQuizRequestError({
+        error: new CertForgeRequestError({
           code: "answer-locked",
           message: "이미 제출된 답안입니다.",
           requestId: "async-boundary-test:next-action",

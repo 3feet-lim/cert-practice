@@ -2,16 +2,16 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 
-import { CertQuizCompositionRoot } from "./app/CertQuizCompositionRoot";
-import { createMockCertQuizApi } from "./api/mock-adapter";
+import { CertForgeCompositionRoot } from "./app/CertForgeCompositionRoot";
+import { createMockCertForgeApi } from "./api/mock-adapter";
 import { App } from "./App";
 
-function renderApp(api = createMockCertQuizApi()) {
+function renderApp(api = createMockCertForgeApi()) {
   return render(
     <MemoryRouter initialEntries={["/app"]}>
-      <CertQuizCompositionRoot api={api}>
+      <CertForgeCompositionRoot api={api}>
         <App />
-      </CertQuizCompositionRoot>
+      </CertForgeCompositionRoot>
     </MemoryRouter>,
   );
 }
@@ -32,10 +32,10 @@ describe("App bootstrap", () => {
 
   it("does not make the catalog route depend on the optional mock health payload", async () => {
     renderApp(
-      createMockCertQuizApi({
+      createMockCertForgeApi({
         healthPayload: {
           status: "ok",
-          service: "cert-quiz-api",
+          service: "cert-forge-api",
           contractVersion: "v1",
           unexpected: "field",
         },

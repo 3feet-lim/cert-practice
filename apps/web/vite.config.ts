@@ -14,7 +14,7 @@ export default defineConfig({
   // CloudFront serves SPA fallbacks for deep links, so production assets must be root-absolute.
   base: "/",
   resolve: {
-    alias: [{ find: /^@cert-quiz\/contracts$/, replacement: contractsSource }],
+    alias: [{ find: /^@cert-forge\/contracts$/, replacement: contractsSource }],
   },
   build: {
     assetsDir: "assets",

@@ -27,7 +27,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: certquiz-${{ inputs.stage }}-release
+  group: certforge-${{ inputs.stage }}-release
   cancel-in-progress: false
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
           cache: pnpm
       - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.CERTQUIZ_RELEASE_ROLE_ARN }}
+          role-to-assume: ${{ secrets.CERTFORGE_RELEASE_ROLE_ARN }}
           aws-region: ap-northeast-2
       - run: pnpm install --frozen-lockfile
       - run: pnpm ci:pr
@@ -54,22 +54,22 @@ jobs:
         run: echo "iso=$(node -p 'new Date().toISOString()')" >> "$GITHUB_OUTPUT"
       - run: pnpm ci:db-adapter
         env:
-          DSQL_ENDPOINT: ${{ secrets.CERTQUIZ_DSQL_ENDPOINT }}
-          DSQL_DATABASE: ${{ secrets.CERTQUIZ_DSQL_DATABASE }}
-          DSQL_USER: ${{ secrets.CERTQUIZ_DSQL_USER }}
+          DSQL_ENDPOINT: ${{ secrets.CERTFORGE_DSQL_ENDPOINT }}
+          DSQL_DATABASE: ${{ secrets.CERTFORGE_DSQL_DATABASE }}
+          DSQL_USER: ${{ secrets.CERTFORGE_DSQL_USER }}
           PGSSLROOTCERT: /etc/ssl/certs/ca-certificates.crt
-          CERTQUIZ_DSQL_SPIKE_NOT_BEFORE: ${{ steps.release-started.outputs.iso }}
+          CERTFORGE_DSQL_SPIKE_NOT_BEFORE: ${{ steps.release-started.outputs.iso }}
       - if: inputs.action == 'release'
         run: pnpm release:apply -- --stage "${{ inputs.stage }}" --catalog-file "${{ inputs.catalog_file }}"
         env:
-          CERTQUIZ_ADMIN_TOKEN: ${{ secrets.CERTQUIZ_RELEASE_ADMIN_TOKEN }}
-          CERTQUIZ_API_ORIGIN: ${{ secrets.CERTQUIZ_API_ORIGIN }}
+          CERTFORGE_ADMIN_TOKEN: ${{ secrets.CERTFORGE_RELEASE_ADMIN_TOKEN }}
+          CERTFORGE_API_ORIGIN: ${{ secrets.CERTFORGE_API_ORIGIN }}
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-          DSQL_DATABASE: ${{ secrets.CERTQUIZ_DSQL_DATABASE }}
-          DSQL_USER: ${{ secrets.CERTQUIZ_DSQL_USER }}
+          DSQL_DATABASE: ${{ secrets.CERTFORGE_DSQL_DATABASE }}
+          DSQL_USER: ${{ secrets.CERTFORGE_DSQL_USER }}
           PGSSLROOTCERT: /etc/ssl/certs/ca-certificates.crt
       - if: inputs.action == 'rollback'
         run: pnpm release:rollback -- --stage "${{ inputs.stage }}" --release-id "${{ inputs.release_id }}" --catalog-file "${{ inputs.catalog_file }}" --confirm-rollback
         env:
-          CERTQUIZ_ADMIN_TOKEN: ${{ secrets.CERTQUIZ_RELEASE_ADMIN_TOKEN }}
-          CERTQUIZ_API_ORIGIN: ${{ secrets.CERTQUIZ_API_ORIGIN }}
+          CERTFORGE_ADMIN_TOKEN: ${{ secrets.CERTFORGE_RELEASE_ADMIN_TOKEN }}
+          CERTFORGE_API_ORIGIN: ${{ secrets.CERTFORGE_API_ORIGIN }}

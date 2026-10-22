@@ -42,7 +42,7 @@ describe("durable rate limiting", () => {
   it("uses one atomic actor/IP transaction and returns the remaining window on a limit", async () => {
     const commands: TransactWriteItemsCommand[] = [];
     const limiter = new DynamoDbRateLimiter({
-      tableName: "certquiz-dev-rate-limit",
+      tableName: "certforge-dev-rate-limit",
       policies,
       now: () => new Date("2026-01-01T00:00:45.000Z"),
       client: {

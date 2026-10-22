@@ -4,7 +4,7 @@ import type { QuizStoreApi } from "../quiz/quiz-store";
 import { certQuizQueryKeys } from "./query-keys";
 
 /** Creates an isolated client so tests and application roots never share request state. */
-export function createCertQuizQueryClient() {
+export function createCertForgeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
@@ -19,7 +19,7 @@ export function createCertQuizQueryClient() {
 }
 
 /** Removes all authenticated server and transient quiz state during logout. */
-export async function purgeCertQuizSession(
+export async function purgeCertForgeSession(
   queryClient: QueryClient,
   quizStore: QuizStoreApi,
 ) {

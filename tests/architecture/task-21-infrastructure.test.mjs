@@ -126,32 +126,32 @@ test("Task 21 keeps Terraform stateful resources separate from Serverless routes
   );
   assert.match(
     serverless,
-    /iam:\s+# Terraform owns[\s\S]*role: \$\{env:CERTQUIZ_LAMBDA_ROLE_ARN, ssm:\/certquiz\/\$\{sls:stage\}\/lambda-role-arn\}/,
+    /iam:\s+# Terraform owns[\s\S]*role: \$\{env:CERTFORGE_LAMBDA_ROLE_ARN, ssm:\/certforge\/\$\{sls:stage\}\/lambda-role-arn\}/,
   );
   assert.match(
     serverless,
-    /COGNITO_ISSUER: \$\{env:CERTQUIZ_COGNITO_ISSUER, ssm:\/certquiz\/\$\{sls:stage\}\/cognito-issuer\}/,
+    /COGNITO_ISSUER: \$\{env:CERTFORGE_COGNITO_ISSUER, ssm:\/certforge\/\$\{sls:stage\}\/cognito-issuer\}/,
   );
   assert.match(
     serverless,
-    /WEB_ORIGIN: \$\{env:CERTQUIZ_WEB_ORIGIN, ssm:\/certquiz\/\$\{sls:stage\}\/web-origin\}/,
+    /WEB_ORIGIN: \$\{env:CERTFORGE_WEB_ORIGIN, ssm:\/certforge\/\$\{sls:stage\}\/web-origin\}/,
   );
   assert.match(
     serverless,
-    /MARKDOWN_IMAGE_ORIGINS: \$\{env:CERTQUIZ_MARKDOWN_IMAGE_ORIGINS, ssm:\/certquiz\/\$\{sls:stage\}\/markdown-image-origins\}/,
+    /MARKDOWN_IMAGE_ORIGINS: \$\{env:CERTFORGE_MARKDOWN_IMAGE_ORIGINS, ssm:\/certforge\/\$\{sls:stage\}\/markdown-image-origins\}/,
   );
   assert.match(
     serverless,
-    /RATE_LIMIT_TABLE: \$\{env:CERTQUIZ_RATE_LIMIT_TABLE, ssm:\/certquiz\/\$\{sls:stage\}\/rate-limit-table-name\}/,
+    /RATE_LIMIT_TABLE: \$\{env:CERTFORGE_RATE_LIMIT_TABLE, ssm:\/certforge\/\$\{sls:stage\}\/rate-limit-table-name\}/,
   );
   assert.match(
     serverless,
-    /RATE_LIMIT_POLICIES: \$\{env:CERTQUIZ_RATE_LIMIT_POLICIES, ssm:\/certquiz\/\$\{sls:stage\}\/rate-limit-policies\}/,
+    /RATE_LIMIT_POLICIES: \$\{env:CERTFORGE_RATE_LIMIT_POLICIES, ssm:\/certforge\/\$\{sls:stage\}\/rate-limit-policies\}/,
   );
   assert.match(serverless, /type: jwt/);
   assert.match(
     serverless,
-    /httpApi:[\s\S]*?cors:[\s\S]*?allowedOrigins:[\s\S]*?\$\{env:CERTQUIZ_WEB_ORIGIN, ssm:\/certquiz\/\$\{sls:stage\}\/web-origin\}[\s\S]*?allowedHeaders:[\s\S]*?authorization[\s\S]*?content-type[\s\S]*?x-request-id[\s\S]*?allowedMethods:[\s\S]*?GET[\s\S]*?POST[\s\S]*?PATCH[\s\S]*?OPTIONS/,
+    /httpApi:[\s\S]*?cors:[\s\S]*?allowedOrigins:[\s\S]*?\$\{env:CERTFORGE_WEB_ORIGIN, ssm:\/certforge\/\$\{sls:stage\}\/web-origin\}[\s\S]*?allowedHeaders:[\s\S]*?authorization[\s\S]*?content-type[\s\S]*?x-request-id[\s\S]*?allowedMethods:[\s\S]*?GET[\s\S]*?POST[\s\S]*?PATCH[\s\S]*?OPTIONS/,
     "Gateway CORS must use the Terraform-published exact SPA origin and browser request headers.",
   );
   assert.doesNotMatch(
@@ -362,7 +362,7 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   );
 
   assert.match(outputs, /output "github_actions_dev_deploy_role_arn"/);
-  assert.match(outputs, /CERTQUIZ_RELEASE_ROLE_ARN/);
+  assert.match(outputs, /CERTFORGE_RELEASE_ROLE_ARN/);
   assert.match(documentation, /repo:3feet-lim@139703302\/cert-practice@1354159331:\*/);
   assert.match(documentation, /branch, tag, and GitHub environment independent/);
   assert.match(
@@ -384,11 +384,11 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(documentation, /SERVERLESS_ACCESS_KEY/);
   assert.match(workflow, /branches: \[main\]/);
   assert.match(workflow, /environment: release-dev/);
-  assert.match(workflow, /CERTQUIZ_RELEASE_ROLE_ARN/);
+  assert.match(workflow, /CERTFORGE_RELEASE_ROLE_ARN/);
   assert.match(workflow, /Apply and verify DEV DSQL migrations/);
-  assert.match(workflow, /DSQL_ENDPOINT="\$\(aws ssm get-parameter --name \/certquiz\/dev\/dsql-endpoint/);
+  assert.match(workflow, /DSQL_ENDPOINT="\$\(aws ssm get-parameter --name \/certforge\/dev\/dsql-endpoint/);
   assert.match(workflow, /DSQL_USER=admin/);
-  assert.match(workflow, /pnpm --filter @cert-quiz\/db run migrate:deploy/);
+  assert.match(workflow, /pnpm --filter @cert-forge\/db run migrate:deploy/);
   assert.ok(
     workflow.indexOf("Apply and verify DEV DSQL migrations") <
       workflow.indexOf("Deploy DEV Serverless API"),
@@ -400,20 +400,20 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(workflow, /Resolve DEV SPA runtime configuration/);
   assert.match(
     workflow,
-    /cloudformation describe-stacks --stack-name certquiz-api-dev/,
+    /cloudformation describe-stacks --stack-name certforge-api-dev/,
   );
   assert.match(workflow, /OutputKey=='HttpApiUrl'/);
-  assert.match(workflow, /\/certquiz\/dev\/cognito-hosted-ui-base-url/);
-  assert.match(workflow, /\/certquiz\/dev\/cognito-client-id/);
-  assert.match(workflow, /VITE_CERTQUIZ_RUNTIME_MODE: http/);
+  assert.match(workflow, /\/certforge\/dev\/cognito-hosted-ui-base-url/);
+  assert.match(workflow, /\/certforge\/dev\/cognito-client-id/);
+  assert.match(workflow, /VITE_CERTFORGE_RUNTIME_MODE: http/);
   assert.match(
     workflow,
-    /VITE_CERTQUIZ_API_BASE_URL: \$\{\{ steps\.web-runtime\.outputs\.api_base_url \}\}/,
+    /VITE_CERTFORGE_API_BASE_URL: \$\{\{ steps\.web-runtime\.outputs\.api_base_url \}\}/,
   );
-  assert.match(workflow, /VITE_CERTQUIZ_COGNITO_HOSTED_UI_BASE_URL/);
-  assert.match(workflow, /VITE_CERTQUIZ_COGNITO_CLIENT_ID/);
+  assert.match(workflow, /VITE_CERTFORGE_COGNITO_HOSTED_UI_BASE_URL/);
+  assert.match(workflow, /VITE_CERTFORGE_COGNITO_CLIENT_ID/);
   assert.match(workflow, /Build DEV SPA with public runtime configuration/);
-  assert.match(workflow, /pnpm --filter @cert-quiz\/web build/);
+  assert.match(workflow, /pnpm --filter @cert-forge\/web build/);
   assert.match(workflow, /aws s3 sync apps\/web\/dist/);
   assert.match(workflow, /--delete --exclude "index\.html"/);
   assert.match(workflow, /max-age=31536000,immutable/);
@@ -423,7 +423,7 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(workflow, /cloudfront wait invalidation-completed/);
   assert.match(
     workflow,
-    /CERTQUIZ_DEPLOYED_WEB_ORIGIN="\$\(aws ssm get-parameter --name \/certquiz\/dev\/web-origin/,
+    /CERTFORGE_DEPLOYED_WEB_ORIGIN="\$\(aws ssm get-parameter --name \/certforge\/dev\/web-origin/,
   );
   assert.match(workflow, /pnpm infra:smoke/);
   assert.ok(

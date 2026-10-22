@@ -1,4 +1,4 @@
-# Implementation Plan: CertQuiz MVP
+# Implementation Plan: CertForge MVP
 
 ## Overview
 
@@ -12,7 +12,7 @@
   - [x] 1.1 pnpm/TypeScript workspace와 React/Vite 앱 기반을 구성한다. _Requirements: 16.1, 16.2_
   - [x] 1.2 lint·format·Vitest·Playwright·coverage 단일 실행 품질 게이트를 구성한다. _Requirements: 16.1, 16.2, 16.8, 16.9_
   - [x] 1.3 strict transport contracts와 공개 시점별 question projection schema를 구현한다. _Requirements: 1.7-1.12, 3.6-3.11, 8.8-8.10, 10.7, 13.1-13.3_
-  - [x] 1.4 교체 가능한 `CertQuizApi` frontend port와 provider 경계를 구현한다. _Requirements: 1.7-16.9_
+  - [x] 1.4 교체 가능한 `CertForgeApi` frontend port와 provider 경계를 구현한다. _Requirements: 1.7-16.9_
   - [x] 1.5 결정적 정적 UI fixture를 구현한다. _Requirements: 1.7-16.7_
   - [x] 1.6 MSW/mock 상태 머신과 오류 scenario를 구현한다. _Requirements: 6.7-16.9_
   - [x] 1.7 shared health contract로 frontend bootstrap을 검증한다. _Requirements: 16.1, 16.2, 16.4_
@@ -231,7 +231,7 @@
     - _Requirements: 1.1-2.6, 3.9, 4.1-4.12, 10.1-10.13, 12.1-12.17, 15.20-15.28_
 
 - [x] 23. Mock를 실제 API로 교체하고 통합·E2E·release gate 완성
-  - [x] 23.1 frontend real HTTP adapter를 전체 `CertQuizApi`로 확장한다
+  - [x] 23.1 frontend real HTTP adapter를 전체 `CertForgeApi`로 확장한다
     - **완료 근거:** strict health transport와 network/contract 오류 변환 test가 있다.
     - **남은 작업:** bearer token provider, 모든 endpoint method/path/body/envelope parsing, request ID, retry metadata, Idempotency-Key와 stale-version 처리를 구현하고 `main.tsx`가 환경 설정으로 mock/real adapter를 선택하게 한다.
     - _Requirements: 1.1-2.6, 3.6-3.11, 6.7-16.9_

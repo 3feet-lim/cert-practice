@@ -1,4 +1,4 @@
-import type { DryRunImportResponse, PendingUsersDto } from "@cert-quiz/contracts";
+import type { DryRunImportResponse, PendingUsersDto } from "@cert-forge/contracts";
 
 import {
   Badge,

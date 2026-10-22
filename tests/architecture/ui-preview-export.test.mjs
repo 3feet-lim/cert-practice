@@ -10,7 +10,7 @@ import {
 } from "../../scripts/export-ui-preview.mjs";
 
 test("static preview export emits deterministic, self-contained S1-S10 documents", async () => {
-  const outputRoot = await mkdtemp(path.join(os.tmpdir(), "certquiz-ui-preview-"));
+  const outputRoot = await mkdtemp(path.join(os.tmpdir(), "certforge-ui-preview-"));
   try {
     const result = await exportUiPreview(outputRoot);
     assert.equal(result.documentCount, staticPreviewManifest.length + 1);

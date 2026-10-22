@@ -3,8 +3,8 @@ import {
   ImportService,
   LifecycleServices,
   SessionFactory,
-} from "@cert-quiz/domain";
-import { initializeDsqlRuntime } from "@cert-quiz/db/runtime";
+} from "@cert-forge/domain";
+import { initializeDsqlRuntime } from "@cert-forge/db/runtime";
 import type { Hono } from "hono";
 
 import { createApp } from "./app.js";

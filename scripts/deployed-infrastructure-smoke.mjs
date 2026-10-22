@@ -22,15 +22,15 @@ function optionalHttpsOrigin(value, name) {
 
 async function resolveApiOrigin() {
   const override = optionalHttpsOrigin(
-    process.env.CERTQUIZ_DEPLOYED_API_ORIGIN,
-    "CERTQUIZ_DEPLOYED_API_ORIGIN",
+    process.env.CERTFORGE_DEPLOYED_API_ORIGIN,
+    "CERTFORGE_DEPLOYED_API_ORIGIN",
   );
-  if (override) return { origin: override, source: "CERTQUIZ_DEPLOYED_API_ORIGIN" };
+  if (override) return { origin: override, source: "CERTFORGE_DEPLOYED_API_ORIGIN" };
 
-  const stage = process.env.CERTQUIZ_STAGE ?? "dev";
+  const stage = process.env.CERTFORGE_STAGE ?? "dev";
   const region =
-    process.env.CERTQUIZ_REGION ?? process.env.AWS_REGION ?? "ap-northeast-2";
-  const stackName = `certquiz-api-${stage}`;
+    process.env.CERTFORGE_REGION ?? process.env.AWS_REGION ?? "ap-northeast-2";
+  const stackName = `certforge-api-${stage}`;
   let stdout;
   try {
     ({ stdout } = await run(
@@ -118,7 +118,7 @@ async function verifyHealth(apiOrigin, webOrigin) {
   const healthBody = await health.json();
   if (
     healthBody?.data?.status !== "ok" ||
-    healthBody?.data?.service !== "cert-quiz-api" ||
+    healthBody?.data?.service !== "cert-forge-api" ||
     healthBody?.data?.contractVersion !== "v1" ||
     typeof healthBody?.meta?.requestId !== "string" ||
     healthBody.meta.requestId.length === 0
@@ -177,8 +177,8 @@ async function verifyCors(apiOrigin, webOrigin) {
 
 const { origin: apiOrigin, source } = await resolveApiOrigin();
 const webOrigin = optionalHttpsOrigin(
-  process.env.CERTQUIZ_DEPLOYED_WEB_ORIGIN,
-  "CERTQUIZ_DEPLOYED_WEB_ORIGIN",
+  process.env.CERTFORGE_DEPLOYED_WEB_ORIGIN,
+  "CERTFORGE_DEPLOYED_WEB_ORIGIN",
 );
 await verifyHealth(apiOrigin, webOrigin);
 await verifyCors(apiOrigin, webOrigin);

@@ -4,18 +4,18 @@ import {
   dryRunImportResponseSchema,
   errorEnvelopeSchema,
   successEnvelopeSchema,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import {
   DOP_C02_CATALOG_FIXTURE,
   InMemoryUnitOfWork,
   createDopC02CatalogFixture,
-} from "@cert-quiz/db";
+} from "@cert-forge/db";
 import {
   ImportService,
   SequenceRandomSource,
   SequenceUuidFactory,
   type UserProfile,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import { describe, expect, it } from "vitest";
 
 import {

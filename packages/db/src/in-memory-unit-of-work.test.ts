@@ -3,7 +3,7 @@ import {
   Fraction,
   type NewPracticeSession,
   type PersistedQuestionSnapshot,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 
 import {
   DOP_C02_CATALOG_FIXTURE,
@@ -233,7 +233,7 @@ describe("revisioned catalog repository reads", () => {
 describe("atomic imported catalog activation", () => {
   it("binds validation to actor/content/token/TTL and restores head/token on faults", async () => {
     const { ImportService, SequenceRandomSource, SequenceUuidFactory, sha256Hex } =
-      await import("@cert-quiz/domain");
+      await import("@cert-forge/domain");
     const database = new InMemoryUnitOfWork();
     const ids = [
       "00000000-0000-4000-8000-000000000701",
@@ -305,7 +305,7 @@ describe("atomic imported catalog activation", () => {
         ),
       ).not.toBeNull();
     });
-    const { SessionFactory } = await import("@cert-quiz/domain");
+    const { SessionFactory } = await import("@cert-forge/domain");
     const generation = await database.transaction((repos) =>
       repos.catalog.fullGenerationSource(
         commit.materialization.source.certifications[0]!.id,
@@ -405,13 +405,13 @@ function canonicalEquivalentImportContent(content: string): string {
   });
 }
 
-// Feature: cert-quiz-mvp, Property 24: validation binding and atomic catalog switch
+// Feature: cert-forge-mvp, Property 24: validation binding and atomic catalog switch
 // **Validates: Requirements 15.20-15.28**
 describe("Property 24: validation binding and atomic catalog switch", () => {
   it("commits only a matching unexpired actor-bound token once, rolls every fault back, and preserves Attempt snapshots", async () => {
     const { default: fc } = await import("fast-check");
     const { ImportService, SequenceRandomSource, SequenceUuidFactory, sha256Hex } =
-      await import("@cert-quiz/domain");
+      await import("@cert-forge/domain");
 
     const createService = (clock: { now: Date }) =>
       new ImportService({

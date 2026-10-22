@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "service_name" {
   description = "Service name used for tags and SSM paths."
   type        = string
-  default     = "certquiz"
+  default     = "certforge"
 
   validation {
     condition     = can(regex("^[a-z][a-z0-9-]{1,30}$", var.service_name))

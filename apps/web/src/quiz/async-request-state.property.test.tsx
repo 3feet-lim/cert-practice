@@ -1,29 +1,29 @@
-// Feature: cert-quiz-mvp, Property 25
+// Feature: cert-forge-mvp, Property 25
 import type {
   PracticeSessionDto,
   PracticeStateResponse,
   SubmitPracticeQuestionResponse,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import { act, renderHook } from "@testing-library/react";
 import fc from "fast-check";
 import type { PropsWithChildren } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  type CertQuizApi,
-  type CertQuizApiFailure,
-  type CertQuizApiResult,
+  type CertForgeApi,
+  type CertForgeApiFailure,
+  type CertForgeApiResult,
 } from "../api/port";
-import { CertQuizRequestError } from "../api/query-result";
-import { createUnavailableCertQuizApi } from "../api/unavailable-adapter";
-import { CertQuizCompositionRoot } from "../app/CertQuizCompositionRoot";
-import { createCertQuizQueryClient } from "../app/query-client";
+import { CertForgeRequestError } from "../api/query-result";
+import { createUnavailableCertForgeApi } from "../api/unavailable-adapter";
+import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";
+import { createCertForgeQueryClient } from "../app/query-client";
 import { certQuizQueryKeys } from "../app/query-keys";
 import {
   toMutationAsyncBoundaryState,
   toQueryAsyncBoundaryState,
 } from "../components/async-boundary-state";
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import { createQuizStore, type QuizQuestionTarget } from "./quiz-store";
 import { usePracticeFlagMutation, usePracticeQuestionSubmit } from "./quiz-queries";
 
@@ -35,19 +35,19 @@ const PROPERTY_SEED = 25053025;
 const PROPERTY_PATH = "";
 
 function wrapperFor(
-  api: CertQuizApi,
-  queryClient = createCertQuizQueryClient(),
+  api: CertForgeApi,
+  queryClient = createCertForgeQueryClient(),
   quizStore = createQuizStore(),
 ) {
   return function Wrapper({ children }: PropsWithChildren) {
     return (
-      <CertQuizCompositionRoot
+      <CertForgeCompositionRoot
         api={api}
         queryClient={queryClient}
         quizStore={quizStore}
       >
         {children}
-      </CertQuizCompositionRoot>
+      </CertForgeCompositionRoot>
     );
   };
 }
@@ -60,7 +60,7 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
-function failure(retryable: boolean): CertQuizApiFailure {
+function failure(retryable: boolean): CertForgeApiFailure {
   return {
     ok: false,
     error: retryable
@@ -122,7 +122,7 @@ function assertBoundaryState(outcome: RequestOutcome) {
     return;
   }
 
-  const requestError = new CertQuizRequestError(
+  const requestError = new CertForgeRequestError(
     failure(outcome === "retryable-failure").error,
   );
   const state = toMutationAsyncBoundaryState(
@@ -168,14 +168,14 @@ describe("Property 25: asynchronous UI request-state machine", () => {
           { minLength: 1, maxLength: 12 },
         ),
         async (outcomes) => {
-          const fixtures = createCertQuizFixtures();
+          const fixtures = createCertForgeFixtures();
           const sessionId = fixtures.ids.practiceSessionId;
           const submittedQuestion = fixtures.practice.submitted.questions[0];
           if (submittedQuestion?.kind !== "practice-submitted") {
             throw new Error("Expected a submitted practice question fixture.");
           }
 
-          const queryClient = createCertQuizQueryClient();
+          const queryClient = createCertForgeQueryClient();
           const quizStore = createQuizStore();
           queryClient.setQueryData(
             certQuizQueryKeys.practice(sessionId),
@@ -186,17 +186,17 @@ describe("Property 25: asynchronous UI request-state machine", () => {
           const selectedChoiceIds = submittedQuestion.selectedChoiceIds;
           let canonicalVersion = fixtures.practice.active.stateVersion;
           let submitResponse: () => Promise<
-            CertQuizApiResult<SubmitPracticeQuestionResponse>
+            CertForgeApiResult<SubmitPracticeQuestionResponse>
           >;
-          let flagResponse: () => Promise<CertQuizApiResult<PracticeStateResponse>>;
-          const submitPracticeQuestion = vi.fn<CertQuizApi["submitPracticeQuestion"]>(
+          let flagResponse: () => Promise<CertForgeApiResult<PracticeStateResponse>>;
+          const submitPracticeQuestion = vi.fn<CertForgeApi["submitPracticeQuestion"]>(
             () => submitResponse(),
           );
-          const patchPracticeState = vi.fn<CertQuizApi["patchPracticeState"]>(() =>
+          const patchPracticeState = vi.fn<CertForgeApi["patchPracticeState"]>(() =>
             flagResponse(),
           );
-          const api: CertQuizApi = {
-            ...createUnavailableCertQuizApi(),
+          const api: CertForgeApi = {
+            ...createUnavailableCertForgeApi(),
             submitPracticeQuestion,
             patchPracticeState,
           };
@@ -218,7 +218,7 @@ describe("Property 25: asynchronous UI request-state machine", () => {
 
               if (outcome === "duplicate") {
                 const pending =
-                  deferred<CertQuizApiResult<SubmitPracticeQuestionResponse>>();
+                  deferred<CertForgeApiResult<SubmitPracticeQuestionResponse>>();
                 submitResponse = () => pending.promise;
                 let first!: Promise<SubmitPracticeQuestionResponse | undefined>;
                 let duplicate!: Promise<SubmitPracticeQuestionResponse | undefined>;
@@ -279,7 +279,7 @@ describe("Property 25: asynchronous UI request-state machine", () => {
                     stateVersion: canonicalVersion,
                   });
                 } else {
-                  await expect(submission).rejects.toBeInstanceOf(CertQuizRequestError);
+                  await expect(submission).rejects.toBeInstanceOf(CertForgeRequestError);
                   expect(
                     queryClient.getQueryData<PracticeSessionDto>(
                       certQuizQueryKeys.practice(sessionId),
@@ -354,7 +354,7 @@ describe("Property 25: asynchronous UI request-state machine", () => {
                     ?.flagged,
                 ).toBe(expectedFlagged);
               } else {
-                await expect(flagMutation).rejects.toBeInstanceOf(CertQuizRequestError);
+                await expect(flagMutation).rejects.toBeInstanceOf(CertForgeRequestError);
                 expect(
                   queryClient.getQueryData<PracticeSessionDto>(
                     certQuizQueryKeys.practice(sessionId),

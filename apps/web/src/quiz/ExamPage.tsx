@@ -1,8 +1,8 @@
-import type { ExamActiveSessionDto, Uuid } from "@cert-quiz/contracts";
+import type { ExamActiveSessionDto, Uuid } from "@cert-forge/contracts";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { CertQuizRequestError } from "../api/query-result";
+import { CertForgeRequestError } from "../api/query-result";
 import { useDocumentTitle } from "../lib/use-document-title";
 import { AsyncBoundary } from "../components/AsyncBoundary";
 import { AccessibleDialog } from "../components/AccessibleDialog";
@@ -65,7 +65,7 @@ function ExamInteraction({
   };
 
   const handleMutationError = (error: unknown) => {
-    if (error instanceof CertQuizRequestError && error.detail.code === "exam-expired") {
+    if (error instanceof CertForgeRequestError && error.detail.code === "exam-expired") {
       setExpired(true);
       void submitAndNavigate();
       return;

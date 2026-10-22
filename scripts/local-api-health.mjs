@@ -1,5 +1,5 @@
 const configuredOrigin =
-  process.env.CERTQUIZ_LOCAL_API_ORIGIN ?? "http://127.0.0.1:3000";
+  process.env.CERTFORGE_LOCAL_API_ORIGIN ?? "http://127.0.0.1:3000";
 const origin = new URL(configuredOrigin);
 
 if (
@@ -11,7 +11,7 @@ if (
   origin.hash
 ) {
   throw new Error(
-    "CERTQUIZ_LOCAL_API_ORIGIN must be an HTTP(S) origin without a path.",
+    "CERTFORGE_LOCAL_API_ORIGIN must be an HTTP(S) origin without a path.",
   );
 }
 
@@ -26,7 +26,7 @@ if (response.status !== 200) {
 const body = await response.json();
 if (
   body?.data?.status !== "ok" ||
-  body?.data?.service !== "cert-quiz-api" ||
+  body?.data?.service !== "cert-forge-api" ||
   body?.data?.contractVersion !== "v1" ||
   typeof body?.meta?.requestId !== "string" ||
   body.meta.requestId.length === 0

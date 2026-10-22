@@ -3,7 +3,7 @@ import type {
   LanguageMode,
   PracticeSubmittedQuestion,
   Uuid,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 
 import { useState } from "react";
 

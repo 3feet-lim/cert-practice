@@ -2,7 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createCertQuizFixtures } from "../mocks/fixtures";
+import { createCertForgeFixtures } from "../mocks/fixtures";
 import { QuizStoreProvider } from "./quiz-store-provider";
 import { createQuizStore } from "./quiz-store";
 import { QuizQuestionPresenter } from "./QuizQuestionPresenter";
@@ -11,7 +11,7 @@ afterEach(cleanup);
 
 describe("QuizQuestionPresenter", () => {
   it("keeps capped draft selections, language, flags, and reveal state while navigating", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const submitted = fixtures.practice.submitted.questions[0];
     const multiChoice = fixtures.practice.active.questions.find(
       (question) => question.requiredChoiceCount === 2 && question.id !== submitted?.id,
@@ -94,7 +94,7 @@ describe("QuizQuestionPresenter", () => {
 
 describe("QuizQuestionPresenter keyboard shortcuts", () => {
   it("navigates with arrows, selects with number keys, flags with F, and submits with Enter", async () => {
-    const fixtures = createCertQuizFixtures();
+    const fixtures = createCertForgeFixtures();
     const singles = fixtures.practice.active.questions
       .filter(
         (question) =>

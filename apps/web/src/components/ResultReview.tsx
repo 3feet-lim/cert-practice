@@ -1,4 +1,4 @@
-import type { LanguageMode, ReviewQuestion, Uuid } from "@cert-quiz/contracts";
+import type { LanguageMode, ReviewQuestion, Uuid } from "@cert-forge/contracts";
 import { useId, useMemo, useState } from "react";
 
 import { cn } from "../lib/cn";

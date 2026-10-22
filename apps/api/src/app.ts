@@ -35,7 +35,7 @@ import {
   updateScoreVisibilityRequestSchema,
   updateScoreVisibilityResponseSchema,
   uuidSchema,
-} from "@cert-quiz/contracts";
+} from "@cert-forge/contracts";
 import {
   domainFailure,
   isDomainFailure,
@@ -45,7 +45,7 @@ import {
   type LifecycleServices,
   type TransactionRepositories,
   type UserProfile,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 import { Hono, type Context, type MiddlewareHandler } from "hono";
 
 import {
@@ -273,7 +273,7 @@ export function createApp(
       healthSuccessEnvelopeSchema.parse({
         data: {
           status: "ok",
-          service: "cert-quiz-api",
+          service: "cert-forge-api",
           contractVersion: "v1",
         },
         meta: responseMeta(context),

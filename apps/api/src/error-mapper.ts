@@ -2,8 +2,8 @@ import {
   errorEnvelopeSchema,
   type ErrorEnvelope,
   type RequestId,
-} from "@cert-quiz/contracts";
-import { isDomainFailure } from "@cert-quiz/domain";
+} from "@cert-forge/contracts";
+import { isDomainFailure } from "@cert-forge/domain";
 import { isRateLimitExceeded } from "./rate-limit.js";
 export type HttpErrorStatus = 400 | 401 | 403 | 404 | 409 | 410 | 422 | 429 | 500 | 503;
 export type MappedHttpError = {

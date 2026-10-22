@@ -77,7 +77,7 @@ async function loadProductionComposition() {
 
 /** Lazily composes the production graph once and reuses it for Lambda warm starts. */
 export async function handler(...args: Parameters<ReturnType<typeof handle>>) {
-  if (process.env.CERTQUIZ_LOCAL_EMULATION === "true") {
+  if (process.env.CERTFORGE_LOCAL_EMULATION === "true") {
     return handle(app)(...args);
   }
 

@@ -1,17 +1,17 @@
-import * as contracts from "@cert-quiz/contracts";
+import * as contracts from "@cert-forge/contracts";
 import { describe, expect, it } from "vitest";
 
-import { createMockCertQuizApi } from "../api/mock-adapter";
-import type { CertQuizApi, CertQuizApiResult } from "../api/port";
+import { createMockCertForgeApi } from "../api/mock-adapter";
+import type { CertForgeApi, CertForgeApiResult } from "../api/port";
 import { MOCK_IDS } from "./state-machine";
-import { createCertQuizFixtures } from "./fixtures";
+import { createCertForgeFixtures } from "./fixtures";
 
 type Schema = { parse(value: unknown): unknown };
 
-const fixtures = createCertQuizFixtures();
+const fixtures = createCertForgeFixtures();
 
 async function expectSuccess(
-  result: Promise<CertQuizApiResult<unknown>>,
+  result: Promise<CertForgeApiResult<unknown>>,
   responseSchema: Schema,
 ): Promise<unknown> {
   const resolved = await result;
@@ -22,8 +22,8 @@ async function expectSuccess(
   return resolved.data;
 }
 
-function approvedApi(): CertQuizApi {
-  return createMockCertQuizApi({ authActor: "approved" });
+function approvedApi(): CertForgeApi {
+  return createMockCertForgeApi({ authActor: "approved" });
 }
 
 /**
@@ -32,7 +32,7 @@ function approvedApi(): CertQuizApi {
  */
 describe("frontend mock endpoint request/response matrix", () => {
   it("constructs a corpus whose every transport-shaped fixture parses through shared Zod", () => {
-    expect(() => createCertQuizFixtures()).not.toThrow();
+    expect(() => createCertForgeFixtures()).not.toThrow();
   });
 
   it("parses every approved S1-S10 port request and response", async () => {
@@ -179,7 +179,7 @@ describe("frontend mock endpoint request/response matrix", () => {
       contracts.examResultDtoSchema,
     );
 
-    const completedResultsApi = createMockCertQuizApi({
+    const completedResultsApi = createMockCertForgeApi({
       authActor: "approved",
       e2eScenario: "completed-results",
     });
@@ -209,7 +209,7 @@ describe("frontend mock endpoint request/response matrix", () => {
       contracts.leaderboardDtoSchema,
     );
 
-    const adminApi = createMockCertQuizApi({ authActor: "admin" });
+    const adminApi = createMockCertForgeApi({ authActor: "admin" });
     const pendingUsers = contracts.pendingUsersDtoSchema.parse(
       await expectSuccess(adminApi.getPendingUsers(), contracts.pendingUsersDtoSchema),
     );

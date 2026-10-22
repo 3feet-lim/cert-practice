@@ -2,7 +2,7 @@ import {
   validateMaximum,
   type RandomSource,
   type UuidFactory,
-} from "@cert-quiz/domain";
+} from "@cert-forge/domain";
 
 const UINT32_RANGE = 2 ** 32;
 
