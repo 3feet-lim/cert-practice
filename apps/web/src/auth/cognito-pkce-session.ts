@@ -16,8 +16,7 @@ export interface BrowserAuthSession {
 }
 
 export type AuthCallbackResult =
-  | { readonly ok: true; readonly returnTo: string }
-  | { readonly ok: false };
+  { readonly ok: true; readonly returnTo: string } | { readonly ok: false };
 
 type PendingTransaction = {
   readonly state: string;
@@ -66,10 +65,10 @@ function encodeBase64Url(bytes: Uint8Array): string {
 function decodeBase64Url(value: string): Uint8Array | undefined {
   if (!/^[A-Za-z0-9_-]+$/.test(value)) return undefined;
   try {
-    const padded = value.replaceAll("-", "+").replaceAll("_", "/").padEnd(
-      Math.ceil(value.length / 4) * 4,
-      "=",
-    );
+    const padded = value
+      .replaceAll("-", "+")
+      .replaceAll("_", "/")
+      .padEnd(Math.ceil(value.length / 4) * 4, "=");
     const binary = atob(padded);
     return Uint8Array.from(binary, (character) => character.charCodeAt(0));
   } catch {
@@ -87,7 +86,10 @@ async function createCodeChallenge(
   crypto: Pick<Crypto, "subtle">,
   verifier: string,
 ): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(verifier),
+  );
   return encodeBase64Url(new Uint8Array(digest));
 }
 
@@ -100,7 +102,10 @@ function constantTimeEqual(left: string, right: string): boolean {
   return mismatch === 0;
 }
 
-function parseStoredValue<T>(storage: Pick<Storage, "getItem">, key: string): T | undefined {
+function parseStoredValue<T>(
+  storage: Pick<Storage, "getItem">,
+  key: string,
+): T | undefined {
   const value = storage.getItem(key);
   if (!value) return undefined;
   try {
@@ -116,7 +121,9 @@ function parseIdTokenExpiry(idToken: string): number | undefined {
   const payloadBytes = decodeBase64Url(parts[1] ?? "");
   if (!payloadBytes) return undefined;
   try {
-    const payload = JSON.parse(new TextDecoder().decode(payloadBytes)) as { exp?: unknown };
+    const payload = JSON.parse(new TextDecoder().decode(payloadBytes)) as {
+      exp?: unknown;
+    };
     if (
       typeof payload.exp !== "number" ||
       !Number.isSafeInteger(payload.exp) ||
@@ -152,25 +159,27 @@ function parseTokenSession(
   };
 }
 
-function isPendingTransaction(value: PendingTransaction | undefined): value is PendingTransaction {
+function isPendingTransaction(
+  value: PendingTransaction | undefined,
+): value is PendingTransaction {
   return Boolean(
     value &&
-      typeof value.state === "string" &&
-      value.state.length >= 32 &&
-      typeof value.codeVerifier === "string" &&
-      value.codeVerifier.length >= 43 &&
-      typeof value.returnTo === "string" &&
-      value.returnTo.startsWith("/"),
+    typeof value.state === "string" &&
+    value.state.length >= 32 &&
+    typeof value.codeVerifier === "string" &&
+    value.codeVerifier.length >= 43 &&
+    typeof value.returnTo === "string" &&
+    value.returnTo.startsWith("/"),
   );
 }
 
 function isTokenSession(value: TokenSession | undefined): value is TokenSession {
   return Boolean(
     value &&
-      typeof value.idToken === "string" &&
-      typeof value.expiresAtMs === "number" &&
-      Number.isSafeInteger(value.expiresAtMs) &&
-      (value.refreshToken === undefined || typeof value.refreshToken === "string"),
+    typeof value.idToken === "string" &&
+    typeof value.expiresAtMs === "number" &&
+    Number.isSafeInteger(value.expiresAtMs) &&
+    (value.refreshToken === undefined || typeof value.refreshToken === "string"),
   );
 }
 
@@ -209,7 +218,10 @@ export function createCognitoPkceSession(
   };
 
   const getTokenSession = (): TokenSession | undefined => {
-    const session = parseStoredValue<TokenSession>(dependencies.storage, TOKEN_SESSION_KEY);
+    const session = parseStoredValue<TokenSession>(
+      dependencies.storage,
+      TOKEN_SESSION_KEY,
+    );
     if (
       !isTokenSession(session) ||
       parseIdTokenExpiry(session.idToken) !== session.expiresAtMs
@@ -237,7 +249,11 @@ export function createCognitoPkceSession(
         },
       );
       if (!response.ok) return undefined;
-      return parseTokenSession(await response.json().catch(() => undefined), dependencies.now(), previousRefreshToken);
+      return parseTokenSession(
+        await response.json().catch(() => undefined),
+        dependencies.now(),
+        previousRefreshToken,
+      );
     } catch {
       return undefined;
     }
@@ -269,7 +285,10 @@ export function createCognitoPkceSession(
     async beginLogin(returnTo) {
       const state = randomBase64Url(dependencies.crypto, 32);
       const codeVerifier = randomBase64Url(dependencies.crypto, 64);
-      const codeChallenge = await createCodeChallenge(dependencies.crypto, codeVerifier);
+      const codeChallenge = await createCodeChallenge(
+        dependencies.crypto,
+        codeVerifier,
+      );
       dependencies.storage.setItem(
         PENDING_TRANSACTION_KEY,
         JSON.stringify({ state, codeVerifier, returnTo }),

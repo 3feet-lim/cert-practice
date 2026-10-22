@@ -205,7 +205,9 @@ export function createMockCertForgeApi(
       ? FIXTURES.auth.admin.user.id
       : FIXTURES.auth.approved.user.id;
 
-  const importFailure = <Output>(error: MockStateError): CertForgeApiResult<Output> => ({
+  const importFailure = <Output>(
+    error: MockStateError,
+  ): CertForgeApiResult<Output> => ({
     ok: false,
     error: {
       code: error.code,
@@ -726,7 +728,9 @@ export function createMockCertForgeApi(
         meta: { requestId: "mock:exam:start" },
       };
     },
-    getExam: async ({ examSessionId }): Promise<CertForgeApiResult<GetExamResponse>> => {
+    getExam: async ({
+      examSessionId,
+    }): Promise<CertForgeApiResult<GetExamResponse>> => {
       const failure = authorizationFailure<GetExamResponse>(getAuthActor());
       if (failure) return failure;
       try {

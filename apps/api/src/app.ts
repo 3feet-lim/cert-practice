@@ -153,10 +153,9 @@ async function parseImportRequest<Schema extends { parse(input: unknown): unknow
  * code/constraint/table). Never the free-text message or SQL detail, which
  * can embed literal row values.
  */
-function describeUnexpectedError(error: unknown): Pick<
-  ApiTelemetryEvent,
-  "errorName" | "dbErrorCode" | "dbConstraint" | "dbTable"
-> {
+function describeUnexpectedError(
+  error: unknown,
+): Pick<ApiTelemetryEvent, "errorName" | "dbErrorCode" | "dbConstraint" | "dbTable"> {
   if (!(error instanceof Error)) return {};
   const candidate = error as Error & {
     code?: unknown;

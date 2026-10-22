@@ -63,7 +63,10 @@ export type CertForgeApiErrorCode =
   | "transaction-conflict"
   | "internal-error";
 
-type ErrorWithCode<Code extends CertForgeApiErrorCode> = Omit<TransportError, "code"> & {
+type ErrorWithCode<Code extends CertForgeApiErrorCode> = Omit<
+  TransportError,
+  "code"
+> & {
   code: Code;
 };
 
@@ -141,7 +144,10 @@ export interface CertForgeApi {
 
   // S4 practice
   readonly resumePractice: CertForgeOperation<ResumePracticeInput, PracticeSessionDto>;
-  readonly replacePractice: CertForgeOperation<ReplacePracticeInput, PracticeSessionDto>;
+  readonly replacePractice: CertForgeOperation<
+    ReplacePracticeInput,
+    PracticeSessionDto
+  >;
   readonly patchPracticeState: CertForgeOperation<
     PatchPracticeStateInput,
     PracticeStateResponse

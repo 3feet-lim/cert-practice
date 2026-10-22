@@ -556,8 +556,9 @@ describe("offline lifecycle properties", () => {
     });
     expect(flagged.stateVersion).toBe(submitted.stateVersion + 1);
     const resumed = await service.resumePractice(USER_A, sessionId);
-    expect(resumed.questions.find(({ id: questionId }) => questionId === target.id))
-      .toMatchObject({ flagged: true });
+    expect(
+      resumed.questions.find(({ id: questionId }) => questionId === target.id),
+    ).toMatchObject({ flagged: true });
 
     await expect(
       service.patchPractice(USER_A, sessionId, {

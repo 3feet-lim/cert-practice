@@ -38,7 +38,10 @@ describe("web runtime configuration", () => {
       "VITE_CERTFORGE_API_BASE_URL must be an HTTPS origin or base URL",
     ],
     [
-      { ...httpEnvironment, VITE_CERTFORGE_AUTH_REDIRECT_PATH: "//outside.example.com" },
+      {
+        ...httpEnvironment,
+        VITE_CERTFORGE_AUTH_REDIRECT_PATH: "//outside.example.com",
+      },
       "VITE_CERTFORGE_AUTH_REDIRECT_PATH must be a same-origin absolute path.",
     ],
   ])("fails closed for invalid HTTP configuration", (environment, message) => {

@@ -84,7 +84,9 @@ export function sampleSession(
   const ordered = fullShuffle(selected, random);
   return {
     certificationKey: source.certification.externalKey,
-    questions: ordered.map((question, displayIndex) => snapshot(question, displayIndex, source)),
+    questions: ordered.map((question, displayIndex) =>
+      snapshot(question, displayIndex, source),
+    ),
   };
 }
 

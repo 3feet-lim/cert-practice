@@ -147,7 +147,8 @@ describe("TanStack Query API state", () => {
       throw new Error("Expected a submitted practice question fixture.");
     }
     const selectedChoiceIds = submittedQuestion.selectedChoiceIds;
-    const pendingSubmit = deferred<CertForgeApiResult<SubmitPracticeQuestionResponse>>();
+    const pendingSubmit =
+      deferred<CertForgeApiResult<SubmitPracticeQuestionResponse>>();
     const submitPracticeQuestion = vi.fn(() => pendingSubmit.promise);
     const api: CertForgeApi = {
       ...createUnavailableCertForgeApi(),

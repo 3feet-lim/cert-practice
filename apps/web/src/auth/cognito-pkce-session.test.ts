@@ -28,19 +28,25 @@ class MemorySessionStorage {
 
 function idToken(exp: number) {
   const part = (value: unknown) =>
-    btoa(JSON.stringify(value)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+    btoa(JSON.stringify(value))
+      .replaceAll("+", "-")
+      .replaceAll("/", "_")
+      .replaceAll("=", "");
   return `${part({ alg: "none" })}.${part({ exp })}.signature`;
 }
 
-type FetchMock = ReturnType<typeof vi.fn> & ((input: string, init?: RequestInit) => Promise<Response>);
+type FetchMock = ReturnType<typeof vi.fn> &
+  ((input: string, init?: RequestInit) => Promise<Response>);
 type LocationMock = ReturnType<typeof vi.fn> & ((url: string) => void);
 
-function createSession(overrides: {
-  storage?: MemorySessionStorage;
-  fetch?: FetchMock;
-  assignLocation?: LocationMock;
-  now?: number;
-} = {}) {
+function createSession(
+  overrides: {
+    storage?: MemorySessionStorage;
+    fetch?: FetchMock;
+    assignLocation?: LocationMock;
+    now?: number;
+  } = {},
+) {
   const storage = overrides.storage ?? new MemorySessionStorage();
   const fetch: FetchMock = overrides.fetch ?? (vi.fn() as FetchMock);
   const assignLocation: LocationMock =
@@ -78,7 +84,9 @@ describe("Cognito PKCE browser session", () => {
     expect(url.searchParams.get("state")).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(url.searchParams.get("code_challenge")).toMatch(/^[A-Za-z0-9_-]{43}$/);
 
-    const transaction = JSON.parse(storage.getItem("certforge.auth.pending.v1") ?? "{}");
+    const transaction = JSON.parse(
+      storage.getItem("certforge.auth.pending.v1") ?? "{}",
+    );
     expect(transaction).toEqual({
       state: url.searchParams.get("state"),
       codeVerifier: expect.stringMatching(/^[A-Za-z0-9_-]{86}$/),
@@ -95,7 +103,9 @@ describe("Cognito PKCE browser session", () => {
           const { session, storage, assignLocation } = createSession();
           await session.beginLogin(returnTo);
           const url = new URL(assignLocation.mock.calls[0]?.[0]);
-          const transaction = JSON.parse(storage.getItem("certforge.auth.pending.v1") ?? "{}");
+          const transaction = JSON.parse(
+            storage.getItem("certforge.auth.pending.v1") ?? "{}",
+          );
 
           expect(url.searchParams.get("state")).toBe(transaction.state);
           expect(transaction.codeVerifier).not.toBe(transaction.state);
@@ -113,9 +123,11 @@ describe("Cognito PKCE browser session", () => {
     await session.beginLogin("/app");
     const { state } = JSON.parse(storage.getItem("certforge.auth.pending.v1") ?? "{}");
 
-    await expect(session.completeCallback("?code=unused&state=wrong")).resolves.toEqual({
-      ok: false,
-    });
+    await expect(session.completeCallback("?code=unused&state=wrong")).resolves.toEqual(
+      {
+        ok: false,
+      },
+    );
     expect(fetch).not.toHaveBeenCalled();
     expect(storage.getItem("certforge.auth.pending.v1")).toBeNull();
 
@@ -147,7 +159,9 @@ describe("Cognito PKCE browser session", () => {
     await session.beginLogin("/app/history");
     const { state } = JSON.parse(storage.getItem("certforge.auth.pending.v1") ?? "{}");
 
-    await expect(session.completeCallback(`?code=one-time-code&state=${state}`)).resolves.toEqual({
+    await expect(
+      session.completeCallback(`?code=one-time-code&state=${state}`),
+    ).resolves.toEqual({
       ok: true,
       returnTo: "/app/history",
     });
@@ -190,22 +204,32 @@ describe("Cognito PKCE browser session", () => {
     const storage = new MemorySessionStorage();
     storage.setItem(
       "certforge.auth.tokens.v1",
-      JSON.stringify({ idToken: idToken(now / 1000 - 1), refreshToken: "refresh-value", expiresAtMs: now - 1_000 }),
+      JSON.stringify({
+        idToken: idToken(now / 1000 - 1),
+        refreshToken: "refresh-value",
+        expiresAtMs: now - 1_000,
+      }),
     );
     const refreshFetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ id_token: idToken(now / 1000 + 3600) }), { status: 200 }),
+      new Response(JSON.stringify({ id_token: idToken(now / 1000 + 3600) }), {
+        status: 200,
+      }),
     );
     const { session } = createSession({ storage, fetch: refreshFetch, now });
 
     expect(await session.getIdToken()).toBe(idToken(now / 1000 + 3600));
-    expect(new URLSearchParams(refreshFetch.mock.calls[0]?.[1]?.body).get("grant_type")).toBe(
-      "refresh_token",
-    );
+    expect(
+      new URLSearchParams(refreshFetch.mock.calls[0]?.[1]?.body).get("grant_type"),
+    ).toBe("refresh_token");
     expect(storage.getItem("certforge.auth.tokens.v1")).toContain("refresh-value");
 
     storage.setItem(
       "certforge.auth.tokens.v1",
-      JSON.stringify({ idToken: idToken(now / 1000 - 1), refreshToken: "refresh-value", expiresAtMs: now - 1_000 }),
+      JSON.stringify({
+        idToken: idToken(now / 1000 - 1),
+        refreshToken: "refresh-value",
+        expiresAtMs: now - 1_000,
+      }),
     );
     const failed = createSession({
       storage,

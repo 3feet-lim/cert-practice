@@ -10,7 +10,11 @@ import fc from "fast-check";
 import type { PropsWithChildren } from "react";
 import { describe, expect, it } from "vitest";
 
-import type { CertForgeApi, CertForgeApiFailure, CertForgeApiResult } from "../api/port";
+import type {
+  CertForgeApi,
+  CertForgeApiFailure,
+  CertForgeApiResult,
+} from "../api/port";
 import { CertForgeRequestError } from "../api/query-result";
 import { createUnavailableCertForgeApi } from "../api/unavailable-adapter";
 import { CertForgeCompositionRoot } from "../app/CertForgeCompositionRoot";

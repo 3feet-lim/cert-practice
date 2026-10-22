@@ -26,7 +26,8 @@ const messages = {
   "invalid-scoring-configuration": "The scoring configuration is invalid.",
   "dependency-unavailable": "The service is temporarily unavailable. Please retry.",
   "submission-failed": "Submission could not be completed. Please retry.",
-  "content-already-active": "This exact content is already the active revision. No import is needed.",
+  "content-already-active":
+    "This exact content is already the active revision. No import is needed.",
 } as const;
 const statuses = {
   unauthenticated: 401,

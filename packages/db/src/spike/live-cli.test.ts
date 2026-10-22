@@ -43,7 +43,9 @@ describe("live DSQL spike configuration", () => {
   });
 
   it("uses an adapter-specific endpoint parameter in the selection artifact", () => {
-    expect(endpointParameterNameForAdapter("dsql")).toBe("/certforge/dev/dsql-endpoint");
+    expect(endpointParameterNameForAdapter("dsql")).toBe(
+      "/certforge/dev/dsql-endpoint",
+    );
     expect(endpointParameterNameForAdapter("postgres")).toBe(
       "/certforge/dev/postgres-endpoint",
     );

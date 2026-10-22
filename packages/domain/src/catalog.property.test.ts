@@ -46,7 +46,13 @@ function source(input: {
     revisionId,
     certificationKey: "CERT-1",
     providers: [
-      { id: providerId, revisionId, externalKey: "provider", name: "Provider", logoUrl: null },
+      {
+        id: providerId,
+        revisionId,
+        externalKey: "provider",
+        name: "Provider",
+        logoUrl: null,
+      },
     ],
     certifications: [
       {
@@ -224,7 +230,7 @@ describe("projectActiveCatalog groups providers by external key across independe
     };
   }
 
-  it("merges two independently imported revisions sharing provider.id \"aws\" into a single provider", () => {
+  it('merges two independently imported revisions sharing provider.id "aws" into a single provider', () => {
     // Each independent import derives its own provider primary key from its own
     // revisionId, so these two providers intentionally have DIFFERENT `id`s but
     // the SAME `externalKey`, mirroring two separate real import operations.

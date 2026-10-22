@@ -279,7 +279,9 @@ describe("Property 25: asynchronous UI request-state machine", () => {
                     stateVersion: canonicalVersion,
                   });
                 } else {
-                  await expect(submission).rejects.toBeInstanceOf(CertForgeRequestError);
+                  await expect(submission).rejects.toBeInstanceOf(
+                    CertForgeRequestError,
+                  );
                   expect(
                     queryClient.getQueryData<PracticeSessionDto>(
                       certQuizQueryKeys.practice(sessionId),
@@ -354,7 +356,9 @@ describe("Property 25: asynchronous UI request-state machine", () => {
                     ?.flagged,
                 ).toBe(expectedFlagged);
               } else {
-                await expect(flagMutation).rejects.toBeInstanceOf(CertForgeRequestError);
+                await expect(flagMutation).rejects.toBeInstanceOf(
+                  CertForgeRequestError,
+                );
                 expect(
                   queryClient.getQueryData<PracticeSessionDto>(
                     certQuizQueryKeys.practice(sessionId),

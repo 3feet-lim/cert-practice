@@ -386,7 +386,10 @@ test("DEV GitHub Actions deployment trusts repository-wide OIDC subjects with ac
   assert.match(workflow, /environment: release-dev/);
   assert.match(workflow, /CERTFORGE_RELEASE_ROLE_ARN/);
   assert.match(workflow, /Apply and verify DEV DSQL migrations/);
-  assert.match(workflow, /DSQL_ENDPOINT="\$\(aws ssm get-parameter --name \/certforge\/dev\/dsql-endpoint/);
+  assert.match(
+    workflow,
+    /DSQL_ENDPOINT="\$\(aws ssm get-parameter --name \/certforge\/dev\/dsql-endpoint/,
+  );
   assert.match(workflow, /DSQL_USER=admin/);
   assert.match(workflow, /pnpm --filter @cert-forge\/db run migrate:deploy/);
   assert.ok(

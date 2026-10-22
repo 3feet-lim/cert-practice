@@ -503,8 +503,8 @@ export function QuestionNavigator({
                 : progress === "incorrect"
                   ? "border-danger/40 bg-danger-soft text-danger"
                   : progress === "answered"
-                  ? "border-primary/40 bg-primary-soft text-primary"
-                  : "border-border bg-card text-foreground",
+                    ? "border-primary/40 bg-primary-soft text-primary"
+                    : "border-border bg-card text-foreground",
             current &&
               item.progress !== undefined &&
               "ring-2 ring-primary ring-offset-2 ring-offset-card",

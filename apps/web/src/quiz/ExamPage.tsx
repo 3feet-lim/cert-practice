@@ -65,7 +65,10 @@ function ExamInteraction({
   };
 
   const handleMutationError = (error: unknown) => {
-    if (error instanceof CertForgeRequestError && error.detail.code === "exam-expired") {
+    if (
+      error instanceof CertForgeRequestError &&
+      error.detail.code === "exam-expired"
+    ) {
       setExpired(true);
       void submitAndNavigate();
       return;
