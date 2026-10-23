@@ -42,10 +42,10 @@ After the user applies the dev Terraform root, perform the one AWS-to-GitHub han
 
 ## Cognito and Google identity provider
 
-Each root creates a Cognito user pool, OAuth authorization-code web client, and Hosted UI domain. Google is parameterized but credentials are never stored in Terraform files or SSM:
+Each root creates a Cognito user pool, OAuth authorization-code web client, and Hosted UI domain. Google is parameterized and credentials are read from SSM Parameter Store at apply time, never stored in Terraform files:
 
 - set `enable_google_identity_provider=true`;
-- inject `google_oauth_client_id` and sensitive `google_oauth_client_secret` through a protected CI secret store or `TF_VAR_*` environment variables;
+- store the credentials in SSM before apply: `/<service>/<env>/google-oauth-client-id` (String) and `/<service>/<env>/google-oauth-client-secret` (SecureString);
 - register the generated Cognito redirect endpoint with Google before apply.
 
 Dev defaults the Google binding off so static validation needs no credentials. Production defaults it on and fails planning until credentials are supplied. This is an intentional configuration gate, not a fallback login path.

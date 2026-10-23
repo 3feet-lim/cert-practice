@@ -3,6 +3,17 @@ locals {
   google_provider_name       = "Google"
 }
 
+data "aws_ssm_parameter" "google_oauth_client_id" {
+  count = var.enable_google_identity_provider ? 1 : 0
+  name  = "/${var.service_name}/${local.runtime_environment}/google-oauth-client-id"
+}
+
+data "aws_ssm_parameter" "google_oauth_client_secret" {
+  count           = var.enable_google_identity_provider ? 1 : 0
+  name            = "/${var.service_name}/${local.runtime_environment}/google-oauth-client-secret"
+  with_decryption = true
+}
+
 resource "aws_cognito_user_pool" "this" {
   name                     = "${var.service_name}-${local.runtime_environment}-users"
   username_attributes      = ["email"]
@@ -70,8 +81,8 @@ resource "aws_cognito_identity_provider" "google" {
     oidc_issuer                   = "https://accounts.google.com"
     attributes_url                = "https://people.googleapis.com/v1/people/me?personFields="
     attributes_url_add_attributes = "true"
-    client_id                     = var.google_oauth_client_id
-    client_secret                 = var.google_oauth_client_secret
+    client_id                     = data.aws_ssm_parameter.google_oauth_client_id[0].value
+    client_secret                 = data.aws_ssm_parameter.google_oauth_client_secret[0].value
   }
 
   attribute_mapping = {

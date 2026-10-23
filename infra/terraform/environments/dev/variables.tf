@@ -50,31 +50,6 @@ variable "enable_google_identity_provider" {
   default     = false
 }
 
-variable "google_oauth_client_id" {
-  description = "Google OAuth client ID injected from CI or TF_VAR when the IdP is enabled."
-  type        = string
-  default     = null
-  nullable    = true
-
-  validation {
-    condition     = !var.enable_google_identity_provider || (var.google_oauth_client_id != null && trimspace(var.google_oauth_client_id) != "")
-    error_message = "google_oauth_client_id is required when enable_google_identity_provider is true."
-  }
-}
-
-variable "google_oauth_client_secret" {
-  description = "Google OAuth client secret injected from a secret-capable CI runner when the IdP is enabled."
-  type        = string
-  default     = null
-  nullable    = true
-  sensitive   = true
-
-  validation {
-    condition     = !var.enable_google_identity_provider || (var.google_oauth_client_secret != null && trimspace(var.google_oauth_client_secret) != "")
-    error_message = "google_oauth_client_secret is required when enable_google_identity_provider is true."
-  }
-}
-
 variable "web_domain_name" {
   description = "Custom DNS name for the dev SPA."
   type        = string
