@@ -453,10 +453,10 @@ describe("offline lifecycle properties", () => {
         expect(first.kind).toBe("created");
         const resumed = await service.startPractice(USER_A, CERTIFICATION_ID);
         expect(resumed.kind).toBe("resume-or-replace-required");
-        if (replace) {
+        if (replace && first.kind === "created") {
           const replacement = await service.replacePractice(
             USER_A,
-            CERTIFICATION_ID,
+            first.practiceSessionId,
             "confirm",
           );
           expect(replacement.kind).toBe("created");

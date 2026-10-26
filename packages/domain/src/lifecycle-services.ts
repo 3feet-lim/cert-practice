@@ -119,12 +119,17 @@ export class LifecycleServices {
 
   async replacePractice(
     userId: string,
-    certificationId: string,
+    sessionId: string,
     confirmationNonce: string,
   ): Promise<StartPracticeResponse> {
     if (confirmationNonce.trim().length === 0) throw domainFailure("validation-failed");
     return this.dependencies.unitOfWork.transaction(async (repos) => {
-      const source = await requiredSource(repos, certificationId);
+      const current = await repos.practice.getOwned(userId, sessionId);
+      if (!current) throw domainFailure("not-found");
+      const source = await repos.catalog.activeFullGenerationSource(
+        current.certificationKey,
+      );
+      if (!source) throw domainFailure("not-found");
       const session = await this.dependencies.sessionFactory.createPractice(
         repos,
         userId,

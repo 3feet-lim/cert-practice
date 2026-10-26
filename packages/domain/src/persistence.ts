@@ -233,6 +233,14 @@ export interface CatalogRepository {
   fullGenerationSource(
     certificationId: string,
   ): Promise<FullCatalogGenerationSource | null>;
+  /**
+   * Revision-invariant full-content read by immutable certification key. Resolves
+   * the key's current active revision, so a session started on a superseded
+   * revision can still be replaced against the catalog's active head.
+   */
+  activeFullGenerationSource(
+    certificationKey: string,
+  ): Promise<FullCatalogGenerationSource | null>;
 }
 
 export interface PracticeRepository {

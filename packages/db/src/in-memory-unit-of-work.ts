@@ -366,6 +366,15 @@ class InMemoryRepositories implements TransactionRepositories {
         }
         return null;
       },
+      activeFullGenerationSource: async (certificationKey) => {
+        const revisionId = this.state.heads.get(certificationKey);
+        if (!revisionId) return null;
+        const source = this.state.catalogSources.get(revisionId);
+        const full = this.state.fullGenerationSources.get(revisionId);
+        if (!source || !full) return null;
+        const publicGeneration = findGenerationSource([source], full.certification.id);
+        return publicGeneration ? copyFullGenerationSource(full) : null;
+      },
     };
   }
 
