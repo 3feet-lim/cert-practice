@@ -589,13 +589,9 @@ export function createApp(
     const id = uuidSchema.safeParse(context.req.param("id"));
     if (!id.success) throw domainFailure("validation-failed");
     const request = await parseImportRequest(context, replacePracticeRequestSchema);
-    const current = await requireLifecycle().resumePractice(
-      context.get("actor").userId,
-      id.data,
-    );
     const data = await requireLifecycle().replacePractice(
       context.get("actor").userId,
-      current.certificationId,
+      id.data,
       request.confirmationNonce,
     );
     return context.json(

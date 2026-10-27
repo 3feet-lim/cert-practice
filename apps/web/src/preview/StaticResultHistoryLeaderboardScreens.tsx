@@ -64,7 +64,7 @@ type LeaderboardFixtures =
   FixtureSuccess<LeaderboardDto> | FixtureEmpty<LeaderboardDto> | FixtureError<never>;
 
 /** Shared page width for S6-S9 so every results-style screen lines up. */
-const pageClassName = "content-card grid gap-8";
+const pageClassName = "content-card grid grid-cols-[minmax(0,1fr)] gap-8";
 
 const actionLinkClassName =
   "inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-focus/30";

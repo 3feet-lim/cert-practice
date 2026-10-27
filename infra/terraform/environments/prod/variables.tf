@@ -37,31 +37,6 @@ variable "enable_google_identity_provider" {
   default     = true
 }
 
-variable "google_oauth_client_id" {
-  description = "Google OAuth client ID injected by the deployment environment."
-  type        = string
-  default     = null
-  nullable    = true
-
-  validation {
-    condition     = !var.enable_google_identity_provider || (var.google_oauth_client_id != null && trimspace(var.google_oauth_client_id) != "")
-    error_message = "google_oauth_client_id is required when enable_google_identity_provider is true."
-  }
-}
-
-variable "google_oauth_client_secret" {
-  description = "Google OAuth client secret injected by a secret-capable deployment environment."
-  type        = string
-  default     = null
-  nullable    = true
-  sensitive   = true
-
-  validation {
-    condition     = !var.enable_google_identity_provider || (var.google_oauth_client_secret != null && trimspace(var.google_oauth_client_secret) != "")
-    error_message = "google_oauth_client_secret is required when enable_google_identity_provider is true."
-  }
-}
-
 variable "web_domain_name" {
   description = "Production SPA domain, such as quiz.example.com."
   type        = string

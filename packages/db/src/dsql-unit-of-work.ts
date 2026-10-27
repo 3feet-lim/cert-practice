@@ -336,6 +336,11 @@ class DsqlRepositories implements TransactionRepositories {
       },
       fullGenerationSource: async (certificationId) =>
         loadFullSource(this.db, certificationId),
+      activeFullGenerationSource: async (certificationKey) => {
+        const certificationId = await activeCertificationId(this.db, certificationKey);
+        if (!certificationId) return null;
+        return loadFullSource(this.db, certificationId);
+      },
     };
   }
 
