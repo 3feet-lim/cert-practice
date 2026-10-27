@@ -158,7 +158,7 @@ function ReviewItem({
         ? current.picked.filter((id) => id !== choiceId)
         : current.picked.length < question.requiredChoiceCount
           ? [...current.picked, choiceId]
-          : current.picked;
+          : [...current.picked.slice(1), choiceId];
       return { picked, checked: false };
     });
 
@@ -343,7 +343,7 @@ export function ResultReview({ questions, initialFilter }: ResultReviewProps) {
   };
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-sm">
         <div
           role="group"
@@ -436,7 +436,10 @@ export function ResultReview({ questions, initialFilter }: ResultReviewProps) {
           조건에 맞는 문항이 없습니다.
         </p>
       ) : (
-        <ol aria-label="문항 검토" className="grid list-none gap-2 p-0">
+        <ol
+          aria-label="문항 검토"
+          className="grid list-none grid-cols-[minmax(0,1fr)] gap-2 p-0"
+        >
           {visible.map((question) => (
             <ReviewItem
               key={`${question.id}:${retryMode ? "retry" : "review"}`}
