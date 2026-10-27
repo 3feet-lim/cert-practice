@@ -162,6 +162,11 @@ select {
   margin-bottom: 0;
 }
 
+/* Long unbreakable tokens (e.g. documentation URLs) must wrap, not widen the page. */
+.safe-markdown {
+  overflow-wrap: anywhere;
+}
+
 .safe-markdown p,
 .safe-markdown ul,
 .safe-markdown ol,

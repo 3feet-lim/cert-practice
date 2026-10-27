@@ -9,7 +9,7 @@ import { cn } from "../../lib/cn";
 
 export function Table({ className, ...props }: TableHTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="max-w-full overflow-x-auto rounded-xl border border-border bg-card">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-xl border border-border bg-card">
       <table
         className={cn("w-full border-collapse text-left text-sm", className)}
         {...props}
