@@ -18,6 +18,7 @@ export default defineConfig({
   },
   build: {
     assetsDir: "assets",
+    assetsInlineLimit: 0,
   },
   plugins: [tailwindcss(), react()],
   test: {
