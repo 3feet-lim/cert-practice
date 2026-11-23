@@ -874,6 +874,13 @@ async function finalize(
       scoringQuestion(question, question.selectedChoiceIds),
     ),
   });
+  const earnedByQuestion = new Map(
+    score.questions.map((scored) => [scored.questionId, scored.earnedScore]),
+  );
+  const scoredItems = questions.map((question) => ({
+    ...question,
+    earnedScore: earnedByQuestion.get(question.id) ?? Fraction.fromInteger(0n),
+  }));
   const attempt = await repos.exams.finalizeOnce({
     id,
     userId,
@@ -885,7 +892,7 @@ async function finalize(
     reference1000Score: score.reference1000Score,
     submittedAt: requestReceivedAt,
     submissionReason: reason,
-    items: questions,
+    items: scoredItems,
   });
   if (!attempt) throw domainFailure("not-found");
   return projectAttempt(attempt);
