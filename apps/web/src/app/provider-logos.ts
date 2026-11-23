@@ -1,4 +1,5 @@
 import awsLogo from "../assets/providers/aws.png";
+import linuxFoundationLogo from "../assets/providers/linux-foundation.svg";
 
 /**
  * Bundled provider logo assets, keyed by the exact `provider.name` returned by the
@@ -9,6 +10,7 @@ import awsLogo from "../assets/providers/aws.png";
  */
 const PROVIDER_LOGOS: Record<string, string> = {
   AWS: awsLogo,
+  "The Linux Foundation": linuxFoundationLogo,
 };
 
 export function providerLogoSrc(providerName: string): string | undefined {
